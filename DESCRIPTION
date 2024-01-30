@@ -1,0 +1,21 @@
+Package: stcompr
+Title: Comparison of Merscope spatial transcriptomic datasets using segmentation-free approach.
+Version: 0.0.1
+Authors@R: c(
+    person("Denis", "Puthier", email = "denis.puthier@univ-amu.fr", role = c("cre", "aut")),
+    person("Jessica", "Chevallier", email = "jessica.chevallier@univ-amu.fr", role = "aut"),
+    person("Julie", "Bavais", email = "bavais@ciml.univ-mrs.fr", role = "aut"))
+Description: This package is intended to compare Merscope spatial transcriptomic datasets using segmentation-free approach.
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
+License: GPL (>= 3)
+VignetteBuilder: knitr
+Suggests: 
+    testthat (>= 3.0.0)
+LazyLoad: yes
+LazyDataCompression: xz
+URL: https://github.com/dputhier/stcompr
+Packaged:
+LazyData: true
+Config/testthat/edition: 3

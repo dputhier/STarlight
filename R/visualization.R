@@ -1,0 +1,100 @@
+# -------------------------------------------------------------------------
+##    Spatial image
+# -------------------------------------------------------------------------
+#' @title Create a spatial image of based on a  STGrid object.
+#' @description
+#' Create a spatial image of based on a  STGrid object.
+#' @param object The STGrid object.
+#' @keywords internal
+#'
+setGeneric("spatial_image",
+           function(object,
+                    gene=NULL,
+                    saturation=0.75,
+                    scale=TRUE,
+                    colors=c('#000003', '#410967', '#932567', '#DC5039', '#FBA40A', '#FCFEA4'),
+                    ceil=TRUE,
+                    coord_fixed=TRUE)
+             standardGeneric("spatial_image")
+)
+
+#' @title Create a spatial image of based on a  STGrid object.
+#' @description
+#' Create a spatial image of based on a  STGrid object.
+#' @param object The STGrid object.
+#' @keywords
+setMethod("spatial_image",
+          signature(object = "STGrid"),
+          function(object,
+                   gene=NULL,
+                   saturation=0.75,
+                   scale=TRUE,
+                   colors=c('#000003', '#410967', '#932567', '#DC5039', '#FBA40A', '#FCFEA4'),
+                   ceil=TRUE,
+                   coord_fixed=TRUE) {
+
+            if(is.null(gene))
+              print_msg("Please provide a gene name (see gene arguments).", msg_type = "STOP")
+
+            if(length(gene) > 1)
+              print_msg("Please provide a single gene name (see gene arguments).", msg_type = "STOP")
+
+            if(!gene %in% c(gene_names(object), "all_genes"))
+              print_msg("The gene not found in the object.", msg_type = "STOP")
+
+            if(gene != "all_genes"){
+              spatial_matrix <- object@bin_mat$layer_1[, c("bin_x", "bin_y", gene)]
+              tmp <- spatial_matrix[, gene]
+              tmp[is.na(tmp)] <- 0
+            }else{
+              spatial_matrix <- object@bin_mat$layer_1
+              spatial_matrix$all_genes <- 0
+              tmp <- spatial_matrix[, setdiff(gene_names(object), c("bin_x", "bin_y"))]
+              spatial_matrix <- spatial_matrix[, c("bin_x", "bin_y", gene)]
+              tmp[is.na(tmp)] <- 0
+              tmp <- rowSums(tmp)
+              print("YO")
+            }
+
+            if(saturation != 0){
+              q_sat <- quantile(tmp[tmp != 0], saturation)
+              tmp[tmp > q_sat] <- q_sat
+            }
+
+            if(scale){
+              if(max(tmp) > 1){
+                tmp <- (tmp - min(tmp)) / (max(tmp) - min(tmp))
+              }
+            }
+
+            spatial_matrix[, gene] <- tmp
+
+            spatial_matrix$bin_x <- factor(spatial_matrix$bin_x,
+                                           levels = bin_x(object),
+                                           ordered=TRUE)
+
+            spatial_matrix$bin_y <- factor(spatial_matrix$bin_y,
+                                           levels = bin_y(object),
+                                           ordered=TRUE)
+
+            spatial_matrix_melted <- reshape2::melt(spatial_matrix, id.vars=c("bin_x", "bin_y"))
+
+            p <- ggplot2::ggplot(data=spatial_matrix_melted,
+                                 mapping = ggplot2::aes(x=bin_x, y=bin_y, fill= value)) +
+              ggplot2::geom_tile() +
+              ggplot2::xlab("")  +
+              ggplot2::ylab("") +
+              ggplot2::theme(axis.ticks = ggplot2::element_blank(),
+                             axis.text = ggplot2::element_blank(),
+                             strip.background = ggplot2::element_rect(fill="gray30"),
+                             strip.text = ggplot2::element_text(color="white")) +
+              ggplot2::scale_fill_gradientn(colours=colors) +
+              ggplot2::facet_wrap(~variable, nrow = 3, ncol=3)
+
+            if(coord_fixed)
+              p <- p + ggplot2::coord_fixed()
+            return(p)
+})
+
+
+
