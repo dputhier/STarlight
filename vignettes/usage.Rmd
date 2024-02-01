@@ -1,0 +1,155 @@
+---
+author: "D. Puthier & Jessica Chevalier."
+date: "`r Sys.Date()`"
+title: "Guided tutorial"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteEngine{knitr::knitr}
+  %\VignetteIndexEntry{Guided tutorial}
+  %\usepackage[UTF-8]{inputenc}
+---
+
+# Guided tutorial
+
+Some blabla
+
+## The dataset
+
+Some blabla
+
+
+# Visualization
+
+
+# Verbosity level
+
+How it works...
+
+stcompr
+
+```{r verbosity_level, echo = TRUE, eval=FALSE, warning=FALSE, results='hide'}
+library(stcompr)
+stcompr::set_verbosity(1)
+```
+
+# Loading dataset
+
+Some text about the `load_spatial()` function.
+
+```{r load_dataset, echo = TRUE, eval=FALSE, warning=FALSE, results='hide'}
+st_obj <- load_spatial("~/vizgen_input_region_1.txt")
+```
+
+# The STGrid object
+
+## slot names, methods...
+
+Objective, what it is...
+
+```{r show, echo = TRUE, eval=FALSE, warning=FALSE, results='hide'}
+st_obj
+```
+
+```{r slots, echo = TRUE, eval=FALSE, warning=FALSE, results='hide'}
+slotNames(st_obj)
+```
+
+```{r slots, echo = TRUE, eval=FALSE, warning=FALSE, results='hide'}
+stcompr::show_methods()
+```
+
+## Subsetting
+
+### Using bin_x / bin_y
+
+```{r binx_1, echo = TRUE, eval=FALSE, warning=FALSE, results='hide'}
+head(bin_x(st_obj))
+```
+
+```{r binx_2, echo = TRUE, eval=FALSE, warning=FALSE, results='hide'}
+head(bin_y(st_obj))
+```
+
+```{r binx_3, echo = TRUE, eval=FALSE, warning=FALSE, results='hide'}
+st_obj[bin_x(st_obj)[50:100], bin_y(st_obj)[50:100]]
+```
+
+### Using gene
+
+```{r genes, echo = TRUE, eval=FALSE, warning=FALSE, results='hide'}
+st_obj[c("Rag1", "Cd3e", ]
+```
+
+Delete all Blanks...
+
+```{r delete, echo = TRUE, eval=FALSE, warning=FALSE, results='hide'}
+st_obj <- rm_controls(st_obj)
+```
+
+### Using numeric
+
+According to the position in gene_names()
+
+```{r}
+gene_names(st_obj)
+```
+
+```{r slots, echo = TRUE, eval=FALSE, warning=FALSE, results='hide'}
+st_obj <- st_obj[-grep("^Blank\\-.*", gene_names(st_obj)), ]
+```
+
+## Using numeric
+
+The n-th genes...
+
+```{r slots, echo = TRUE, eval=FALSE, warning=FALSE, results='hide'}
+nb_genes(st_obj)
+st_obj[10:12, ]
+```
+
+# Image Visualization
+
+Something about the `spatial_image()` function.
+
+* Single gene
+
+```{r single_gene, warning=FALSE, results='hide', echo = FALSE, eval=TRUE}
+spatial_image(st_obj, gene="Rag1")
+```
+
+* sum of counts...
+
+```{r sumcts, warning=FALSE, results='hide', echo = FALSE, eval=TRUE}
+spatial_image(st_obj, gene="all_genes", scale=FALSE, saturation = 0)
+```
+
+* Zooming...
+
+```{r loadlib1, warning=FALSE, results='hide', echo = FALSE, eval=TRUE}
+spatial_image(st_obj[bin_x(st_obj)[50:100], bin_y(st_obj)[50:100]], gene="Cd3e")
+```
+
+# Comparing counts
+
+## Creating an STCompR object
+
+```{r}
+st_obj_1 <- load_spatial("~/vizgen_input_region_1.txt")
+st_obj_2 <- load_spatial("~/vizgen_input_region_0.txt")
+```
+```{r}
+cmp <- stcompr(st_obj_1, st_obj_2, name_1 = "young", name_2 = "old")
+```
+
+
+
+## Using barplot
+
+
+
+## Session info
+
+```{r}
+sessionInfo()
+```
+

@@ -22,7 +22,7 @@ setGeneric("spatial_image",
 #' @description
 #' Create a spatial image of based on a  STGrid object.
 #' @param object The STGrid object.
-#' @keywords
+#' @export spatial_image
 setMethod("spatial_image",
           signature(object = "STGrid"),
           function(object,
@@ -97,4 +97,132 @@ setMethod("spatial_image",
 })
 
 
+# -------------------------------------------------------------------------
+##    Molecule counts
+# -------------------------------------------------------------------------
+#' @title Create a barplot to show molecule counts of selected genes
+#' @description
+#' Create a barplot to show molecule counts of selected genes
+#' @param object The STGrid object.
+#' @keywords internal
+setGeneric("cmp_mol_counts",
+           function(object,
+                    genes=head(gene_names(object_1)),
+                    name_1="Condition_1",
+                    name_2="Condition_2",
+                    colors=c("#4DBBD5B2", "#F39B7FB2"))
+             standardGeneric("cmp_mol_counts")
+)
+
+#' @title Create a barplot to show molecule counts of selected genes
+#' @description
+#' Create a barplot to show molecule counts of selected genes
+#' @param object_1 A STGrid object.
+#' @param object_2 A STGrid object.
+#' @export cmp_mol_counts
+setMethod(
+  "cmp_mol_counts", signature("STCompR"),
+    function(object,
+             genes=head(gene_names(object_1)),
+             name_1="Condition_1",
+             name_2="Condition_2",
+             colors=c("#4DBBD5B2", "#F39B7FB2")) {
+
+    check_var(name_1)
+    check_var(name_2)
+
+    if(is.null(genes)){
+      print_msg("Please provide some genes...", msg_type = "STOP")
+    }
+
+    if(!all(genes %in% gene_names(object)))
+       print_msg("Some genes where not found.", msg_type = "STOP")
+
+    merge_coord <- rbind(tb_1, tb_2)
+    colnames(merge_coord) <- c("Genes", "Counts", "Conditions")
+    merge_coord$Genes <- factor(merge_coord$Genes, levels=genes, ordered = TRUE)
+
+    ggplot2::ggplot(data=merge_coord,
+                    mapping = ggplot2::aes(x=Genes, y=Counts,
+                                           fill=Conditions)) +
+    ggplot2::geom_col(color="black", linewidth=0, position="dodge") +
+    ggplot2::theme_bw() +
+    ggplot2::theme(axis.text.x = ggplot2::element_text(size=4, angle=45, vjust = 0.5),
+          axis.text.y = ggplot2::element_text(size=8),
+          panel.grid.major.y = ggplot2::element_blank(),
+          panel.grid.minor.x = ggplot2::element_blank(),
+          panel.grid.minor.y =ggplot2:: element_blank(),
+          panel.border = ggplot2::element_blank()) +
+    ggplot2::ylab("Molecule count") +
+    ggplot2::scale_fill_manual(values = colors)
+
+  }
+)
+
+# -------------------------------------------------------------------------
+##    Boxplot / jitter
+# -------------------------------------------------------------------------
+#' @title Create a boxplot/jitter plot to show molecule counts distribution.
+#' @description
+#' Create a boxplot/jitter plot to show molecule counts distribution.
+#' @param object_1 A STGrid object.
+#' @param object_2 A STGrid object.
+#' @keywords internal
+setGeneric("cmp_boxplot",
+           function(object_1,
+                    object_2,
+                    genes=head(gene_names(object_1)),
+                    name_1="Condition_1",
+                    name_2="Condition_2",
+                    colors=c("#4DBBD5B2", "#F39B7FB2"),
+                    ...)
+             standardGeneric("cmp_boxplot")
+)
+
+#' @title Create a boxplot/jitter plot to show molecule counts.
+#' @description
+#' Create a boxplot/jitter plot to show molecule counts.
+#' @param object_1 A STGrid object.
+#' @param object_2 A STGrid object.
+#' ... Additiona parameters to pass to ggpol::geom_boxjitter().
+#' @export cmp_boxplot
+setMethod(
+  "cmp_boxplot", signature("STGrid"),
+  function(object_1,
+           object_2,
+           name_1="Condition_1",
+           name_2="Condition_2",
+           colors=ggsci::pal_npg("nrc", alpha = 1)(2),
+           ...) {
+
+    check_var(name_1)
+    check_var(name_2)
+
+    tb_1 <- as.data.frame(table(coord(object_1)$gene))
+    tb_1$condition <- name_1
+    print(tb_1)
+    tb_2 <- as.data.frame(table(coord(object_2)$gene))
+    tb_2$condition <- name_2
+
+
+    merge_coord <- rbind(tb_1, tb_2)
+    colnames(merge_coord) <- c("Genes", "Counts", "Conditions")
+
+    merge_coord$Genes <- factor(merge_coord$Genes, levels=genes, ordered = TRUE)
+
+    ggplot2::ggplot(data=merge_coord,
+           mapping = ggplot2::aes(x=Conditions, y=log10(Counts), fill=Conditions)) +
+      ggpol::geom_boxjitter(alpha=0.5, ...) +
+      ggplot2::theme_bw() +
+      ggplot2::theme(axis.text.x = ggplot2::element_text(size=10, angle=45, vjust = 0.5),
+            axis.text.y = ggplot2::element_text(size=12),
+            panel.grid.major.y = ggplot2::element_blank(),
+            panel.grid.minor.x = ggplot2::element_blank(),
+            panel.grid.minor.y = ggplot2::element_blank(),
+            panel.border = ggplot2::element_blank()) +
+      ggplot2::ylab("log10(Molecule count)") +
+      ggplot2::scale_fill_manual(values = colors)
+
+  }
+)
 
