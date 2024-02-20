@@ -27,7 +27,7 @@ How it works...
 
 stcompr
 
-```{r verbosity_level, echo = TRUE, eval=FALSE, warning=FALSE, results='hide'}
+```{r verbosity_level, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
 library(stcompr)
 stcompr::set_verbosity(1)
 ```
@@ -36,8 +36,8 @@ stcompr::set_verbosity(1)
 
 Some text about the `load_spatial()` function.
 
-```{r load_dataset, echo = TRUE, eval=FALSE, warning=FALSE, results='hide'}
-st_obj <- load_spatial("~/vizgen_input_region_1.txt")
+```{r load_dataset, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
+st_obj_1 <- load_spatial("~/vizgen_input_region_1.txt")
 ```
 
 # The STGrid object
@@ -46,15 +46,18 @@ st_obj <- load_spatial("~/vizgen_input_region_1.txt")
 
 Objective, what it is...
 
-```{r show, echo = TRUE, eval=FALSE, warning=FALSE, results='hide'}
-st_obj
+```{r show, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
+st_obj_1
+```
+```{r}
+summary(st_obj_1)
 ```
 
-```{r slots, echo = TRUE, eval=FALSE, warning=FALSE, results='hide'}
-slotNames(st_obj)
+```{r slots, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
+slotNames(st_obj_1)
 ```
 
-```{r slots, echo = TRUE, eval=FALSE, warning=FALSE, results='hide'}
+```{r show_methods, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
 stcompr::show_methods()
 ```
 
@@ -62,49 +65,43 @@ stcompr::show_methods()
 
 ### Using bin_x / bin_y
 
-```{r binx_1, echo = TRUE, eval=FALSE, warning=FALSE, results='hide'}
-head(bin_x(st_obj))
+```{r binx_1, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
+head(bin_x(st_obj_1))
 ```
 
-```{r binx_2, echo = TRUE, eval=FALSE, warning=FALSE, results='hide'}
-head(bin_y(st_obj))
+```{r binx_2, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
+head(bin_y(st_obj_1))
 ```
 
-```{r binx_3, echo = TRUE, eval=FALSE, warning=FALSE, results='hide'}
-st_obj[bin_x(st_obj)[50:100], bin_y(st_obj)[50:100]]
+```{r binx_3, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
+st_obj_1[bin_x(st_obj_1)[50:100], ]
 ```
 
 ### Using gene
 
-```{r genes, echo = TRUE, eval=FALSE, warning=FALSE, results='hide'}
-st_obj[c("Rag1", "Cd3e", ]
+```{r genes, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
+st_obj_1[c("Rag1", "Cd3e"), ]
 ```
 
 Delete all Blanks...
 
-```{r delete, echo = TRUE, eval=FALSE, warning=FALSE, results='hide'}
-st_obj <- rm_controls(st_obj)
+```{r delete, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
+st_obj_1 <- rm_controls(st_obj_1)
 ```
 
 ### Using numeric
 
 According to the position in gene_names()
 
-```{r}
-gene_names(st_obj)
+```{r blanks, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
+st_obj_1[gene_names(st_obj_1)[1:10], ]
 ```
-
-```{r slots, echo = TRUE, eval=FALSE, warning=FALSE, results='hide'}
-st_obj <- st_obj[-grep("^Blank\\-.*", gene_names(st_obj)), ]
-```
-
-## Using numeric
 
 The n-th genes...
 
-```{r slots, echo = TRUE, eval=FALSE, warning=FALSE, results='hide'}
-nb_genes(st_obj)
-st_obj[10:12, ]
+```{r index, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
+nb_genes(st_obj_1)
+st_obj_1[10:12, ]
 ```
 
 # Image Visualization
@@ -114,19 +111,26 @@ Something about the `spatial_image()` function.
 * Single gene
 
 ```{r single_gene, warning=FALSE, results='hide', echo = FALSE, eval=TRUE}
-spatial_image(st_obj, gene="Rag1")
+spatial_image(st_obj_1, gene="Rag1")
+```
+
+```{r}
+spatial_image(re_bin(st_obj_1["Rag1"], bin_size = 10), gene="Rag1")
 ```
 
 * sum of counts...
 
 ```{r sumcts, warning=FALSE, results='hide', echo = FALSE, eval=TRUE}
-spatial_image(st_obj, gene="all_genes", scale=FALSE, saturation = 0)
+spatial_image(st_obj_1, gene="all_genes", scale=FALSE, saturation = 0)
 ```
 
 * Zooming...
 
 ```{r loadlib1, warning=FALSE, results='hide', echo = FALSE, eval=TRUE}
-spatial_image(st_obj[bin_x(st_obj)[50:100], bin_y(st_obj)[50:100]], gene="Cd3e")
+st_obj_1_b10 <- re_bin(st_obj_1["Cd3e",], bin_size=10)
+spatial_image(st_obj_1_b10[bin_x(st_obj_1_b10)[100:400], 
+                           bin_y(st_obj_1_b10)[100:400]], 
+              gene="Cd3e")
 ```
 
 # Comparing counts
@@ -134,18 +138,130 @@ spatial_image(st_obj[bin_x(st_obj)[50:100], bin_y(st_obj)[50:100]], gene="Cd3e")
 ## Creating an STCompR object
 
 ```{r}
-st_obj_1 <- load_spatial("~/vizgen_input_region_1.txt")
 st_obj_2 <- load_spatial("~/vizgen_input_region_0.txt")
+st_obj_2 <- rm_controls(st_obj_2)
 ```
+```{r}
+st_obj_2
+```
+
 ```{r}
 cmp <- stcompr(st_obj_1, st_obj_2, name_1 = "young", name_2 = "old")
 ```
 
 
+```{r}
+cmp_volcano(cmp)
+```
 
-## Using barplot
 
 
+## Visualizing counts
+
+### Barplot
+
+```{r}
+cmp_bar_plot(cmp, transform = "log10", normalized = FALSE)
+```
+
+### Boxplot
+
+```{r}
+cmp_boxplot(cmp, transform = "log10", normalized = TRUE)
+```
+
+# Density of molecules
+
+## Ripley's K function
+
+### Computing Ripley's K function
+
+```{r}
+st_obj_1 <- compute_k_ripley(st_obj_1)
+st_obj_2 <- compute_k_ripley(st_obj_2)
+```
+
+```{r}
+head(ripley_k_function(st_obj_1))
+```
+
+```{r}
+plot_rip_k(st_obj_1) +  plot_rip_k(st_obj_2) 
+```
+
+### Comparing density across samples
+
+```{r}
+spatial_image(st_obj_1, gene="Cd36")
+```
+```{r}
+spatial_image(st_obj_1, gene="Ighd") + ggtitle("Young") + spatial_image(st_obj_2, gene="Ighd") + ggtitle("Old") 
+```
+```{r}
+spatial_image(st_obj_1, gene="Cd19") + ggtitle("Young") + spatial_image(st_obj_2, gene="Cd19") + ggtitle("Old") 
+```
+
+# The strange case of Blanks...
+
+
+```{r}
+goi <- unique(grep("^Blank-[0-9]", 
+                   st_obj_1@coord$gene, val=TRUE))
+ggplot(st_obj_1@coord[st_obj_1@coord$gene %in% goi,],
+       mapping=aes(x=x, y=y, col=gene)) +
+  geom_point(size=0.5, shape=15) + theme_bw() +
+ggplot(st_obj_2@coord[st_obj_2@coord$gene %in% goi,],
+       mapping=aes(x=x, y=y, col=gene)) +
+  geom_point(size=0.5, shape=15) + theme_bw() 
+```
+
+```{r}
+ggplot(st_obj_1@coord[st_obj_1@coord$gene %in% goi,],
+       mapping=aes(x=x, y=y, col=gene)) +
+  geom_point(size=0.5, shape=15) + theme_bw()
+```
+
+
+```{r}
+spatial_image(st_obj_1, 
+              gene = "all_genes", 
+              overlay_gene = "Cd19", 
+              colors = c("#000000", "#0f9b0f"), 
+              colors_overlay = c("#DEEBF7", 
+                                 "#9ECAE1", 
+                                 "#3182BD", 
+                                 "#0000FF"))
+```
+
+# Subset 
+
+```{r}
+spatial_image(st_obj_2[bin_x(st_obj_2)[50:70], bin_y(st_obj_2)[120:150]], gene="Ighd")
+bin_x(st_obj_2)[50:70]
+bin_y(st_obj_2)[120:150]
+```
+
+```{r}
+test_1 <- st_obj_2@coord$x > 1.29e+03 & st_obj_2@coord$x < 1.81e+03 
+test_2 <- st_obj_2@coord$y > 2.96e+03 & st_obj_2@coord$y < 3.73e+03
+coord_sub <- st_obj_2@coord[test_1 & test_2,]
+coord_sub$gene <- factor(as.character(coord_sub$gene))
+ggplot(coord_sub,
+       mapping=aes(x=x, y=y, col=gene)) +
+  geom_point(size=0.5, shape=15, show.legend=FALSE) + theme_bw() + coord_fixed()
+```
+
+```{r}
+for(goi in sort(grep("^[ABC]", unique(coord_sub$gene),  perl = TRUE, val=TRUE))){
+  p <- ggplot(coord_sub[coord_sub$gene == goi, ],
+       mapping=aes(x=x, y=y, col=gene)) +
+  geom_point(size=0.5, shape=15, show.legend=FALSE) + theme_bw() + coord_fixed() + 
+    ggtitle(goi)
+  print(p)
+}
+
+```
+```
 
 ## Session info
 
