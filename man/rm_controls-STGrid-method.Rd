@@ -12,4 +12,3 @@
 \description{
 Remove control (Blank-*) "genes".
 }
-\keyword{internal}

@@ -63,7 +63,9 @@ get_verbosity <- function() {
 #' Print a message based on the level of verbosity
 #'
 #' @param ... The variables that will be pasted in the message.
-#' @param msg_type The type of message, one of "INFO", "DEBUG", or "WARNING"
+#' @param msg_type The type of message, one of "INFO", "DEBUG",
+#' "WARNING" or "STOP" (may also accept "ERROR" which is
+#' translated as "STOP").
 #'
 #' @return None
 #'
@@ -83,9 +85,15 @@ get_verbosity <- function() {
 #' @keywords internal
 print_msg <-
   function(...,
-           msg_type = c("INFO", "DEBUG", "WARNING", "STOP")) {
+           msg_type = c("INFO", "DEBUG", "WARNING", "STOP", "ERROR")) {
+
+
 
     msg_type <- match.arg(msg_type)
+
+    if(msg_type == "ERROR")
+      msg_type <- "STOP"
+
     msg <- list(...)
     msg <- paste0(msg, collapse = " ")
 

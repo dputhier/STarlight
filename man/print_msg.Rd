@@ -4,12 +4,14 @@
 \alias{print_msg}
 \title{Print a message based on the level of verbosity}
 \usage{
-print_msg(..., msg_type = c("INFO", "DEBUG", "WARNING", "STOP"))
+print_msg(..., msg_type = c("INFO", "DEBUG", "WARNING", "STOP", "ERROR"))
 }
 \arguments{
 \item{...}{The variables that will be pasted in the message.}
 
-\item{msg_type}{The type of message, one of "INFO", "DEBUG", or "WARNING"}
+\item{msg_type}{The type of message, one of "INFO", "DEBUG",
+"WARNING" or "STOP" (may also accept "ERROR" which is
+translated as "STOP").}
 }
 \value{
 None

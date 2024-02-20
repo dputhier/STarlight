@@ -9,8 +9,6 @@ gene_names(x)
 gene_names(x)
 
 gene_names(x)
-
-gene_names(x)
 }
 \arguments{
 \item{x}{The STCompR object}
@@ -19,8 +17,6 @@ gene_names(x)
 The genes stored in a STGrid object
 
 The genes stored in a STGrid object
-
-The genes stored in a STCompR object
 
 The genes stored in a STCompR object
 }

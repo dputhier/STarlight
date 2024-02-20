@@ -11,10 +11,10 @@ This class store transcript molecule coordinates as a grid.
 \section{Slots}{
 
 \describe{
-\item{\code{coordinate}}{A list of data frames representing spatial coordinates (empty by default).
+\item{\code{coordinate}}{A data frames representing spatial coordinates (empty by default).
 May accept several layers in the future.}
 
-\item{\code{bin_mat}}{A list of data frames representing binned matrices (empty by default).
+\item{\code{bin_mat}}{A data frames representing the matrix (empty by default).
 May accept several layers in the future.}
 
 \item{\code{y_max}}{Numeric value representing the maximum y-coordinate (default is 0).}

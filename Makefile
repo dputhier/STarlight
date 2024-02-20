@@ -70,7 +70,7 @@ __check_defined_VER:
 
 release: __check_defined_VER
 	@ echo "#-----------------------------------------------#"
-	@ echo "# Starting the release $(VERSION)                   #"
+	@ echo "# Starting the release $(VERSION)               #"
 	@ echo "#-----------------------------------------------#"
 
 release_bump: release
@@ -83,7 +83,7 @@ release_bump: release
 	@ cat ./DESCRIPTION | perl -npe "s/Version: .*/Version: $(VERSION)/" > /tmp/stcompr.bump
 	@ mv /tmp/stcompr.bump ./DESCRIPTION
 	@ cat ./Makefile | perl -npe 's/^VERSION=.*/VERSION=$(VERSION)/' > /tmp/stcompr.bump
-	@ mv /tmp/stcompr.bump ./Makefile 
+	@ mv /tmp/stcompr.bump ./Makefile
 	@ echo "Version was bump to $(VERSION)"
 	@ make install
 	@ git commit -m 'Bumped version $(VERSION)'

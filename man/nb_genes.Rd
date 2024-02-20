@@ -9,8 +9,6 @@ nb_genes(x)
 nb_genes(x)
 
 nb_genes(x)
-
-nb_genes(x)
 }
 \arguments{
 \item{x}{The STCompR object}
@@ -19,8 +17,6 @@ nb_genes(x)
 The number of genes stored in a STGrid object
 
 The number of genes stored in a STGrid object
-
-The number of genes stored in a STCompR object
 
 The number of genes stored in a STCompR object
 }
