@@ -29,6 +29,8 @@ stcompr
 
 ```{r verbosity_level, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
 library(stcompr)
+library(ggplot2)
+library(patchwork)
 stcompr::set_verbosity(1)
 ```
 
@@ -124,10 +126,182 @@ spatial_image(re_bin(st_obj_1["Rag1"], bin_size = 10), gene="Rag1")
 spatial_image(st_obj_1, gene="all_genes", scale=FALSE, saturation = 0)
 ```
 
-* Zooming...
+## Zooming...
+
+```{r}
+st_obj_1_b5 <- re_bin(st_obj_1[c("Rag1", "Ccl19", "Cd19", "Dntt"),], bin_size=5)
+
+```
+
+```{r}
+st_obj_1_b5 <- re_bin(st_obj_1, bin_size=5)
+
+spatial_image(st_obj_1_b5, 
+             gene="all_genes", 
+             overlay_gene = "Cd19", 
+             grid=TRUE,
+             grid_by = 50)
+
+sub <- st_obj_1_b5[bin_x(st_obj_1_b5)[350:550],
+                          bin_y(st_obj_1_b5)[625:875]]
+
+# Could also add Lifr, Ltbr
+p1 <-  spatial_image(sub, 
+             gene="all_genes", 
+             overlay_gene = "Selp", 
+             colors_overlay = c("green", "red"), 
+             size=0.3) + ggtitle("Selp") + 
+  theme(legend.position = "none")
+
+p2 <-  spatial_image(sub, 
+             gene="all_genes", 
+             overlay_gene = "S100a6", 
+             colors_overlay = c("green", "red"), 
+             size=0.3) + ggtitle("S100a6") + 
+  theme(legend.position = "none")
+
+p3 <-  spatial_image(sub, 
+             gene="all_genes", 
+             overlay_gene = "Dcn", 
+             colors_overlay = c("green", "red"), 
+             size=0.3) + ggtitle("Dcn") + 
+  theme(legend.position = "none")
+
+p4 <-  spatial_image(sub, 
+             gene="all_genes", 
+             overlay_gene = "Sparc", 
+             colors_overlay = c("green", "red"), 
+             size=0.3) + ggtitle("Sparc") + 
+  theme(legend.position = "none")
+
+p5 <-  spatial_image(sub, 
+             gene="all_genes", 
+             overlay_gene = "Pecam1", 
+             colors_overlay = c("green", "red"), 
+             size=0.3) + ggtitle("Pecam1") + 
+  theme(legend.position = "none")
+
+p6 <-  spatial_image(sub, 
+             gene="all_genes", 
+             overlay_gene = "Pdgfra", 
+             colors_overlay = c("green", "red"), 
+             size=0.3) + ggtitle("Pdgfra") + 
+  theme(legend.position = "none")
+
+
+p7 <-  spatial_image(sub, 
+             gene="all_genes", 
+             overlay_gene = "Cdh5", 
+             colors_overlay = c("green", "red"), 
+             size=0.3) + ggtitle("Cdh5") + 
+  theme(legend.position = "none")
+
+p8 <-  spatial_image(sub, 
+             gene="all_genes", 
+             overlay_gene = "Cd36", 
+             colors_overlay = c("green", "red"), 
+             size=0.3) + ggtitle("Cd36") + 
+  theme(legend.position = "none")
+
+p9 <-  spatial_image(sub, 
+             gene="all_genes", 
+             overlay_gene = "Ccl19", 
+             colors_overlay = c("green", "red"), 
+             size=0.3) + ggtitle("Ccl19") + 
+  theme(legend.position = "none")
+
+p10 <-  spatial_image(sub, 
+             gene="all_genes", 
+             overlay_gene = "Lifr", 
+             colors_overlay = c("green", "red"), 
+             size=0.3) + ggtitle("Lifr") + 
+  theme(legend.position = "none")
+
+(p1 | p2 | p3 | p4 | p9) / (p5 | p6 | p7 | p8 | p10)
+
+
+p1 <-  spatial_image(sub, 
+             gene="all_genes", 
+             overlay_gene = "Cxcl12", 
+             colors_overlay = c("green", "red"), 
+             size=0.3) + ggtitle("Cxcl12") + 
+  theme(legend.position = "none")
+
+p2 <-  spatial_image(sub, 
+             gene="all_genes", 
+             overlay_gene = "Prss16", 
+             colors_overlay = c("green", "red"), 
+             size=0.3) + ggtitle("Prss16") + 
+  theme(legend.position = "none")
+
+p3 <-  spatial_image(sub, 
+             gene="all_genes", 
+             overlay_gene = "Ccl25", 
+             colors_overlay = c("green", "red"), 
+             size=0.3) + ggtitle("Ccl25") + 
+  theme(legend.position = "none")
+
+p4 <-  spatial_image(sub, 
+             gene="all_genes", 
+             overlay_gene = "Psmb11", 
+             colors_overlay = c("green", "red"), 
+             size=0.3) + ggtitle("Psmb11") + 
+  theme(legend.position = "none")
+
+(p1 | p2) / (p3 | p4 )
+
+
+p1 <-  spatial_image(sub, 
+             gene="all_genes", 
+             overlay_gene = "Ccl22", 
+             colors_overlay = c("green", "red"), 
+             size=0.3) + ggtitle("Ccl22") + 
+  theme(legend.position = "none")
+
+p2 <-  spatial_image(sub, 
+             gene="all_genes", 
+             overlay_gene = "Krt14", 
+             colors_overlay = c("green", "red"), 
+             size=0.3) + ggtitle("Krt14") + 
+  theme(legend.position = "none")
+
+p3 <-  spatial_image(sub, 
+             gene="all_genes", 
+             overlay_gene = "Aire", 
+             colors_overlay = c("green", "red"), 
+             size=0.3) + ggtitle("Aire") + 
+  theme(legend.position = "none")
+
+p4 <-  spatial_image(sub, 
+             gene="all_genes", 
+             overlay_gene = "Fezf2", 
+             colors_overlay = c("green", "red"), 
+             size=0.3) + ggtitle("Fezf2") + 
+  theme(legend.position = "none")
+
+
+p5 <-  spatial_image(sub, 
+             gene="all_genes", 
+             overlay_gene = "Ccr7", 
+             colors_overlay = c("green", "red"), 
+             size=0.3) + ggtitle("Ccr7") + 
+  theme(legend.position = "none")
+
+p6 <-  spatial_image(sub, 
+             gene="all_genes", 
+             overlay_gene = "Igfbp4", 
+             colors_overlay = c("green", "red"), 
+             size=0.3) + ggtitle("Igfbp4") + 
+  theme(legend.position = "none")
+
+(p1 | p2 | p3 ) / (p4 | p5 | p6)
+
+
+
+```
 
 ```{r loadlib1, warning=FALSE, results='hide', echo = FALSE, eval=TRUE}
-st_obj_1_b10 <- re_bin(st_obj_1["Cd3e",], bin_size=10)
+
 spatial_image(st_obj_1_b10[bin_x(st_obj_1_b10)[100:400], 
                            bin_y(st_obj_1_b10)[100:400]], 
               gene="Cd3e")
@@ -261,6 +435,23 @@ for(goi in sort(grep("^[ABC]", unique(coord_sub$gene),  perl = TRUE, val=TRUE)))
 }
 
 ```
+```
+
+
+## Hull ?
+
+```{r}
+goi <- "Cd19"
+st_obj_1$has_signal <- as.factor(ifelse(bin_mat(st_obj_1)[,"all_genes"] > 20,
+            1, 
+            0))
+goi_mat <- bin_mat(st_obj_1, as_factor = TRUE)[,c("bin_x", "bin_y", goi)]
+goi_mat <- goi_mat[goi_mat[[goi]] > 0, ]
+ggplot(cbind(bin_mat(st_obj_1, as_factor = TRUE), st_obj_1$has_signal), mapping = aes(x=bin_x, y=bin_y, color=st_obj_1$has_signal)) +
+geom_point() +
+geom_point(data=goi_mat, 
+    mapping=aes(x=bin_x, y=bin_y),
+    inherit.aes = FALSE, size=0.1)
 ```
 
 ## Session info

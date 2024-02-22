@@ -2,8 +2,7 @@
 % Please edit documentation in R/st_grid_class.R
 \name{bin_y}
 \alias{bin_y}
-\title{Y bins of a STGrid object.
-row_names}
+\title{Y bins of a STGrid object.}
 \usage{
 bin_y(x)
 }

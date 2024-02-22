@@ -4,10 +4,12 @@
 \alias{coord,STGrid-method}
 \title{The coordinates stored in a STGrid object}
 \usage{
-\S4method{coord}{STGrid}(x)
+\S4method{coord}{STGrid}(object, as_factor = FALSE)
 }
 \arguments{
-\item{x}{The STGrid object}
+\item{object}{The STGrid object}
+
+\item{as_factor}{Should bin_x and bin_y columns be returned as ordered factor ?}
 }
 \description{
 The coordinates stored in a STGrid object

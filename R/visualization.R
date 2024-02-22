@@ -1,12 +1,21 @@
 # -------------------------------------------------------------------------
 ##    Spatial image
 # -------------------------------------------------------------------------
-#' @title Create a spatial image of based on a  STGrid object.
-#' @description
-#' Create a spatial image of based on a  STGrid object.
-#' @param object The STGrid object.
-#' @keywords internal
+#' Color-coded representation of the molecule density
 #'
+#' This function displays a color-coded representation of the molecule density observed in a spatial transcriptomics experiment.
+#'
+#' @param object The STGrid object.
+#' @param gene The name of the gene for which the spatial image will be created.
+#' @param saturation The saturation level for the gene expression values. Defaults to 0.75.
+#' @param scale Logical value indicating whether to scale the gene expression values. Defaults to TRUE.
+#' @param colors The colors to use for gradient fill in the spatial image. Defaults to a set of colors.
+#' @param ceil Logical value indicating whether to ceil the gene expression values. Defaults to TRUE.
+#' @param coord_fixed Logical value indicating whether to keep the aspect ratio fixed. Defaults to TRUE.
+#' @param overlay_gene The gene to overlay on the spatial image. Defaults to NULL.
+#' @param colors_overlay The colors to use for gradient fill in the overlay gene. Defaults to a set of colors.
+#' @param size The size of the overlayed points.
+#' @export
 setGeneric("spatial_image",
            function(object=NULL,
                     gene=NULL,
@@ -16,15 +25,30 @@ setGeneric("spatial_image",
                     ceil=TRUE,
                     coord_fixed=TRUE,
                     overlay_gene=NULL,
-                    colors_overlay=c("#DEEBF7", "#9ECAE1", "#3182BD"))
+                    colors_overlay=c("#DEEBF7", "#9ECAE1", "#3182BD"),
+                    grid=FALSE,
+                    grid_by=20,
+                    color_grid="black",
+                    size=0.5)
              standardGeneric("spatial_image")
 )
 
-#' @title Create a spatial image of based on a  STGrid object.
-#' @description
-#' Create a spatial image of based on a  STGrid object.
+#' Color-coded representation of the molecule density
+#'
+#' This function displays a color-coded representation of the molecule density observed in a spatial transcriptomics experiment.
+#'
 #' @param object The STGrid object.
-#' @export spatial_image
+#' @param gene The name of the gene for which the spatial image will be created.
+#' @param saturation The saturation level for the gene expression values. Defaults to 0.75.
+#' @param scale Logical value indicating whether to scale the gene expression values. Defaults to TRUE.
+#' @param colors The colors to use for gradient fill in the spatial image. Defaults to a set of colors.
+#' @param ceil Logical value indicating whether to ceil the gene expression values. Defaults to TRUE.
+#' @param coord_fixed Logical value indicating whether to keep the aspect ratio fixed. Defaults to TRUE.
+#' @param overlay_gene The gene to overlay on the spatial image. Defaults to NULL.
+#' @param colors_overlay The colors to use for gradient fill in the overlay gene. Defaults to a set of colors.
+#' @param size The size of the overlayed points.
+#' @import ggplot2
+#' @export
 setMethod("spatial_image",
           signature(object = "STGrid"),
           function(object=NULL,
@@ -35,15 +59,19 @@ setMethod("spatial_image",
                    ceil=TRUE,
                    coord_fixed=TRUE,
                    overlay_gene=NULL,
-                   colors_overlay=c("#DEEBF7", "#9ECAE1", "#3182BD")) {
+                   colors_overlay=c("#DEEBF7", "#9ECAE1", "#3182BD"),
+                   grid=FALSE,
+                   grid_by=20,
+                   color_grid="white",
+                   size=0.5) {
 
             if(is.null(object))
                 print_msg("Please provide an STGrid object.",
                         msg_type = "STOP")
 
             if(!is.null(overlay_gene)){
-              if(!overlay_gene %in% gene_names(object))
-                print_msg("The gene was not found in the object.",
+              if(!overlay_gene %in% gene_names(object, all_genes=TRUE))
+                print_msg("The gene to overlay was not found in the object.",
                           msg_type = "STOP")
 
             }
@@ -54,12 +82,13 @@ setMethod("spatial_image",
             if(length(gene) > 1)
               print_msg("Please provide a single gene name (see gene arguments).", msg_type = "STOP")
 
-            if(!gene %in% gene_names(object))
+            if(!gene %in% gene_names(object, all_genes=TRUE)){
               print_msg("The gene was not found in the object.", msg_type = "STOP")
+            }
+
 
               spatial_matrix <- object@bin_mat[, c("bin_x", "bin_y", gene)]
               tmp <- spatial_matrix[, gene]
-              tmp[is.na(tmp)] <- 0
 
             if(saturation != 0){
               q_sat <- quantile(tmp[tmp != 0], saturation)
@@ -101,19 +130,117 @@ setMethod("spatial_image",
 
 
             if(!is.null(overlay_gene)){
-              over <- na.omit(bin_mat(object,
-                              as_factor = TRUE)[ ,c("bin_x", "bin_y", overlay_gene)])
+              over <- bin_mat(object,
+                              as_factor = TRUE)[ ,c("bin_x", "bin_y", overlay_gene)]
+              over <- over[over[[overlay_gene]] != 0,]
+
               p <- p + geom_point(data=over, mapping=aes(x=bin_x,
                                                          y=bin_y,
                                                          color=log10(.data[[overlay_gene]])),
-                                  size=0.1,
+                                  size=size,
                                   inherit.aes = FALSE) +
                 scale_color_gradientn(colors=colors_overlay)
             }
 
+            if(grid){
+
+              lev_bin_x <- levels(spatial_matrix$bin_x)
+              lev_bin_y <- levels(spatial_matrix$bin_y)
+
+              x_seq <- seq(from=1, to=length(lev_bin_x), by=grid_by)
+              y_seq <- seq(from=1, to=length(lev_bin_y), by=grid_by)
+
+              label_x <- setNames(lev_bin_x, 1:length(lev_bin_x))
+              names(label_x)[-x_seq] <- ""
+              label_y <- setNames(lev_bin_y, 1:length(lev_bin_y))
+              names(label_y)[-y_seq] <- ""
+
+              p <- p + geom_vline(data=data.frame(bin_x=levels(spatial_matrix$bin_x)[x_seq]),
+                                  mapping=aes(xintercept=bin_x), color = color_grid) +
+                       geom_hline(data=data.frame(bin_y=levels(spatial_matrix$bin_y)[y_seq]),
+                                  mapping=aes(yintercept=bin_y), color = color_grid) +
+                  theme(axis.text = element_text(size=6, angle = 45)) +
+                  scale_x_discrete("bla", labels=names(label_x)) +
+                  scale_y_discrete("bla", labels=names(label_y))
+            }
+
             return(p)
+
 })
 
+# -------------------------------------------------------------------------
+##    The spatial_plot function
+# -------------------------------------------------------------------------
+#' Plot x/y coordinates of molecules
+#'
+#' Plot x/y coordinates of molecules of a spatial transcriptomics experiment.
+#'
+#' @param object The STGrid object.
+#' @param gene The name of the genes for which the spatial image will be created.
+#' @param colors The colors to use for genes in the spatial image.
+#' @param size The size of the points
+#' @param coord_fixed Logical value indicating whether to keep the aspect ratio fixed. Defaults to TRUE.
+#' @export
+#' @keywords internal
+setGeneric("spatial_plot",
+           function(object=NULL,
+                    gene_list=NULL,
+                    colors=NULL,
+                    size=0.1,
+                    coord_fixed=TRUE)
+             standardGeneric("spatial_plot")
+)
+
+#' Plot x/y coordinates of molecules
+#'
+#' Plot x/y coordinates of molecules of a spatial transcriptomics experiment.
+#'
+#' @param object The STGrid object.
+#' @param gene The name of the genes for which the spatial image will be created.
+#' @param colors The colors to use for genes in the spatial image.
+#' @param size The size of the points
+#' @param coord_fixed Logical value indicating whether to keep the aspect ratio fixed. Defaults to TRUE.
+#' @export
+setMethod("spatial_plot", "STGrid",
+           function(object=NULL,
+                    gene_list=NULL,
+                    colors=NULL,
+                    size=0.1,
+                    coord_fixed=TRUE){
+
+             if(is.null(object))
+               print_msg("Please provide an STGrid object.",
+                         msg_type = "STOP")
+
+             if(is.null(gene_list))
+               print_msg("Please provide gene names (see gene_list arguments).",
+                         msg_type = "STOP")
+
+             if(!all(gene_list %in% gene_names(object)))
+               print_msg("One or several genes was not found in the object.", msg_type = "STOP")
+
+             coord <- get_gn_coord(object, gene_list = gene_list, as.factor=TRUE)
+
+             p <- ggplot2::ggplot(data=coord,
+                                  mapping = ggplot2::aes(x=x,
+                                                         y=y,
+                                                         color= gene)) +
+               ggplot2::geom_point(size=size) +
+               ggplot2::xlab("x")  +
+               ggplot2::ylab("y") +
+               ggplot2::theme_minimal() +
+               theme(axis.text = element_text(size=6))
+
+              if(!is.null(colors))
+                p <- p +ggplot2::scale_color_manual(values=colors)
+
+             if(coord_fixed)
+               p <- p + ggplot2::coord_fixed()
+
+             return(p)
+
+           }
+)
 
 # -------------------------------------------------------------------------
 ##    Molecule counts
@@ -372,7 +499,9 @@ setMethod(
                          size=mean_counts)) +
       ggplot2::geom_vline(xintercept = 0) +
       ggplot2::geom_hline(yintercept = 0) +
-      ggplot2::geom_point(shape=21, color="black", stroke=0.2) +
+      ggplot2::geom_point(shape=21,
+                          color="black",
+                          stroke=0.2) +
       ggplot2::theme_bw() +
       ggrepel::geom_text_repel(data=na.omit(volc_data), mapping=ggplot2::aes(label=gene),
                                size=text_size,

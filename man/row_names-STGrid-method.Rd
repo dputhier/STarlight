@@ -2,8 +2,7 @@
 % Please edit documentation in R/st_grid_class.R
 \name{row_names,STGrid-method}
 \alias{row_names,STGrid-method}
-\title{Row names of a STGrid object.
-row_names}
+\title{Row names of a STGrid object.}
 \usage{
 \S4method{row_names}{STGrid}(x)
 }

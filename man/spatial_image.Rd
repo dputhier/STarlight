@@ -2,22 +2,45 @@
 % Please edit documentation in R/visualization.R
 \name{spatial_image}
 \alias{spatial_image}
-\title{Create a spatial image of based on a  STGrid object.}
+\title{Color-coded representation of the molecule density}
 \usage{
 spatial_image(
-  object,
+  object = NULL,
   gene = NULL,
   saturation = 0.75,
   scale = TRUE,
   colors = c("#000003", "#410967", "#932567", "#DC5039", "#FBA40A", "#FCFEA4"),
   ceil = TRUE,
-  coord_fixed = TRUE
+  coord_fixed = TRUE,
+  overlay_gene = NULL,
+  colors_overlay = c("#DEEBF7", "#9ECAE1", "#3182BD"),
+  grid = FALSE,
+  grid_by = 20,
+  color_grid = "black",
+  size = 0.5
 )
 }
 \arguments{
 \item{object}{The STGrid object.}
+
+\item{gene}{The name of the gene for which the spatial image will be created.}
+
+\item{saturation}{The saturation level for the gene expression values. Defaults to 0.75.}
+
+\item{scale}{Logical value indicating whether to scale the gene expression values. Defaults to TRUE.}
+
+\item{colors}{The colors to use for gradient fill in the spatial image. Defaults to a set of colors.}
+
+\item{ceil}{Logical value indicating whether to ceil the gene expression values. Defaults to TRUE.}
+
+\item{coord_fixed}{Logical value indicating whether to keep the aspect ratio fixed. Defaults to TRUE.}
+
+\item{overlay_gene}{The gene to overlay on the spatial image. Defaults to NULL.}
+
+\item{colors_overlay}{The colors to use for gradient fill in the overlay gene. Defaults to a set of colors.}
+
+\item{size}{The size of the overlayed points.}
 }
 \description{
-Create a spatial image of based on a  STGrid object.
+This function displays a color-coded representation of the molecule density observed in a spatial transcriptomics experiment.
 }
-\keyword{internal}

@@ -2,8 +2,7 @@
 % Please edit documentation in R/st_grid_class.R
 \name{row_names}
 \alias{row_names}
-\title{Row names of a STGrid object.
-row_names}
+\title{Row names of a STGrid object.}
 \usage{
 row_names(x)
 }

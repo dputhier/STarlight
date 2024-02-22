@@ -4,7 +4,7 @@
 \alias{gene_names,STCompR-method}
 \title{The genes stored in a STCompR object}
 \usage{
-\S4method{gene_names}{STCompR}(x)
+\S4method{gene_names}{STCompR}(object)
 }
 \arguments{
 \item{x}{The STCompR object}

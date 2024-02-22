@@ -4,7 +4,7 @@
 \alias{bin_this_matrix}
 \title{Create a 2D binned grid (rasterization) from molecule coordinates}
 \usage{
-bin_this_matrix(coord = NULL, bin_size = 25)
+bin_this_matrix(coord = NULL, bin_size = 25, control = NULL)
 }
 \arguments{
 \item{coord}{A data frame containing molecule coordinates with columns 'x', 'y', and 'gene'. Defaults to NULL.}

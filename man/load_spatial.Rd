@@ -4,7 +4,12 @@
 \alias{load_spatial}
 \title{Constructor for SpatialTranscriptomicAnalysis class (STGrid)}
 \usage{
-load_spatial(path = "", method = c("coordinates", "merscope"), bin_size = 25)
+load_spatial(
+  path = "",
+  method = c("coordinates", "merscope"),
+  bin_size = 25,
+  control = "^Blank\\\\-[0-9]+"
+)
 }
 \arguments{
 \item{path}{Either a file (if method is set to "coordinates") or a directory (if method
@@ -14,6 +19,9 @@ is set to "merscope"). If method is set to "coordinates" the file should contain
 \item{method}{The type of technology ("merscope" in the only supported method at the moment).}
 
 \item{bin_size}{Numeric value representing the bin size (default to 25).}
+
+\item{control}{A regular expression to identify controls. As the function computes the sum of
+expression levels ("all_genes" features), this will allow to delete these blanks/controls for computation.}
 }
 \value{
 An object of class STGrid.

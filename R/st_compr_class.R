@@ -69,8 +69,6 @@ setClass("STCompR",
 #' Each count is then divided by its corresponding geometric mean, and the median
 #' of these ratios across all samples is computed to obtain the size factor for each sample.
 #'
-#' @examples
-#'
 #' @keywords internal
 estimSf <- function(cts) {
 
@@ -229,54 +227,41 @@ setMethod(
 
 
 # -------------------------------------------------------------------------
-##    REDEFINE SHOW() METHOD FOR CLASS OBJECT : STCompR
-# -------------------------------------------------------------------------
-
-#' @title The number of genes stored in a STCompR object
-#' @description
-#' The number of genes stored in a STCompR object
-#' @param x The STCompR object
-#' @export nb_genes
-#' @keywords internal
-setGeneric("nb_genes",
-           function(x)
-             standardGeneric("nb_genes")
-)
-
-# -------------------------------------------------------------------------
 ##    Some basic functions
 # -------------------------------------------------------------------------
 
+if(!isGeneric("nb_genes")){
+  setGeneric("nb_genes",
+            function(object)
+              standardGeneric("nb_genes")
+  )
+}
+
 #' @title The number of genes stored in a STCompR object
 #' @description
 #' The number of genes stored in a STCompR object
-#' @param x The STCompR object
+#' @param object The STCompR object
 #' @export nb_genes
-setMethod("nb_genes", "STCompR",
-           function(x)
-             nrow(x@stat_test)
+setMethod("nb_genes", signature(object = "STCompR"),
+           function(object)
+             nrow(object@stat_test)
 )
 
 
+if(!isGeneric("gene_names")){
+  setGeneric("gene_names",
+             function(object)
+               standardGeneric("gene_names")
+  )
+}
 #' @title The genes stored in a STCompR object
 #' @description
 #' The genes stored in a STCompR object
 #' @param x The STCompR object
-#' @export gene_names
-#' @keywords internal
-setGeneric("gene_names",
-           function(x)
-             standardGeneric("gene_names")
-)
-
-#' @title The genes stored in a STCompR object
-#' @description
-#' The genes stored in a STCompR object
-#' @param x The STCompR object
-#' @export gene_names
-setMethod("gene_names", "STCompR",
-           function(x)
-             rownames(x@stat_test)
+#' @export
+setMethod("gene_names", signature(object="STCompR"),
+           function(object)
+             rownames(object@stat_test)
 )
 
 # -------------------------------------------------------------------------

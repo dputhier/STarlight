@@ -4,10 +4,10 @@
 \alias{nb_genes,STCompR-method}
 \title{The number of genes stored in a STCompR object}
 \usage{
-\S4method{nb_genes}{STCompR}(x)
+\S4method{nb_genes}{STCompR}(object)
 }
 \arguments{
-\item{x}{The STCompR object}
+\item{object}{The STCompR object}
 }
 \description{
 The number of genes stored in a STCompR object
