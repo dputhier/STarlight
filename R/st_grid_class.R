@@ -947,7 +947,7 @@ load_spatial <- function(path = "",
                                     "merscope",
                                     "xenium"),
                          bin_size = 25,
-                         control = "^Blank\\-[0-9]+") {
+                         control = NULL) {
 
   method <- match.arg(method)
 
