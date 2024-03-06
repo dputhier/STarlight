@@ -342,7 +342,7 @@ setMethod(
 
     what <- match.arg(what)
     dist_method <- match.arg(dist_method)
-
+    hclust_method <- match.arg(hclust_method)
   if(what=="changes"){
     print_msg("Parameter 'what' is set to 'changes'...")
     obj <- object@neighborhood[[2]] - object@neighborhood[[1]]

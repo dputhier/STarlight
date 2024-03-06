@@ -2,13 +2,13 @@
 % Please edit documentation in R/st_grid_class.R
 \name{load_spatial}
 \alias{load_spatial}
-\title{Constructor for SpatialTranscriptomicAnalysis class (STGrid)}
+\title{Create a Spatial Transcriptomic Grid class (STGrid)}
 \usage{
 load_spatial(
   path = "",
   method = c("coordinates", "merscope", "xenium"),
   bin_size = 25,
-  control = "^Blank\\\\-[0-9]+"
+  control = NULL
 )
 }
 \arguments{
@@ -27,5 +27,6 @@ expression levels ("all_genes" features), this will allow to delete these blanks
 An object of class STGrid.
 }
 \description{
-Constructor for SpatialTranscriptomicAnalysis class (STGrid)
+The load_spatial() function is the entry point of the stcompr package.
+It will load the molecule coordinates and create a 2D binned grid with default size 25µm.
 }

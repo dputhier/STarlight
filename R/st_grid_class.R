@@ -62,16 +62,15 @@ setClass(
 # -------------------------------------------------------------------------
 #      NCOL/NROW/DIM METHOD FOR CLASS OBJECT : STGrid
 # -------------------------------------------------------------------------
-
 #' @title
 #' ncol.STGrid
 #' @description
 #' The number of columns of a STGrid object.
 #' @param x The STGrid object
 #' @keywords internal
-ncol.STGrid <- function (x) {
-  length((x@bin_x))
-}
+  ncol.STGrid <- function (x) {
+    length(x@bin_x)
+  }
 
 #' @title
 #' nrow.STGrid
@@ -530,24 +529,18 @@ setMethod("show", signature("STGrid"),
 #' @export summary
 setMethod("summary", signature("STGrid"),
           function(object) {
+            mx_col <- min(ncol(object), 4)
             print_msg("An object of class STGrid")
             print_msg("Method:", object@method)
             print_msg("Bin size:", object@bin_size)
-            print_msg("Coord:")
-            cat("\n")
-            print(head(object@coord, 3))
-            cat("\n")
-            print_msg("bin_mat:")
-            cat("\n")
-            print(head(object@bin_mat, 3))
-            cat("\n")
+            print_msg("Genes:", c(head(gene_names(object), 4), "..."))
             print_msg("x_min:", object@x_min)
             print_msg("x_max:", object@x_max)
             print_msg("y_min:", object@y_min)
             print_msg("y_max:", object@y_max)
             print_msg("path:", object@path)
-            print_msg("bin_x:", head(bin_x(object)), "...")
-            print_msg("bin_y:", head(bin_y(object)), "...")
+            print_msg("bin_x:", head(bin_x(object), 4), "...")
+            print_msg("bin_y:", head(bin_y(object), 4), "...")
             print_msg("Meta data:", object@meta)
           })
 
@@ -567,7 +560,6 @@ setMethod("[", signature(x = "STGrid"),
           function (x, i, j, ..., drop = FALSE) {
             x_is_gene <- FALSE
             x_is_bin <- FALSE
-            x_is_num <- FALSE
 
             if (!missing(i)) {
               i <- unique(i)
@@ -579,20 +571,24 @@ setMethod("[", signature(x = "STGrid"),
                 if (any(i %in% gene_names(x, all_genes = TRUE))) {
                   x_is_gene <- TRUE
                 } else{
-                  x_is_gene <- FALSE
                   if (is.numeric(i)) {
-                    if (any(i > nb_genes(x))) {
+                    i <- round(i, 0)
+                    if (any(i > nb_genes(x)) | any(i < 1)) {
                       print_msg("Numering value i is out of range (should be < nb_genes(x)).",
                                 msg_type = "STOP")
                     }
-                    x_is_num <- TRUE
+                    i <- gene_names(x, all_genes = TRUE)[i]
+                    x_is_gene <- TRUE
+                  }else{
+                    print_msg("Check i... Should be a set of genes or bins.",
+                              msg_type = "STOP")
                   }
 
                 }
 
               }
 
-              if (!x_is_bin && !x_is_gene && !x_is_num)
+              if (!x_is_bin && !x_is_gene)
                 print_msg("Some gene or bin_x or indexes where not found in the object.",
                           msg_type = "STOP")
             }
@@ -620,7 +616,7 @@ setMethod("[", signature(x = "STGrid"),
                   n_ripley_k_function <-
                     n_ripley_k_function[n_ripley_k_function$gene %in% i, ]
 
-                } else if (x_is_bin) {
+                } else {
                   n_coord <- n_coord[n_coord$bin_x %in% i, ]
                   n_bin_mat <- n_bin_mat[n_bin_mat$bin_x %in% i, ]
                   gene_left <- unique(n_coord$gene)
@@ -633,23 +629,6 @@ setMethod("[", signature(x = "STGrid"),
                       n_bin_mat[, colnames(n_bin_mat) %in% c("bin_x", "bin_y", gene_left)]
                   }
 
-
-                } else{
-                  g <- gene_names(x, all_genes = TRUE)[i]
-                  n_coord <- n_coord[n_coord$gene %in% g, ]
-
-                  if ("all_genes" %in% colnames(n_bin_mat)) {
-                    n_bin_mat <-
-                      n_bin_mat[, colnames(n_bin_mat) %in% c("bin_x", "bin_y", "all_genes", g)]
-                  } else{
-                    n_bin_mat <-
-                      n_bin_mat[, colnames(n_bin_mat) %in% c("bin_x", "bin_y", g)]
-                  }
-
-                  n_bin_mat <-
-                    n_bin_mat[, colnames(n_bin_mat) %in% c("bin_x", "bin_y", g)]
-                  n_ripley_k_function <-
-                    n_ripley_k_function[n_ripley_k_function$gene %in% g,]
 
                 }
               }
@@ -671,7 +650,7 @@ setMethod("[", signature(x = "STGrid"),
                   }
 
 
-                } else if (x_is_bin) {
+                } else {
                   n_coord <- n_coord[n_coord$bin_x %in% i, ]
                   n_bin_mat <- n_bin_mat[n_bin_mat$bin_x %in% i, ]
                   gene_left <- unique(n_coord$gene)
@@ -686,20 +665,6 @@ setMethod("[", signature(x = "STGrid"),
 
 
 
-                } else{
-                  g <- gene_names(x, all_genes = TRUE)[i]
-                  n_coord <- n_coord[n_coord$gene %in% g, ]
-
-                  if ("all_genes" %in% colnames(n_bin_mat)) {
-                    n_bin_mat <-
-                      n_bin_mat[, colnames(n_bin_mat) %in% c("bin_x", "bin_y", "all_genes", g)]
-                  } else{
-                    n_bin_mat <-
-                      n_bin_mat[, colnames(n_bin_mat) %in% c("bin_x", "bin_y", g)]
-                  }
-
-                  n_ripley_k_function <-
-                    n_ripley_k_function[n_ripley_k_function$gene %in% g,]
                 }
 
                 n_coord <- n_coord[n_coord$bin_y %in% j, ]
@@ -930,7 +895,10 @@ setMethod("compute_k_ripley", signature("STGrid"),
 ##    Constructor for SpatialTranscriptomicAnalysis class (STGrid)
 # -------------------------------------------------------------------------
 
-#' Constructor for SpatialTranscriptomicAnalysis class (STGrid)
+#' @title Create a Spatial Transcriptomic Grid class (STGrid)
+#' @description
+#' The load_spatial() function is the entry point of the stcompr package.
+#' It will load the molecule coordinates and create a 2D binned grid with default size 25µm.
 #'
 #' @param path Either a file (if method is set to "coordinates") or a directory (if method
 #' is set to "merscope"). If method is set to "coordinates" the file should contain 3 columns
@@ -1263,11 +1231,11 @@ setMethod("re_bin", signature(object = "STGrid"),
 #' @param as.factor Whether the gene column should be returned as an ordered factor.
 #' @export
 #' @keywords internal
-setGeneric("get_gn_coord",
+setGeneric("get_coord",
            function(object,
                     gene_list = character(),
                     as.factor = TRUE)
-             standardGeneric("get_gn_coord"))
+             standardGeneric("get_coord"))
 
 #' @title The x/y coordinates of genes from a STGrid object.
 #' @description Return the x/y coordinates of genes from a STGrid object
@@ -1275,7 +1243,7 @@ setGeneric("get_gn_coord",
 #' @param gene_list The list of genes
 #' @param as.factor Whether the gene column should be returned as an ordered factor
 #' @export
-setMethod("get_gn_coord", "STGrid",
+setMethod("get_coord", "STGrid",
           function(object,
                    gene_list = character(),
                    as.factor = TRUE) {

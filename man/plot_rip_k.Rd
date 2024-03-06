@@ -8,7 +8,8 @@ plot_rip_k(
   object,
   correction = c("border", "isotropic", "Ripley", "translate"),
   max_gene_label = 8,
-  color = NULL
+  color = NULL,
+  size = 4
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ The genes with the highest correction value (whatever the radius)
 are displayed}
 
 \item{color}{The colors for the genes to be displayed.}
+
+\item{size}{The size of the labels.}
 
 \item{Which}{kind of correction should be displayed.}
 }

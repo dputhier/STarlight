@@ -79,10 +79,8 @@ setMethod("spatial_image",
             if(is.null(gene))
               print_msg("Please provide a gene name (see gene arguments).", msg_type = "STOP")
 
-            if(length(gene) > 1)
-              print_msg("Please provide a single gene name (see gene arguments).", msg_type = "STOP")
 
-            if(!gene %in% gene_names(object, all_genes=TRUE)){
+            if(!all(gene %in% gene_names(object, all_genes=TRUE))){
               print_msg("The gene was not found in the object.", msg_type = "STOP")
             }
 
@@ -218,7 +216,7 @@ setMethod("spatial_plot", "STGrid",
              if(!all(gene_list %in% gene_names(object)))
                print_msg("One or several genes was not found in the object.", msg_type = "STOP")
 
-             coord <- get_gn_coord(object, gene_list = gene_list, as.factor=TRUE)
+             coord <- get_coord(object, gene_list = gene_list, as.factor=TRUE)
 
              p <- ggplot2::ggplot(data=coord,
                                   mapping = ggplot2::aes(x=x,
@@ -532,6 +530,7 @@ setMethod(
 #' The genes with the highest correction value (whatever the radius)
 #' are displayed
 #' @param color The colors for the genes to be displayed.
+#' @param size The size of the labels.
 #' @keywords internal
 setGeneric("plot_rip_k",
            function(object,
@@ -540,7 +539,8 @@ setGeneric("plot_rip_k",
                                  "Ripley",
                                  "translate"),
                     max_gene_label=8,
-                    color=NULL)
+                    color=NULL,
+                    size=4)
              standardGeneric("plot_rip_k")
 )
 
@@ -553,6 +553,7 @@ setGeneric("plot_rip_k",
 #' The genes with the highest correction value (whatever the radius)
 #' are displayed.
 #' @param color The colors for the genes to be displayed.
+#' @param size The size of the labels.
 #' @export plot_rip_k
 setMethod(
   "plot_rip_k", signature("STGrid"),
@@ -562,7 +563,9 @@ setMethod(
                         "Ripley",
                         "translate"),
            max_gene_label=8,
-           color=NULL) {
+           color=NULL,
+           size=4
+           ) {
 
     gg_color_hue <- function(n) {
       hues <-  seq(15, 375, length = n + 1)
@@ -612,6 +615,7 @@ setMethod(
       ggrepel::geom_label_repel(data=voi,
                                 mapping=ggplot2::aes(x=r, y=border, label=gene, color=gene),
                                 inherit.aes = FALSE,
+                                size = size,
                                 force=20) +
       ggplot2::ylab(paste0("Ripley's K function (correction=", correction, ")")) +
       scale_color_manual(values=color)
