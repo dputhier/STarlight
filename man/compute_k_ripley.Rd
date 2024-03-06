@@ -9,7 +9,8 @@ compute_k_ripley(
   rmax = 200,
   nlarge = 1e+06,
   var.approx = FALSE,
-  ratio = FALSE
+  ratio = FALSE,
+  verbose = TRUE
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ compute_k_ripley(
 \item{var.approx}{Logical. If TRUE, the approximate variance of K(r) under CSR will also be computed.}
 
 \item{ratio}{Logical. If TRUE, the numerator and denominator of each edge-corrected estimate will also be saved, for use in analyzing replicated point patterns.}
+
+\item{verbose}{Whether to print porgress bar.}
 }
 \value{
 An updated object of class "STGrid" with the Ripley's K function estimates stored in the slot 'ripley_k_function'.

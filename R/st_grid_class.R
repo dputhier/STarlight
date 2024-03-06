@@ -573,7 +573,7 @@ setMethod("[", signature(x = "STGrid"),
                 } else{
                   if (is.numeric(i)) {
                     i <- round(i, 0)
-                    if (any(i > nb_genes(x)) | any(i < 1)) {
+                    if (any(i > nb_genes(x))) {
                       print_msg("Numering value i is out of range (should be < nb_genes(x)).",
                                 msg_type = "STOP")
                     }
@@ -693,7 +693,7 @@ setMethod("[", signature(x = "STGrid"),
 
             return(STGrid_obj)
 
-          })
+})
 
 # -------------------------------------------------------------------------
 ##    Method for function "[[". Set/Extract/Replace metadata.
@@ -773,7 +773,7 @@ setMethod ("[[<-", "STGrid",
 #' @param nlarge Efficiency threshold. If the number of points exceeds nlarge, then only the border correction will be computed (by default), using a fast algorithm.
 #' @param var.approx Logical. If TRUE, the approximate variance of K(r) under CSR will also be computed.
 #' @param ratio Logical. If TRUE, the numerator and denominator of each edge-corrected estimate will also be saved, for use in analyzing replicated point patterns.
-#'
+#' @param verbose Whether to print porgress bar.
 #' @return An updated object of class "STGrid" with the Ripley's K function estimates stored in the slot 'ripley_k_function'.
 #'
 #' @examples
@@ -786,7 +786,8 @@ setGeneric("compute_k_ripley",
                     rmax = 200,
                     nlarge = 1e6,
                     var.approx = FALSE,
-                    ratio = FALSE)
+                    ratio = FALSE,
+                    verbose=TRUE)
              standardGeneric("compute_k_ripley"))
 
 #' Estimate Ripley's reduced second moment function for each gene in a spatial grid.
@@ -798,7 +799,7 @@ setGeneric("compute_k_ripley",
 #' @param nlarge Efficiency threshold. If the number of points exceeds nlarge, then only the border correction will be computed (by default), using a fast algorithm.
 #' @param var.approx Logical. If TRUE, the approximate variance of K(r) under CSR will also be computed.
 #' @param ratio Logical. If TRUE, the numerator and denominator of each edge-corrected estimate will also be saved, for use in analyzing replicated point patterns.
-#'
+#' @param verbose Whether to print porgress bar.
 #' @return An updated object of class "STGrid" with the Ripley's K function estimates stored in the slot 'ripley_k_function'.
 #'
 #' @examples
@@ -814,7 +815,8 @@ setMethod("compute_k_ripley", signature("STGrid"),
                    rmax = 200,
                    nlarge = 1e6,
                    var.approx = FALSE,
-                   ratio = FALSE) {
+                   ratio = FALSE,
+                   verbose=TRUE) {
             molecules <- coord(object)[, c("x", "y", "gene")]
 
             data_out <- data.frame(
@@ -840,19 +842,26 @@ setMethod("compute_k_ripley", signature("STGrid"),
 
             n_iter <- length(unique(molecules$gene))
 
-            # Initializes the progress bar
-            pb <- txtProgressBar(
-              min = 0,
-              max = n_iter,
-              style = 3,
-              width = 50,
-              char = "="
-            )   # Character used to create the bar
+            if(verbose){
 
-            n <- 0
+              pb <- txtProgressBar(
+                min = 0,
+                max = n_iter,
+                style = 3,
+                width = 50,
+                char = "="
+              )
+
+              n <- 0
+            }
+
             for (g in unique(molecules$gene)) {
-              n <- n + 1
-              setTxtProgressBar(pb, n)
+
+              if(verbose){
+                n <- n + 1
+                setTxtProgressBar(pb, n)
+              }
+
 
               list_neighbors <- data.frame(Var1 = NA,
                                            Var2 = NA,
@@ -907,6 +916,7 @@ setMethod("compute_k_ripley", signature("STGrid"),
 #' @param bin_size Numeric value representing the bin size (default to 25).
 #' @param control A regular expression to identify controls. As the function computes the sum of
 #' expression levels ("all_genes" features), this will allow to delete these blanks/controls for computation.
+#' @param verbose Whether to display the progress bar.
 #' @return An object of class STGrid.
 #'
 #' @export load_spatial
@@ -915,7 +925,8 @@ load_spatial <- function(path = "",
                                     "merscope",
                                     "xenium"),
                          bin_size = 25,
-                         control = NULL) {
+                         control = NULL,
+                         verbose=TRUE) {
 
   method <- match.arg(method)
 
@@ -956,7 +967,8 @@ load_spatial <- function(path = "",
 
   bin_matrix <- bin_this_matrix(coord = spat_input,
                                 bin_size = bin_size,
-                                control = control)
+                                control = control,
+                                verbose=verbose)
 
   # create a STGrid object                             ---------
 
@@ -993,6 +1005,7 @@ load_spatial <- function(path = "",
 #'
 #' @param coord A data frame containing molecule coordinates with columns 'x', 'y', and 'gene'. Defaults to NULL.
 #' @param bin_size An integer specifying the size of each bin. Defaults to 25.
+#' @param verbose Whether to display the progress bar.
 #' @return A list containing the binned spatial matrix, updated molecule coordinates, and information about the binning process.
 #' @examples
 #' # Create a binned grid from molecule coordinates
@@ -1001,7 +1014,8 @@ load_spatial <- function(path = "",
 #' @export bin_this_matrix
 bin_this_matrix <- function(coord = NULL,
                             bin_size = 25,
-                            control = NULL) {
+                            control = NULL,
+                            verbose=TRUE) {
   print_msg("Binning a matrix...")
 
   x_min <- min(coord$x)
@@ -1079,16 +1093,17 @@ bin_this_matrix <- function(coord = NULL,
   coord$bin_x <- NA
   coord$bin_y <- NA
 
+  if(verbose){
+    pb <- txtProgressBar(
+      min = 0,
+      max = length(unique(coord$gene)),
+      style = 3,
+      width = 50,
+      char = "="
+    )
 
-  pb <- txtProgressBar(
-    min = 0,
-    max = length(unique(coord$gene)),
-    style = 3,
-    width = 50,
-    char = "="
-  )
-
-  n_loop <- 0
+    n_loop <- 0
+  }
 
   for (goi in unique(coord$gene)) {
     x_molec <- cut(
@@ -1112,9 +1127,10 @@ bin_this_matrix <- function(coord = NULL,
     spatial_matrix[, goi] <- 0
     spatial_matrix[names(nb_molec), goi] <- nb_molec
 
-    n_loop <- n_loop + 1
-    setTxtProgressBar(pb, n_loop)
-
+    if(verbose){
+      n_loop <- n_loop + 1
+      setTxtProgressBar(pb, n_loop)
+    }
   }
 
   cat("\n")
@@ -1168,11 +1184,13 @@ bin_this_matrix <- function(coord = NULL,
 #' @description Re-bin a STGrid object.
 #' @param object The STGrid object
 #' @param bin_size The size of the bin.
+#' @param verbose Whether to be display progress bar.
 #' @export re_bin
 #' @keywords internal
 setGeneric("re_bin",
            function(object,
-                    bin_size)
+                    bin_size,
+                    verbose=TRUE)
              standardGeneric("re_bin"))
 
 
@@ -1180,10 +1198,12 @@ setGeneric("re_bin",
 #' @description Re-bin a STGrid object.
 #' @param x The STGrid object.
 #' @param bin_size The size of the bin.
+#' @param verbose Whether to be display progress bar.
 #' @export re_bin
 setMethod("re_bin", signature(object = "STGrid"),
           function(object,
-                   bin_size) {
+                   bin_size,
+                   verbose=TRUE) {
             if (object@bin_size == bin_size) {
               print_msg("The bin_size is unchanged.")
               return(object)
@@ -1192,7 +1212,8 @@ setMethod("re_bin", signature(object = "STGrid"),
             bin_matrix <- bin_this_matrix(
               coord = object@coord,
               bin_size = bin_size,
-              control = object@control
+              control = object@control,
+              verbose=verbose
             )
 
             # create a STGrid object                             ---------
@@ -1218,7 +1239,7 @@ setMethod("re_bin", signature(object = "STGrid"),
 
             return(STGrid_obj)
 
-          })
+})
 
 
 # -------------------------------------------------------------------------

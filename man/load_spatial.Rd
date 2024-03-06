@@ -8,7 +8,8 @@ load_spatial(
   path = "",
   method = c("coordinates", "merscope", "xenium"),
   bin_size = 25,
-  control = NULL
+  control = NULL,
+  verbose = TRUE
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ is set to "merscope"). If method is set to "coordinates" the file should contain
 
 \item{control}{A regular expression to identify controls. As the function computes the sum of
 expression levels ("all_genes" features), this will allow to delete these blanks/controls for computation.}
+
+\item{verbose}{Whether to display the progress bar.}
 }
 \value{
 An object of class STGrid.

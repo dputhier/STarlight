@@ -4,12 +4,14 @@
 \alias{re_bin}
 \title{Re-bin a STGrid object.}
 \usage{
-re_bin(object, bin_size)
+re_bin(object, bin_size, verbose = TRUE)
 }
 \arguments{
 \item{object}{The STGrid object}
 
 \item{bin_size}{The size of the bin.}
+
+\item{verbose}{Whether to be display progress bar.}
 }
 \description{
 Re-bin a STGrid object.

@@ -18,7 +18,9 @@ Spatial transcriptomics enables the spatially resolved measurement of gene expre
 library(stcompr)
 library(patchwork)
 library(ggplot2)
-st_obj_1 <- load_spatial("~/Downloads/Xenium_V1_FF_Mouse_Brain_Coronal_Subset_CTX_HP_outs/", method = "xenium")
+st_obj_1 <- load_spatial("~/Downloads/Xenium_V1_FF_Mouse_Brain_Coronal_Subset_CTX_HP_outs/", 
+                         method = "xenium",
+                         verbose = FALSE)
 ```
 # The STGrid object
 
@@ -118,7 +120,7 @@ One can **zoom** for instance in the region with high "Ano1" molecule density in
 x_bins <-  bin_x(st_obj_1)[181:length(bin_x(st_obj_1))]
 y_bins <-  bin_y(st_obj_1)[101:length(bin_y(st_obj_1))]
 st_obj_2 <- st_obj_1[x_bins, y_bins]
-spatial_image(re_bin(st_obj_2["Ano1",], bin_size = 5), gene="Ano1")
+spatial_image(re_bin(st_obj_2["Ano1",], bin_size = 5, verbose = FALSE), gene="Ano1")
 ```
 
 ### The spatial_plot() function
@@ -182,8 +184,8 @@ First we may use the K-Ripley's function to assess the level of clustering of ea
 
 
 ```{r compute_k_ripley}
-st_obj_2 <- compute_k_ripley(st_obj_2, rmax = 200)
-st_obj_3 <- compute_k_ripley(st_obj_3, rmax = 200)
+st_obj_2 <- compute_k_ripley(st_obj_2, rmax = 200, verbose = FALSE)
+st_obj_3 <- compute_k_ripley(st_obj_3, rmax = 200, verbose = FALSE)
 ```
 
 Plotting the results highlight the clustering levels of molecules in both regions:

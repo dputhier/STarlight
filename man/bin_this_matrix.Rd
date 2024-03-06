@@ -4,12 +4,14 @@
 \alias{bin_this_matrix}
 \title{Create a 2D binned grid (rasterization) from molecule coordinates}
 \usage{
-bin_this_matrix(coord = NULL, bin_size = 25, control = NULL)
+bin_this_matrix(coord = NULL, bin_size = 25, control = NULL, verbose = TRUE)
 }
 \arguments{
 \item{coord}{A data frame containing molecule coordinates with columns 'x', 'y', and 'gene'. Defaults to NULL.}
 
 \item{bin_size}{An integer specifying the size of each bin. Defaults to 25.}
+
+\item{verbose}{Whether to display the progress bar.}
 }
 \value{
 A list containing the binned spatial matrix, updated molecule coordinates, and information about the binning process.

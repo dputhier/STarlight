@@ -4,10 +4,12 @@
 \alias{re_bin,STGrid-method}
 \title{Re-bin a STGrid object.}
 \usage{
-\S4method{re_bin}{STGrid}(object, bin_size)
+\S4method{re_bin}{STGrid}(object, bin_size, verbose = TRUE)
 }
 \arguments{
 \item{bin_size}{The size of the bin.}
+
+\item{verbose}{Whether to be display progress bar.}
 
 \item{x}{The STGrid object.}
 }

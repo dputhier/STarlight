@@ -390,9 +390,8 @@ setMethod(
     obj <- obj[rowSums(TF) > 0 , colSums(TF) > 0]
   }
 
-
   print_msg("Calling ggheatmap...")
-  p <- ggheatmap(obj,
+  p <- ggheatmap::ggheatmap(obj,
                  dist_method=dist_method,
                  hclust_method = hclust_method,
                  cluster_rows = TRUE,
@@ -406,7 +405,7 @@ setMethod(
                  annotation_rows = NULL,
                  annotation_cols = NULL,
                  annotation_color = NULL
-  ) %>% ggheatmap_theme(1,
+  ) %>% ggheatmap::ggheatmap_theme(1,
                         theme=list(theme(axis.text.x = element_text(angle = 90,
                                                                    size = size, hjust=1),
                                         axis.text.y = element_text(size=size))))
