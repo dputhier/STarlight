@@ -4,10 +4,10 @@
 \alias{rm_controls,STGrid-method}
 \title{Remove control (Blank-*) "genes" from a STGrid object.}
 \usage{
-\S4method{rm_controls}{STGrid}(x, regexp = "^Blank\\\\-.*")
+\S4method{rm_controls}{STGrid}(object, regexp = NULL)
 }
 \arguments{
-\item{x}{The STGrid object}
+\item{object}{The STGrid object}
 }
 \description{
 Remove control (Blank-*) "genes".

@@ -37,6 +37,8 @@ checkfast: clean
 
 doc:
 	@echo ">>> Creating a package documentation"
+	@echo ">>> Deleting NAMESPACE and man"
+	@rm -Rf NAMESPACE man;
 	@echo "library(roxygen2); roxygen2::roxygenise()" | R --slave
 
 install:

@@ -16,5 +16,4 @@ the \code{\link{print_msg}} function.
 }
 \examples{
 get_verbosity()
-
 }

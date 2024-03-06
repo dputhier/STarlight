@@ -4,10 +4,10 @@
 \alias{rm_controls}
 \title{Remove control (Blank-*) "genes" from a STGrid object.}
 \usage{
-rm_controls(x, regexp = "^Blank\\\\-.*")
+rm_controls(object, regexp = NULL)
 }
 \arguments{
-\item{x}{The STGrid object}
+\item{object}{The STGrid object}
 }
 \description{
 Remove control (Blank-*) "genes".

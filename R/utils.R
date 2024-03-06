@@ -13,7 +13,6 @@
 #'
 #' @return NULL
 #'
-#' @export
 #'
 #' @examples
 #' # Set verbosity level to 2
@@ -25,7 +24,7 @@
 # 0 : No message
 # 1 : Display only INFO type message
 # 2 : Display both INFO and DEBUG type message
-
+#' @export
 set_verbosity <- function(verbosity_value) {
   if (!is.null(verbosity_value) &
       verbosity_value >= 0 & is.numeric(verbosity_value)) {
@@ -45,11 +44,10 @@ set_verbosity <- function(verbosity_value) {
 #'
 #' @return A vector
 #'
-#' @export
 #'
 #' @examples
 #' get_verbosity()
-#'
+#' @export
 get_verbosity <- function() {
   if (is.null(unlist(options()["stcompr_verbosity"]))) {
     options(stcompr_verbosity = 1)
@@ -69,7 +67,6 @@ get_verbosity <- function() {
 #'
 #' @return None
 #'
-#' @export
 #' @examples
 #' opt_warn <- options()$warn
 #' set_verbosity(1)
@@ -83,6 +80,7 @@ get_verbosity <- function() {
 #' print_msg("A warning message not displayed", msg_type = "WARNING")
 #' options(warn=opt_warn)
 #' @keywords internal
+#' @export
 print_msg <-
   function(...,
            msg_type = c("INFO", "DEBUG", "WARNING", "STOP", "ERROR")) {
@@ -133,7 +131,6 @@ print_msg <-
 #'  of decimal. Set argument to -1 for no rounding
 #' @return None
 #'
-#' @export
 #' @examples
 #' opt_warn <- options()$warn
 #' print_stat("My data", 1:10, msg_type="INFO")
@@ -142,6 +139,7 @@ print_msg <-
 #' set_verbosity(0)
 #' print_stat("My data", matrix(rnorm(10), nc=2), msg_type="DEBUG")
 #' @keywords internal
+#' @export
 print_stat <-
   function(msg,
            data,

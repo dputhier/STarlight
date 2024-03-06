@@ -4,10 +4,14 @@
 \alias{gene_names}
 \title{The genes stored in a STGrid object}
 \usage{
-gene_names(object, all_genes = FALSE)
+gene_names(object, all_genes = FALSE, del_control = FALSE)
 }
 \arguments{
 \item{object}{The STGrid object}
+
+\item{all_genes}{Whether "all_genes" should be included. Default to FALSE.}
+
+\item{del_control}{Whether to delete controls.}
 }
 \description{
 The genes stored in a STGrid object

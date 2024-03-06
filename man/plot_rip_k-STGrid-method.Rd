@@ -7,7 +7,8 @@
 \S4method{plot_rip_k}{STGrid}(
   object,
   correction = c("border", "isotropic", "Ripley", "translate"),
-  max_gene_label = 10
+  max_gene_label = 8,
+  color = NULL
 )
 }
 \arguments{
@@ -16,6 +17,8 @@
 \item{max_gene_label}{The maximum number of genes to display.
 The genes with the highest correction value (whatever the radius)
 are displayed.}
+
+\item{color}{The colors for the genes to be displayed.}
 
 \item{Which}{kind of correction should be displayed.}
 }

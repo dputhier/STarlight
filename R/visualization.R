@@ -86,7 +86,6 @@ setMethod("spatial_image",
               print_msg("The gene was not found in the object.", msg_type = "STOP")
             }
 
-
               spatial_matrix <- object@bin_mat[, c("bin_x", "bin_y", gene)]
               tmp <- spatial_matrix[, gene]
 
@@ -532,6 +531,7 @@ setMethod(
 #' @param max_gene_label The maximum number of genes to display.
 #' The genes with the highest correction value (whatever the radius)
 #' are displayed
+#' @param color The colors for the genes to be displayed.
 #' @keywords internal
 setGeneric("plot_rip_k",
            function(object,
@@ -539,7 +539,8 @@ setGeneric("plot_rip_k",
                                  "isotropic",
                                  "Ripley",
                                  "translate"),
-                    max_gene_label=10)
+                    max_gene_label=8,
+                    color=NULL)
              standardGeneric("plot_rip_k")
 )
 
@@ -551,6 +552,7 @@ setGeneric("plot_rip_k",
 #' @param max_gene_label The maximum number of genes to display.
 #' The genes with the highest correction value (whatever the radius)
 #' are displayed.
+#' @param color The colors for the genes to be displayed.
 #' @export plot_rip_k
 setMethod(
   "plot_rip_k", signature("STGrid"),
@@ -559,7 +561,19 @@ setMethod(
                         "isotropic",
                         "Ripley",
                         "translate"),
-           max_gene_label=10) {
+           max_gene_label=8,
+           color=NULL) {
+
+    gg_color_hue <- function(n) {
+      hues <-  seq(15, 375, length = n + 1)
+      grDevices::hcl(h = hues, l = 65, c = 100)[1:n]
+    }
+
+
+    if(is.null(color)){
+      color <- gg_color_hue(max_gene_label)
+    }
+
 
     if(nrow(ripley_k_function(object)) == 0){
       print_msg("Please run ripley_k_function() first.", msg_type = "STOP")
@@ -577,25 +591,137 @@ setMethod(
       dplyr::arrange(desc(border)) %>%
           head(n=max_gene_label)
 
-    goi <- rownames(voi)
+    voi <- voi[!duplicated(voi$gene),]
 
-    ggplot2::ggplot(data= ripk) +
+    goi <- unique(voi$gene)
+
+    ripk_sub <- ripk[ripk$gene %in% goi, ]
+
+    p <- ggplot2::ggplot(data= ripk) +
       ggplot2::geom_line(mapping = ggplot2::aes(x=r, y=border, group=gene), color="black") +
       ggplot2::theme_bw() +
       ggplot2::theme(legend.text = ggplot2::element_text(size=4),
                       legend.position = "none",
                       panel.grid.minor =  ggplot2::element_blank()) +
+      ggplot2::geom_line(data=ripk_sub,
+                 mapping=ggplot2::aes(x=r,
+                                      y=border,
+                                      group=gene,
+                                      color=gene),
+                 inherit.aes = FALSE) +
       ggrepel::geom_label_repel(data=voi,
                                 mapping=ggplot2::aes(x=r, y=border, label=gene, color=gene),
                                 inherit.aes = FALSE,
                                 force=20) +
-      ggplot2::ylab(paste0("Ripley's K function (correction=", correction, ")"))
+      ggplot2::ylab(paste0("Ripley's K function (correction=", correction, ")")) +
+      scale_color_manual(values=color)
+
+    return(p)
 })
 
 
 
+# -------------------------------------------------------------------------
+##    Compare Images
+# -------------------------------------------------------------------------
+
+cmp_images <- function(...,
+                       gene_list=NULL,
+                       names=NULL,
+                       saturation=0.75,
+                       colors=c('#000000',
+                                '#410967',
+                                '#932567',
+                                '#DC5039',
+                                '#FBA40A',
+                                '#FCFEA4'),
+                       condition_vs_gene=TRUE){
+
+  if(is.null(gene_list))
+    print_msg("Please provide a gene list.", msg_type = "STOP")
+
+  st_list <- list(...)
+  if(any(unlist(lapply(lapply(st_list, class), "[", 1)) != "STGrid")){
+    print_msg("Object should be of type STGrid", msg_type = "STOP")
+  }
+  if(length(st_list) < 1){
+    print_msg("Need at least one experiment !!", msg_type = "STOP")
+  }
+
+  for(i in 1:length(st_list)){
+    if(any(!gene_list %in% gene_names(st_list[[i]], del_control = FALSE, all_genes = TRUE))){
+      print_msg("Some genes were not found in sample ", i, ".", msg_type = "STOP")
+    }
+  }
 
 
+  if(is.null(names)){
+    names <- paste("Condition_", 1:length(st_list), sep="")
+  }else{
+    if(length(names) != length(st_list))
+      print_msg("The number of names should be same as the number of objects.",
+                msg_type = "STOP")
+  }
+
+  st_list <- lapply(st_list,
+                    bin_mat,
+                    melt_tab = TRUE,
+                    as_factor = TRUE,
+                    gene_list =gene_list)
+
+
+    for(i in 1:length(st_list)){
+      for(j in gene_list){
+
+        if(max(st_list[[i]]$value[st_list[[i]]$gene == j]) > 1){
+          tmp <- st_list[[i]]$value[st_list[[i]]$gene == j]
+          if(saturation != 0){
+            q_sat <- quantile(tmp[tmp != 0], saturation)
+            tmp[tmp > q_sat] <- q_sat
+          }
+          st_list[[i]]$value[st_list[[i]]$gene == j] <- (tmp - min(tmp)) / (max(tmp) - min(tmp))
+        }
+      }
+
+    }
+
+
+  for(i in 1:length(st_list)){
+    st_list[[i]]$condition <- names[i]
+  }
+
+  st_list <- do.call(rbind, st_list)
+
+
+  st_list$condition <- factor(st_list$condition,
+                              levels=names,
+                              ordered = TRUE)
+
+  st_list$gene <- factor(st_list$gene,
+                              levels=gene_list,
+                              ordered = TRUE)
+
+  p <- ggplot2::ggplot(data=st_list,
+                       mapping = ggplot2::aes(x=bin_x,
+                                              y=bin_y,
+                                              fill= value)) +
+    ggplot2::geom_tile() +
+    ggplot2::xlab("")  +
+    ggplot2::ylab("") +
+    ggplot2::theme(axis.ticks = ggplot2::element_blank(),
+                   axis.text = ggplot2::element_blank(),
+                   strip.background = ggplot2::element_rect(fill="gray30"),
+                   strip.text = ggplot2::element_text(color="white")) +
+    ggplot2::scale_fill_gradientn(colours=colors)
+
+    if(condition_vs_gene){
+      p <- p + ggh4x::facet_grid2(condition~gene, scale="free", independent = "x")
+    }else{
+      p <- p + ggh4x::facet_grid2(gene~condition, scale="free", independent = "y")
+    }
+
+  p
+}
 
 
 

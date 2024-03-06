@@ -4,12 +4,14 @@
 \alias{gene_names,STGrid-method}
 \title{The genes stored in a STGrid object}
 \usage{
-\S4method{gene_names}{STGrid}(object, all_genes = FALSE)
+\S4method{gene_names}{STGrid}(object, all_genes = FALSE, del_control = FALSE)
 }
 \arguments{
 \item{object}{The STGrid object}
 
 \item{all_genes}{Whether "all_genes" should be included. Default to FALSE.}
+
+\item{del_control}{Whether.}
 }
 \description{
 The genes stored in a STGrid object

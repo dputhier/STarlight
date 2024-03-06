@@ -4,7 +4,14 @@
 \alias{bin_mat,STGrid-method}
 \title{The binned matrix stored in a STGrid object.}
 \usage{
-\S4method{bin_mat}{STGrid}(object, as_factor = FALSE, gene_list = character(), melt = FALSE)
+\S4method{bin_mat}{STGrid}(
+  object,
+  as_factor = FALSE,
+  gene_list = character(),
+  melt_tab = FALSE,
+  del_bin = FALSE,
+  all_genes = FALSE
+)
 }
 \arguments{
 \item{object}{The STGrid object}
@@ -13,7 +20,11 @@
 
 \item{gene_list}{Whether to subset to some genes.}
 
-\item{melt}{Whether to melt.}
+\item{melt_tab}{Whether to melt.}
+
+\item{del_bin}{Whether to delete the bin_x, bin_y columns.}
+
+\item{all_genes}{Whether to delete the 'all_genes' columns.}
 }
 \description{
 The binned matrix stored in a STGrid object.

@@ -34,7 +34,8 @@ setClass("STCompR",
            raw_counts = "list",
            scaling_factor = "numeric",
            stat_test = "data.frame",
-           pseudo_count= "numeric"
+           pseudo_count= "numeric",
+           neighborhood="list"
          ),
          prototype = list(
            conditions = "",
@@ -42,7 +43,8 @@ setClass("STCompR",
            raw_counts = list(),
            scaling_factor = numeric(),
            stat_test = data.frame(),
-           pseudo_count= 1
+           pseudo_count= 1,
+           neighborhood=list()
          )
 )
 
@@ -133,6 +135,17 @@ stcompr <- function(object_1,
   check_var(name_1)
   check_var(name_2)
 
+  if(class(object_1)[1] != "STGrid" | class(object_2)[1] != "STGrid"){
+    print_msg("Please provide STGrid objects.")
+  }
+
+  gn_1 <- gene_names(object_1)
+  gn_2 <- gene_names(object_1)
+
+  if(!all(gn_1 %in% gn_2) | !all(gn_2 %in% gn_1)){
+    print_msg("Objects do not contain the same genes.")
+  }
+
   tb_1 <- data.frame(row.names = names(table(coord(object_1)$gene)),
                      counts=as.numeric(table(coord(object_1)$gene)))
 
@@ -156,7 +169,7 @@ stcompr <- function(object_1,
   p_values <- c()
   odd_ratio <- c()
 
-  print_msg("Computing Fisher test...")
+  print_msg("Computing Fisher tests...")
 
   for(g in 1:nrow(norm_counts)){
 
@@ -175,15 +188,52 @@ stcompr <- function(object_1,
                       log2_ratio=log2_ratio,
                       odd_ratio=odd_ratio,
                       p_values=p_values)
+
   stats$p_values[stats$p_values < 1e-320] <- 1e-320
 
   print_msg("Adjusting p-values...")
+
   for(corr in c("holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr")){
     stats[, paste0("padj_", corr)] <- p.adjust(stats$p_values, method=corr)
   }
 
-  STCompR <- new("STCompR")
+  print_msg("Preparing neighborhood analysis...")
 
+  bin_mat_1 <- bin_mat(object_1, all_genes = FALSE, del_bin = TRUE)
+  bin_mat_2 <- bin_mat(object_2, all_genes = FALSE, del_bin = TRUE)
+
+  bin_mat_2 <- bin_mat_2[, colnames(bin_mat_1)]
+
+  spatial_matrix_ratio_1 <- matrix(NA,
+                                     nrow= ncol(bin_mat_1),
+                                     ncol= ncol(bin_mat_1))
+
+  colnames(spatial_matrix_ratio_1) <- colnames(bin_mat_1)
+  rownames(spatial_matrix_ratio_1) <- colnames(bin_mat_1)
+
+  spatial_matrix_ratio_2 <- spatial_matrix_ratio_1
+
+  bin_mat_1 <- bin_mat_1[rowSums(bin_mat_1) > 0, ]
+  bin_mat_2 <- bin_mat_2[rowSums(bin_mat_2) > 0, ]
+
+  bin_mat_1 <- sweep(bin_mat_1,
+                     MARGIN = 2,
+                     STATS = colSums(bin_mat_1, na.rm = TRUE), FUN = "/")
+
+  bin_mat_2 <- sweep(bin_mat_2,
+                     MARGIN = 2,
+                     STATS = colSums(bin_mat_2, na.rm = TRUE), FUN = "/")
+
+
+  spatial_matrix_ratio_1 <- as.matrix(dist(t(bin_mat_1), method = "manhattan"))
+  spatial_matrix_ratio_2 <- as.matrix(dist(t(bin_mat_2), method = "manhattan"))
+
+  print_msg("Preparing an STCompR object... ")
+
+  STCompR <- new("STCompR")
+  STCompR@neighborhood <- list(spatial_matrix_ratio_1,
+                               spatial_matrix_ratio_2)
+  names(STCompR@neighborhood) <- c(name_1, name_2)
   STCompR@conditions <- c(name_1, name_2)
   STCompR@method <- c(object_1@method, object_2@method)
   names(STCompR@method) <- STCompR@conditions
@@ -191,9 +241,179 @@ stcompr <- function(object_1,
   STCompR@stat_test <- stats
   STCompR@raw_counts <- raw_counts
   STCompR@pseudo_count <- pseudo_count
+
   return(STCompR)
 
 }
+
+# -------------------------------------------------------------------------
+##    Generate a heatmap comparison for an 'STCompR' object
+# -------------------------------------------------------------------------
+#' @title Generate a heatmap comparison for an 'STCompR' object
+#'
+#' @description
+#' Generate a heatmap to visualize neighborhood changes between conditions.
+#' The changes are computed as the difference in manhattan distances between the two conditions
+#' stored in the object.
+#'
+#' @param object An object of class 'STCompR'.
+#' @param what A character string specifying what to plot: "changes" (the difference in manhattan distances between conditions 2 and 1),
+#' "changes_2" (the difference in manhattan distances between conditions 1 and 2), "c1" (the manhattan distances of conditions 1), or "c2"
+#' (the manhattan distances of conditions 2).
+#' @param hclust_method A character string specifying the agglomerative criteria for hierarchical clustering ("ward.D", "ward.D2",
+#' "single", "complete", "average", "mcquitty", "median", "centroid").
+#' @param dist_method A character string specifying the distance method to be used ("euclidean",
+#' "maximum", "manhattan", "canberra", "binary","minkowski").
+#' @param del_gene A character vector specifying genes to be excluded from the heatmap.
+#' @param only_genes A character vector specifying genes to be included in the heatmap.
+#' @param filter A numeric value specifying the threshold for filtering out low values in the heatmap.
+#' @param size A numeric value specifying the size of text in the heatmap.
+#'
+#' @return A heatmap plot comparing conditions in the 'STCompR' object.
+#'
+#' @examples
+#' # Example usage:
+#' heatmap_cmp(object = my_STCompR_object, hclust_method = "ward.D", dist_method = "euclidean")
+#' @keywords internal
+#' @export
+setGeneric("heatmap_cmp",
+           function(object,
+                    what=c("changes", "changes_2",  "c1", "c2"),
+                    hclust_method=c("ward.D", "ward.D2",
+                                    "single", "complete", "average",
+                                    "mcquitty", "median", "centroid"),
+                    dist_method=c("euclidean",
+                                  "maximum",
+                                  "manhattan",
+                                  "canberra",
+                                  "binary",
+                                  "minkowski"),
+                    del_gene=NULL,
+                    only_genes=NULL,
+                    filter=0.2,
+                    size=6)
+             standardGeneric("heatmap_cmp")
+)
+
+
+#' @title Generate a heatmap comparison for an 'STCompR' object
+#'
+#' @description
+#' Generate a heatmap to visualize neighborhood changes between conditions.
+#' The changes are computed as the difference in manhattan distances between the two conditions
+#' stored in the object.
+#'
+#' @param object An object of class 'STCompR'.
+#' @param what A character string specifying what to plot: "changes" (the difference in manhattan distances between conditions 2 and 1),
+#' "changes_2" (the difference in manhattan distances between conditions 1 and 2), "c1" (the manhattan distances of conditions 1), or "c2"
+#' (the manhattan distances of conditions 2).
+#' @param hclust_method A character string specifying the agglomerative criteria for hierarchical clustering ("ward.D", "ward.D2",
+#' "single", "complete", "average", "mcquitty", "median", "centroid").
+#' @param dist_method A character string specifying the distance method to be used ("euclidean",
+#' "maximum", "manhattan", "canberra", "binary","minkowski").
+#' @param del_gene A character vector specifying genes to be excluded from the heatmap.
+#' @param only_genes A character vector specifying genes to be included in the heatmap.
+#' @param filter A numeric value specifying the threshold for filtering out low values in the heatmap.
+#' @param size A numeric value specifying the size of text in the heatmap.
+#'
+#' @return A heatmap plot comparing conditions in the 'STCompR' object.
+#'
+#' @examples
+#' # Example usage:
+#' heatmap_cmp(object = my_STCompR_object, hclust_method = "ward.D", dist_method = "euclidean")
+#' @export
+setMethod(
+  "heatmap_cmp", signature("STCompR"),
+  function(object,
+           what=c("changes", "changes_2",  "c1", "c2"),
+           hclust_method=c("ward.D", "ward.D2",
+                           "single", "complete", "average",
+                           "mcquitty", "median", "centroid"),
+           dist_method=c("euclidean",
+                         "maximum",
+                         "manhattan",
+                         "canberra",
+                         "binary",
+                         "minkowski"),
+           del_gene=NULL,
+           only_genes=NULL,
+           filter=0.2,
+           size=6) {
+
+    what <- match.arg(what)
+    dist_method <- match.arg(dist_method)
+
+  if(what=="changes"){
+    print_msg("Parameter 'what' is set to 'changes'...")
+    obj <- object@neighborhood[[2]] - object@neighborhood[[1]]
+    legend_name <- "Changes"
+  } else if(what == "changes_2"){
+    print_msg("Parameter 'what' is set to 'changes_2'...")
+    obj <- object@neighborhood[[1]] - object@neighborhood[[2]]
+    legend_name <- "Changes"
+  }else if(what=="c1"){
+    print_msg("Parameter 'what' is set to 'c1'...")
+    obj <- object@neighborhood[[1]]
+    legend_name <- "Dist"
+  }else {
+    print_msg("Parameter 'what' is set to 'c2'...")
+    obj <- object@neighborhood[[2]]
+    legend_name <- "Dist"
+  }
+
+  if(!is.null(del_gene)){
+    del_gene <- unique(del_gene)
+    if(all(del_gene %in% gene_names(object))){
+      obj <- obj[!rownames(obj) %in% del_gene,
+                 !colnames(obj) %in% del_gene]
+    }else{
+      print_msg("Some gene to delete were not found in the object", msg_type = "STOP")
+    }
+  }
+
+    if(!is.null(only_genes)){
+      only_genes <- unique(only_genes)
+      if(all(del_gene %in% gene_names(object))){
+        obj <- obj[rownames(obj) %in% only_genes,
+                   colnames(obj) %in% only_genes]
+      }else{
+        print_msg("Some gene to delete were not found in the object", msg_type = "STOP")
+      }
+    }
+
+  if(ncol(obj) == 0){
+    print_msg("No more gene left", msg_type = "STOP")
+  }
+
+  if(!is.null(filter)){
+    TF <- abs(obj) > filter
+    obj <- obj[rowSums(TF) > 0 , colSums(TF) > 0]
+  }
+
+
+  print_msg("Calling ggheatmap...")
+  p <- ggheatmap(obj,
+                 dist_method=dist_method,
+                 hclust_method = hclust_method,
+                 cluster_rows = TRUE,
+                 cluster_cols = TRUE,
+                 legendName=legend_name,
+                 scale = "none",
+                 color=RColorBrewer::brewer.pal(7, "Spectral"),
+                 border = "darkgrey",
+                 tree_color_rows = "darkgrey",
+                 tree_color_cols = "darkgrey",
+                 annotation_rows = NULL,
+                 annotation_cols = NULL,
+                 annotation_color = NULL
+  ) %>% ggheatmap_theme(1,
+                        theme=list(theme(axis.text.x = element_text(angle = 90,
+                                                                   size = size, hjust=1),
+                                        axis.text.y = element_text(size=size))))
+  print(p)
+
+}
+)
 
 # -------------------------------------------------------------------------
 ##    REDEFINE SHOW() METHOD FOR CLASS OBJECT : STCompR

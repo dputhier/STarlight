@@ -6,7 +6,7 @@
 \usage{
 load_spatial(
   path = "",
-  method = c("coordinates", "merscope"),
+  method = c("coordinates", "merscope", "xenium"),
   bin_size = 25,
   control = "^Blank\\\\-[0-9]+"
 )
