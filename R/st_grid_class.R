@@ -889,6 +889,8 @@ setMethod("compute_k_ripley", signature("STGrid"),
 
               data_out <- rbind(data_out, u)
             }
+
+            if(verbose)
             close(pb)
 
             data_out <- na.omit(data_out)
@@ -1162,6 +1164,9 @@ bin_this_matrix <- function(coord = NULL,
 
   spatial_matrix <-
     spatial_matrix[, order(colnames(spatial_matrix))]
+
+  if(verbose)
+    close(pb)
 
   return(
     list(
