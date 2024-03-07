@@ -2,11 +2,11 @@
 % Please edit documentation in R/visualization.R
 \name{cmp_bar_plot}
 \alias{cmp_bar_plot}
-\title{Create a barplot to show molecule counts of selected genes}
+\title{Create a barplot to show counts for selected features.}
 \usage{
 cmp_bar_plot(
   object,
-  genes = head(gene_names(object)),
+  features = head(feat_names(object)),
   normalized = FALSE,
   transform = c("None", "log2", "log10", "log"),
   colors = c("#3074BB", "#BE5B52")
@@ -15,15 +15,15 @@ cmp_bar_plot(
 \arguments{
 \item{object}{A STGrid object.}
 
-\item{genes}{The list of genes (NULL for all of them).}
+\item{features}{The list of features (NULL for all of them).}
 
 \item{normalized}{Whether counts should be normalized.}
 
 \item{transform}{Whether the count should be transformed (the pseudo count defined for the object is added).}
 
-\item{facet_shared}{Use ggpol::facet_shared.}
+\item{colors}{A set of colors.}
 }
 \description{
-Create a barplot to show molecule counts of selected genes
+Create a barplot to show counts for selected features.
 }
 \keyword{internal}

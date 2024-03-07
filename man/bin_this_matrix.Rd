@@ -4,10 +4,10 @@
 \alias{bin_this_matrix}
 \title{Create a 2D binned grid (rasterization) from molecule coordinates}
 \usage{
-bin_this_matrix(coord = NULL, bin_size = 25, control = NULL, verbose = TRUE)
+bin_this_matrix(coord = NULL, bin_size = 25, verbose = TRUE)
 }
 \arguments{
-\item{coord}{A data frame containing molecule coordinates with columns 'x', 'y', and 'gene'. Defaults to NULL.}
+\item{coord}{A data frame containing molecule coordinates with columns 'x', 'y', and 'feature'. Defaults to NULL.}
 
 \item{bin_size}{An integer specifying the size of each bin. Defaults to 25.}
 
@@ -17,7 +17,7 @@ bin_this_matrix(coord = NULL, bin_size = 25, control = NULL, verbose = TRUE)
 A list containing the binned spatial matrix, updated molecule coordinates, and information about the binning process.
 }
 \description{
-This function takes molecule coordinates as input (with columns named 'x', 'y', 'gene') and creates a 2D
+This function takes molecule coordinates as input (with columns named 'x', 'y', 'feature') and creates a 2D
 binned grid by dividing the x and y axes into bins. It returns the counts of the number of molecules in
 each bin along with additional information about the binning process.
 }

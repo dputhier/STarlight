@@ -32,8 +32,9 @@ run_example:
 
 checkfast: clean
 	@rm -rf /tmp/stcompr; mkdir -p /tmp/stcompr; cp -r ./* /tmp/stcompr; cd /tmp/stcompr; \
-	rm -f src/*.o src/*.so; rm -f stcompr.Rcheck/dbfmcl/libs/dbfmcl.so; \
-	R CMD check --no-install .
+	rm -f src/*.o src/*.so; rm -f check; \
+	R CMD build --no-build-vignettes . ; \
+	R CMD check stcompr_* .
 
 doc:
 	@echo ">>> Creating a package documentation"

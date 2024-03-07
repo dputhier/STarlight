@@ -2,7 +2,7 @@
 % Please edit documentation in R/st_grid_class.R
 \name{compute_k_ripley}
 \alias{compute_k_ripley}
-\title{Estimate Ripley's reduced second moment function for each gene in a spatial grid.}
+\title{Estimate Ripley's reduced second moment function for each feature in a spatial grid.}
 \usage{
 compute_k_ripley(
   object,
@@ -30,7 +30,7 @@ compute_k_ripley(
 An updated object of class "STGrid" with the Ripley's K function estimates stored in the slot 'ripley_k_function'.
 }
 \description{
-This method calculates Ripley's reduced second moment function, K(r), for each gene in a spatial grid.
+This method calculates Ripley's reduced second moment function, K(r), for each feature in a spatial grid.
 }
 \examples{
 # Example usage:

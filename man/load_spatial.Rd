@@ -15,14 +15,14 @@ load_spatial(
 \arguments{
 \item{path}{Either a file (if method is set to "coordinates") or a directory (if method
 is set to "merscope"). If method is set to "coordinates" the file should contain 3 columns
-("x", "y", "gene").}
+("x", "y", "gene"), ("x", "y", "feature") or ("x", "y", "cell").}
 
-\item{method}{The type of technology ("merscope" in the only supported method at the moment).}
+\item{method}{The type of technology.}
 
 \item{bin_size}{Numeric value representing the bin size (default to 25).}
 
 \item{control}{A regular expression to identify controls. As the function computes the sum of
-expression levels ("all_genes" features), this will allow to delete these blanks/controls for computation.}
+counts, this will allow to delete these blanks/controls for computation.}
 
 \item{verbose}{Whether to display the progress bar.}
 }

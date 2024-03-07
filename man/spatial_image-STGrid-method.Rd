@@ -2,45 +2,50 @@
 % Please edit documentation in R/visualization.R
 \name{spatial_image,STGrid-method}
 \alias{spatial_image,STGrid-method}
-\title{Color-coded representation of the molecule density}
+\title{Color-coded representation of the object (e.g. molecules) density}
 \usage{
 \S4method{spatial_image}{STGrid}(
   object = NULL,
-  gene = NULL,
-  saturation = 0.75,
+  features = NULL,
+  saturation = 1,
   scale = TRUE,
   colors = c("#000003", "#410967", "#932567", "#DC5039", "#FBA40A", "#FCFEA4"),
-  ceil = TRUE,
   coord_fixed = TRUE,
-  overlay_gene = NULL,
+  overlay_feature = NULL,
   colors_overlay = c("#DEEBF7", "#9ECAE1", "#3182BD"),
-  grid = FALSE,
-  grid_by = 20,
+  grid_by = NULL,
   color_grid = "white",
-  size = 0.5
+  size = 0.5,
+  logb = 10,
+  pseudo_count = 1
 )
 }
 \arguments{
 \item{object}{The STGrid object.}
 
-\item{gene}{The name of the gene for which the spatial image will be created.}
+\item{features}{The name of the features for which the spatial image will be created.}
 
-\item{saturation}{The saturation level for the gene expression values. Defaults to 0.75.}
+\item{saturation}{The ceiling level for the feature expression values. Defaults to 1 (no ceiling).}
 
-\item{scale}{Logical value indicating whether to scale the gene expression values. Defaults to TRUE.}
+\item{scale}{Logical value indicating whether to scale the feature expression values. Defaults to TRUE.}
 
 \item{colors}{The colors to use for gradient fill in the spatial image. Defaults to a set of colors.}
 
-\item{ceil}{Logical value indicating whether to ceil the gene expression values. Defaults to TRUE.}
-
 \item{coord_fixed}{Logical value indicating whether to keep the aspect ratio fixed. Defaults to TRUE.}
 
-\item{overlay_gene}{The gene to overlay on the spatial image. Defaults to NULL.}
+\item{overlay_feature}{The feature to overlay on the spatial image. Defaults to NULL.}
 
-\item{colors_overlay}{The colors to use for gradient fill in the overlay gene. Defaults to a set of colors.}
+\item{colors_overlay}{The colors to use for gradient fill in the overlay feature. Defaults to a set of colors.}
+
+\item{grid_by}{Whether to overlay a grid with horizontal and vertical lines at particular interval.
+No overlay if NULL otherwise the size of the interval (e.g. 20).}
 
 \item{size}{The size of the overlayed points.}
+
+\item{logb}{The basis for the log transformation. Default to 10. If NULL no log transformation.}
+
+\item{pseudo_count}{a value for the pseudo count used for log transformation (default to 1).}
 }
 \description{
-This function displays a color-coded representation of the molecule density observed in a spatial transcriptomics experiment.
+This function displays a color-coded representation of the object (e.g. molecules) density observed in a spatial transcriptomics experiment.
 }

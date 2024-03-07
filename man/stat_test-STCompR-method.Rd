@@ -10,10 +10,12 @@
   count_only = FALSE,
   melted_count = FALSE,
   normalized = TRUE,
-  genes = NULL
+  features = NULL
 )
 }
 \arguments{
+\item{object}{The STCompR object}
+
 \item{transform}{Whether the count are transformed (the pseudo count defined for the object is added).}
 
 \item{count_only}{Returns only counts.}
@@ -22,9 +24,7 @@
 
 \item{normalized}{Counts are normalized.}
 
-\item{genes}{The genes that should be returned. Default to all (NULL).}
-
-\item{x}{The STCompR object}
+\item{features}{The features that should be returned. Default to all (NULL).}
 }
 \description{
 The normalized counts and test results of a STCompR object.

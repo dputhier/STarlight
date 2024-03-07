@@ -6,7 +6,7 @@
 \usage{
 spatial_plot(
   object = NULL,
-  gene_list = NULL,
+  feat_list = NULL,
   colors = NULL,
   size = 0.1,
   coord_fixed = TRUE
@@ -15,13 +15,13 @@ spatial_plot(
 \arguments{
 \item{object}{The STGrid object.}
 
-\item{colors}{The colors to use for genes in the spatial image.}
+\item{feat_list}{The name of the features for which the spatial image will be created.}
+
+\item{colors}{The colors to use for features in the spatial image.}
 
 \item{size}{The size of the points}
 
 \item{coord_fixed}{Logical value indicating whether to keep the aspect ratio fixed. Defaults to TRUE.}
-
-\item{gene}{The name of the genes for which the spatial image will be created.}
 }
 \description{
 Plot x/y coordinates of molecules of a spatial transcriptomics experiment.

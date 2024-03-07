@@ -7,7 +7,7 @@
 plot_rip_k(
   object,
   correction = c("border", "isotropic", "Ripley", "translate"),
-  max_gene_label = 8,
+  max_feat_label = 8,
   color = NULL,
   size = 4
 )
@@ -15,15 +15,15 @@ plot_rip_k(
 \arguments{
 \item{object}{A STCompR object.}
 
-\item{max_gene_label}{The maximum number of genes to display.
-The genes with the highest correction value (whatever the radius)
+\item{correction}{kind of correction should be displayed.}
+
+\item{max_feat_label}{The maximum number of features to display.
+The features with the highest value (whatever the radius)
 are displayed}
 
-\item{color}{The colors for the genes to be displayed.}
+\item{color}{The colors for the features to be displayed.}
 
 \item{size}{The size of the labels.}
-
-\item{Which}{kind of correction should be displayed.}
 }
 \description{
 Plot the results from the Ripley's k function stored in the STGrid object.

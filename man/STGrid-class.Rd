@@ -5,17 +5,15 @@
 \alias{STGrid-class}
 \title{Spatial transcriptomic anlysis class (STGrid).}
 \description{
-A class for representing spatial transcriptomic analysis results using (currently) the "merscope" method.
-This class store transcript molecule coordinates as a grid.
+A class for representing spatial transcriptomic analysis results as x/y coordinates.
+This class stores transcript molecules or cell coordinates as a grid.
 }
 \section{Slots}{
 
 \describe{
-\item{\code{coordinate}}{A data frames representing spatial coordinates (empty by default).
-May accept several layers in the future.}
+\item{\code{coord}}{A data frames representing spatial coordinates (empty by default).}
 
-\item{\code{bin_mat}}{A data frames representing the matrix (empty by default).
-May accept several layers in the future.}
+\item{\code{bin_mat}}{A data frames representing the matrix (empty by default).}
 
 \item{\code{y_max}}{Numeric value representing the maximum y-coordinate (default is 0).}
 
@@ -27,7 +25,9 @@ May accept several layers in the future.}
 
 \item{\code{path}}{Character value representing the file path to the original data.}
 
-\item{\code{meta}}{A list containing meta-information.}
+\item{\code{method}}{The technology used.}
+
+\item{\code{meta}}{A list containing meta-information about bins.}
 
 \item{\code{bin_size}}{Numeric value representing the bin size.}
 

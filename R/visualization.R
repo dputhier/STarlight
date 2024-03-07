@@ -1,95 +1,107 @@
 # -------------------------------------------------------------------------
 ##    Spatial image
 # -------------------------------------------------------------------------
-#' Color-coded representation of the molecule density
+#' Color-coded representation of the object (e.g. molecules) density
 #'
-#' This function displays a color-coded representation of the molecule density observed in a spatial transcriptomics experiment.
+#' This function displays a color-coded representation of the object (e.g. molecules) density observed in a spatial transcriptomics experiment.
 #'
 #' @param object The STGrid object.
-#' @param gene The name of the gene for which the spatial image will be created.
-#' @param saturation The saturation level for the gene expression values. Defaults to 0.75.
-#' @param scale Logical value indicating whether to scale the gene expression values. Defaults to TRUE.
+#' @param features The name of the features for which the spatial image will be created.
+#' @param saturation The ceiling level for the feature expression values. Defaults to 1 (no ceiling).
+#' @param scale Logical value indicating whether to scale the feature expression values. Defaults to TRUE.
 #' @param colors The colors to use for gradient fill in the spatial image. Defaults to a set of colors.
-#' @param ceil Logical value indicating whether to ceil the gene expression values. Defaults to TRUE.
 #' @param coord_fixed Logical value indicating whether to keep the aspect ratio fixed. Defaults to TRUE.
-#' @param overlay_gene The gene to overlay on the spatial image. Defaults to NULL.
-#' @param colors_overlay The colors to use for gradient fill in the overlay gene. Defaults to a set of colors.
+#' @param overlay_feature The feature to overlay on the spatial image. Defaults to NULL.
+#' @param colors_overlay The colors to use for gradient fill in the overlay feature. Defaults to a set of colors.
+#' @param grid_by Whether to overlay a grid with horizontal and vertical lines at particular interval.
+#' No overlay if NULL otherwise the size of the interval (e.g. 20).
 #' @param size The size of the overlayed points.
+#' @param logb The basis for the log transformation. Default to 10. If NULL no log transformation.
+#' @param pseudo_count a value for the pseudo count used for log transformation (default to 1).
+#' @keywords internal
 #' @export
 setGeneric("spatial_image",
            function(object=NULL,
-                    gene=NULL,
-                    saturation=0.75,
+                    features=NULL,
+                    saturation=1,
                     scale=TRUE,
                     colors=c('#000003', '#410967', '#932567', '#DC5039', '#FBA40A', '#FCFEA4'),
-                    ceil=TRUE,
                     coord_fixed=TRUE,
-                    overlay_gene=NULL,
+                    overlay_feature=NULL,
                     colors_overlay=c("#DEEBF7", "#9ECAE1", "#3182BD"),
-                    grid=FALSE,
-                    grid_by=20,
-                    color_grid="black",
-                    size=0.5)
+                    grid_by=NULL,
+                    color_grid="white",
+                    size=0.5,
+                    logb=10,
+                    pseudo_count=1)
              standardGeneric("spatial_image")
 )
 
-#' Color-coded representation of the molecule density
+#' Color-coded representation of the object (e.g. molecules) density
 #'
-#' This function displays a color-coded representation of the molecule density observed in a spatial transcriptomics experiment.
+#' This function displays a color-coded representation of the object (e.g. molecules) density observed in a spatial transcriptomics experiment.
 #'
 #' @param object The STGrid object.
-#' @param gene The name of the gene for which the spatial image will be created.
-#' @param saturation The saturation level for the gene expression values. Defaults to 0.75.
-#' @param scale Logical value indicating whether to scale the gene expression values. Defaults to TRUE.
+#' @param features The name of the features for which the spatial image will be created.
+#' @param saturation The ceiling level for the feature expression values. Defaults to 1 (no ceiling).
+#' @param scale Logical value indicating whether to scale the feature expression values. Defaults to TRUE.
 #' @param colors The colors to use for gradient fill in the spatial image. Defaults to a set of colors.
-#' @param ceil Logical value indicating whether to ceil the gene expression values. Defaults to TRUE.
 #' @param coord_fixed Logical value indicating whether to keep the aspect ratio fixed. Defaults to TRUE.
-#' @param overlay_gene The gene to overlay on the spatial image. Defaults to NULL.
-#' @param colors_overlay The colors to use for gradient fill in the overlay gene. Defaults to a set of colors.
+#' @param overlay_feature The feature to overlay on the spatial image. Defaults to NULL.
+#' @param colors_overlay The colors to use for gradient fill in the overlay feature. Defaults to a set of colors.
+#' @param grid_by Whether to overlay a grid with horizontal and vertical lines at particular interval.
+#' No overlay if NULL otherwise the size of the interval (e.g. 20).
 #' @param size The size of the overlayed points.
-#' @import ggplot2
+#' @param logb The basis for the log transformation. Default to 10. If NULL no log transformation.
+#' @param pseudo_count a value for the pseudo count used for log transformation (default to 1).
+#' @importFrom ggplot2 aes coord_fixed facet_wrap geom_tile scale_fill_gradientn theme xlab ylab element_blank element_rect element_text
+#' @importFrom reshape2 melt
 #' @export
 setMethod("spatial_image",
           signature(object = "STGrid"),
           function(object=NULL,
-                   gene=NULL,
-                   saturation=0.75,
+                   features=NULL,
+                   saturation=1,
                    scale=TRUE,
                    colors=c('#000003', '#410967', '#932567', '#DC5039', '#FBA40A', '#FCFEA4'),
-                   ceil=TRUE,
                    coord_fixed=TRUE,
-                   overlay_gene=NULL,
+                   overlay_feature=NULL,
                    colors_overlay=c("#DEEBF7", "#9ECAE1", "#3182BD"),
-                   grid=FALSE,
-                   grid_by=20,
+                   grid_by=NULL,
                    color_grid="white",
-                   size=0.5) {
+                   size=0.5,
+                   logb=10,
+                   pseudo_count=1) {
 
             if(is.null(object))
                 print_msg("Please provide an STGrid object.",
                         msg_type = "STOP")
 
-            if(!is.null(overlay_gene)){
-              if(!overlay_gene %in% gene_names(object, all_genes=TRUE))
-                print_msg("The gene to overlay was not found in the object.",
+            if(!is.null(overlay_feature)){
+              if(!overlay_feature %in% feat_names(object))
+                print_msg("The feature to overlay was not found in the object.",
                           msg_type = "STOP")
 
             }
 
-            if(is.null(gene))
-              print_msg("Please provide a gene name (see gene arguments).", msg_type = "STOP")
+            if(is.null(features))
+              print_msg("Please provide a feature name (see feature arguments).", msg_type = "STOP")
 
 
-            if(!all(gene %in% gene_names(object, all_genes=TRUE))){
-              print_msg("The gene was not found in the object.", msg_type = "STOP")
+            if(!all(features %in% feat_names(object))){
+              print_msg("The feature was not found in the object.", msg_type = "STOP")
             }
 
-              spatial_matrix <- object@bin_mat[, c("bin_x", "bin_y", gene)]
-              tmp <- spatial_matrix[, gene]
+              spatial_matrix <- object@bin_mat[, c("bin_x", "bin_y", features)]
+              tmp <- spatial_matrix[, features]
 
-            if(saturation != 0){
+            if(saturation < 1){
               q_sat <- quantile(tmp[tmp != 0], saturation)
               tmp[tmp > q_sat] <- q_sat
+            }
+
+            if(!is.null(logb)){
+              tmp <- log(tmp + pseudo_count, base = logb)
             }
 
             if(scale){
@@ -98,7 +110,7 @@ setMethod("spatial_image",
               }
             }
 
-            spatial_matrix[, gene] <- tmp
+            spatial_matrix[, features] <- tmp
 
             spatial_matrix$bin_x <- factor(spatial_matrix$bin_x,
                                            levels = bin_x(object),
@@ -126,20 +138,20 @@ setMethod("spatial_image",
               p <- p + ggplot2::coord_fixed()
 
 
-            if(!is.null(overlay_gene)){
+            if(!is.null(overlay_feature)){
               over <- bin_mat(object,
-                              as_factor = TRUE)[ ,c("bin_x", "bin_y", overlay_gene)]
-              over <- over[over[[overlay_gene]] != 0,]
+                              as_factor = TRUE)[ ,c("bin_x", "bin_y", overlay_feature)]
+              over <- over[over[[overlay_feature]] != 0,]
 
               p <- p + geom_point(data=over, mapping=aes(x=bin_x,
                                                          y=bin_y,
-                                                         color=log10(.data[[overlay_gene]])),
+                                                         color=log10(.data[[overlay_feature]])),
                                   size=size,
                                   inherit.aes = FALSE) +
                 scale_color_gradientn(colors=colors_overlay)
             }
 
-            if(grid){
+            if(!is.null(grid_by)){
 
               lev_bin_x <- levels(spatial_matrix$bin_x)
               lev_bin_y <- levels(spatial_matrix$bin_y)
@@ -173,15 +185,15 @@ setMethod("spatial_image",
 #' Plot x/y coordinates of molecules of a spatial transcriptomics experiment.
 #'
 #' @param object The STGrid object.
-#' @param gene The name of the genes for which the spatial image will be created.
-#' @param colors The colors to use for genes in the spatial image.
+#' @param feat_list The name of the features for which the spatial image will be created.
+#' @param colors The colors to use for features in the spatial image.
 #' @param size The size of the points
 #' @param coord_fixed Logical value indicating whether to keep the aspect ratio fixed. Defaults to TRUE.
 #' @export
 #' @keywords internal
 setGeneric("spatial_plot",
            function(object=NULL,
-                    gene_list=NULL,
+                    feat_list=NULL,
                     colors=NULL,
                     size=0.1,
                     coord_fixed=TRUE)
@@ -193,14 +205,14 @@ setGeneric("spatial_plot",
 #' Plot x/y coordinates of molecules of a spatial transcriptomics experiment.
 #'
 #' @param object The STGrid object.
-#' @param gene The name of the genes for which the spatial image will be created.
-#' @param colors The colors to use for genes in the spatial image.
+#' @param feat_list The name of the features for which the spatial image will be created.
+#' @param colors The colors to use for features in the spatial image.
 #' @param size The size of the points
 #' @param coord_fixed Logical value indicating whether to keep the aspect ratio fixed. Defaults to TRUE.
 #' @export
 setMethod("spatial_plot", "STGrid",
            function(object=NULL,
-                    gene_list=NULL,
+                    feat_list=NULL,
                     colors=NULL,
                     size=0.1,
                     coord_fixed=TRUE){
@@ -209,19 +221,19 @@ setMethod("spatial_plot", "STGrid",
                print_msg("Please provide an STGrid object.",
                          msg_type = "STOP")
 
-             if(is.null(gene_list))
-               print_msg("Please provide gene names (see gene_list arguments).",
+             if(is.null(feat_list))
+               print_msg("Please provide feature names (see feat_list arguments).",
                          msg_type = "STOP")
 
-             if(!all(gene_list %in% gene_names(object)))
-               print_msg("One or several genes was not found in the object.", msg_type = "STOP")
+             if(!all(feat_list %in% feat_names(object)))
+               print_msg("One or several features were not found in the object.", msg_type = "STOP")
 
-             coord <- get_coord(object, gene_list = gene_list, as.factor=TRUE)
+             coord <- get_coord(object, feat_list = feat_list, as.factor=TRUE)
 
              p <- ggplot2::ggplot(data=coord,
                                   mapping = ggplot2::aes(x=x,
                                                          y=y,
-                                                         color= gene)) +
+                                                         color= feature)) +
                ggplot2::geom_point(size=size) +
                ggplot2::xlab("x")  +
                ggplot2::ylab("y") +
@@ -242,43 +254,44 @@ setMethod("spatial_plot", "STGrid",
 # -------------------------------------------------------------------------
 ##    Molecule counts
 # -------------------------------------------------------------------------
-#' @title Create a barplot to show molecule counts of selected genes
+#' @title Create a barplot to show counts for selected features.
 #' @description
-#' Create a barplot to show molecule counts of selected genes
+#' Create a barplot to show counts for selected features.
 #' @param object A STGrid object.
-#' @param genes The list of genes (NULL for all of them).
+#' @param features The list of features (NULL for all of them).
 #' @param normalized  Whether counts should be normalized.
 #' @param transform Whether the count should be transformed (the pseudo count defined for the object is added).
-#' @param facet_shared Use ggpol::facet_shared.
+#' @param colors A set of colors.
 #' @keywords internal
 setGeneric("cmp_bar_plot",
            function(object,
-                    genes=head(gene_names(object)),
+                    features=head(feat_names(object)),
                     normalized=FALSE,
                     transform=c("None", "log2", "log10", "log"),
                     colors=c("#3074BB", "#BE5B52"))
              standardGeneric("cmp_bar_plot")
 )
 
-#' @title Create a barplot to show molecule counts of selected genes
+#' @title Create a barplot to show counts for selected features.
 #' @description
-#' Create a barplot to show molecule counts of selected genes
+#' Create a barplot to show counts for selected features.
 #' @param object A STGrid object.
-#' @param genes The list of genes (NULL for all of them).
+#' @param features The list of features (NULL for all of them).
 #' @param normalized  Whether counts should be normalized.
 #' @param transform Whether the count should be transformed (the pseudo count defined for the object is added).
-#' @export cmp_bar_plot
+#' @param colors A set of colors.
+#' @export
 setMethod(
   "cmp_bar_plot", signature("STCompR"),
     function(object,
-             genes=head(gene_names(object)),
+             features=head(feat_names(object)),
              normalized=FALSE,
              transform=c("None", "log2", "log10", "log"),
              colors=c("#3074BB", "#BE5B52")) {
 
 
-    if(is.null(genes)){
-      print_msg("Please provide some genes...", msg_type = "STOP")
+    if(is.null(features)){
+      print_msg("Please provide some features...", msg_type = "STOP")
     }
 
     transform <- match.arg(transform)
@@ -288,14 +301,14 @@ setMethod(
                         count_only = TRUE,
                         melted_count = TRUE,
                         transform=transform,
-                        genes=genes)
+                        features=features)
 
     ylabel <- ifelse(transform %in% c("log2", "log10", "log"),
                      paste0(transform, "(Molecule counts)"),
                      "Molecule counts")
 
     ggplot2::ggplot(data=counts,
-                    mapping = ggplot2::aes(x=Genes, y=Counts,
+                    mapping = ggplot2::aes(x=Features, y=Counts,
                                            fill=Conditions)) +
     ggplot2::geom_col(color="black", linewidth=0, position="dodge") +
     ggplot2::theme_bw() +
@@ -333,8 +346,6 @@ setMethod(
 #' st_compr_result <- stcompr(st_grid_1, st_grid_2, name_1 = "Condition1", name_2 = "Condition2")
 #' cmp_boxplot(st_compr_result, normalized = TRUE, transform = "log2", colors = c("blue", "red"))
 #'
-#' @import ggsci
-#' @import ggpol
 #' @keywords internal
 setGeneric("cmp_boxplot",
            function(object,
@@ -419,8 +430,8 @@ setMethod(
 #' Options are "p_values", "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", or "fdr".
 #' @param x_lim Numeric vector specifying the x-axis limits. Default is c(-2.5, 2.5).
 #' @param colors Color palette for the plot. Default is RColorBrewer::brewer.pal(7, "Spectral").
-#' @param text_y_lim Numeric value specifying the threshold for gene labels on the y-axis. Genes with -log10(p-value) less than this threshold will not be labeled. Default is 100.
-#' @param text_x_lim Numeric value specifying the threshold for gene labels on the x-axis. Genes with absolute x-values less than this threshold will not be labeled. Default is 2.
+#' @param text_y_lim Numeric value specifying the threshold for feature labels on the y-axis. Features with -log10(p-value) less than this threshold won't be labeled. Default is 100.
+#' @param text_x_lim Numeric value specifying the threshold for feature labels on the x-axis. Features with absolute x-values less than this threshold won't not be labeled. Default is 2.
 #' @param text_size Numeric value specifying the size of text labels in the plot. Default is 5.
 #' @keywords internal
 #' @importFrom ggplot2 aes geom_vline geom_hline geom_point theme_bw xlab ylab expand_limits scale_fill_gradientn
@@ -448,8 +459,8 @@ setGeneric("cmp_volcano",
 #' Options are "p_values", "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", or "fdr".
 #' @param x_lim Numeric vector specifying the x-axis limits. Default is c(-2.5, 2.5).
 #' @param colors Color palette for the plot. Default is RColorBrewer::brewer.pal(7, "Spectral").
-#' @param text_y_lim Numeric value specifying the threshold for gene labels on the y-axis. Genes with -log10(p-value) less than this threshold will not be labeled. Default is 100.
-#' @param text_x_lim Numeric value specifying the threshold for gene labels on the x-axis. Genes with absolute x-values less than this threshold will not be labeled. Default is 2.
+#' @param text_y_lim Numeric value specifying the threshold for feature labels on the y-axis. Genes with -log10(p-value) less than this threshold will not be labeled. Default is 100.
+#' @param text_x_lim Numeric value specifying the threshold for feature labels on the x-axis. Genes with absolute x-values less than this threshold will not be labeled. Default is 2.
 #' @param text_size Numeric value specifying the size of text labels in the plot. Default is 5.
 #' @keywords internal
 #' @importFrom ggplot2 aes geom_vline geom_hline geom_point theme_bw xlab ylab expand_limits scale_fill_gradientn
@@ -475,7 +486,7 @@ setMethod(
     volc_data <- stat_test(object,
                           count_only = FALSE,
                           melted_count = FALSE,
-                          genes=NULL)
+                          features=NULL)
 
     volc_data <- volc_data[, c(x_axis, y_axis)]
     colnames(volc_data) <- c("x", "y")
@@ -483,12 +494,12 @@ setMethod(
     counts <- stat_test(object,
                         count_only = TRUE,
                         melted_count = FALSE,
-                        genes=NULL)
+                        features=NULL)
 
     volc_data$mean_counts <- rowMeans(counts)
-    volc_data$gene <- rownames(volc_data)
-    volc_data$gene[-log10(volc_data$y) < text_y_lim] <- NA
-    volc_data$gene[abs(volc_data$x) < text_x_lim] <- NA
+    volc_data$feature <- rownames(volc_data)
+    volc_data$feature[-log10(volc_data$y) < text_y_lim] <- NA
+    volc_data$feature[abs(volc_data$x) < text_x_lim] <- NA
 
     ggplot2::ggplot(data=volc_data,
            mapping = ggplot2::aes(x=x, y=-log10(y),
@@ -500,7 +511,7 @@ setMethod(
                           color="black",
                           stroke=0.2) +
       ggplot2::theme_bw() +
-      ggrepel::geom_text_repel(data=na.omit(volc_data), mapping=ggplot2::aes(label=gene),
+      ggrepel::geom_text_repel(data=na.omit(volc_data), mapping=ggplot2::aes(label=feature),
                                size=text_size,
                                color="black") +
       ggplot2::theme(axis.text.x = ggplot2::element_text(size=10,  vjust = 0.5),
@@ -525,11 +536,11 @@ setMethod(
 #' @description
 #' Plot the results from the Ripley's k function stored in the STGrid object.
 #' @param object A STCompR object.
-#' @param Which kind of correction should be displayed.
-#' @param max_gene_label The maximum number of genes to display.
-#' The genes with the highest correction value (whatever the radius)
+#' @param correction kind of correction should be displayed.
+#' @param max_feat_label The maximum number of features to display.
+#' The features with the highest value (whatever the radius)
 #' are displayed
-#' @param color The colors for the genes to be displayed.
+#' @param color The colors for the features to be displayed.
 #' @param size The size of the labels.
 #' @keywords internal
 setGeneric("plot_rip_k",
@@ -538,7 +549,7 @@ setGeneric("plot_rip_k",
                                  "isotropic",
                                  "Ripley",
                                  "translate"),
-                    max_gene_label=8,
+                    max_feat_label=8,
                     color=NULL,
                     size=4)
              standardGeneric("plot_rip_k")
@@ -548,11 +559,11 @@ setGeneric("plot_rip_k",
 #' @description
 #' Call the Ripley's k function.
 #' @param object A STCompR object.
-#' @param Which kind of correction should be displayed.
-#' @param max_gene_label The maximum number of genes to display.
-#' The genes with the highest correction value (whatever the radius)
+#' @param correction kind of correction should be displayed.
+#' @param max_feat_label The maximum number of features to display.
+#' The features with the highest correction value (whatever the radius)
 #' are displayed.
-#' @param color The colors for the genes to be displayed.
+#' @param color The colors for the features to be displayed.
 #' @param size The size of the labels.
 #' @export plot_rip_k
 setMethod(
@@ -562,7 +573,7 @@ setMethod(
                         "isotropic",
                         "Ripley",
                         "translate"),
-           max_gene_label=8,
+           max_feat_label=8,
            color=NULL,
            size=4
            ) {
@@ -574,7 +585,7 @@ setMethod(
 
 
     if(is.null(color)){
-      color <- gg_color_hue(max_gene_label)
+      color <- gg_color_hue(max_feat_label)
     }
 
 
@@ -585,23 +596,23 @@ setMethod(
     correction <- match.arg(correction)
     ripk <- ripley_k_function(object)
 
-    if(max_gene_label > nrow(ripk))
+    if(max_feat_label > nrow(ripk))
       print_msg("Too much selected gehes...", msg_type = "STOP")
 
     voi <- ripk %>%
-      dplyr::group_by(gene) %>%
+      dplyr::group_by(feature) %>%
       dplyr::filter(border == max(border)) %>%
       dplyr::arrange(desc(border)) %>%
-          head(n=max_gene_label)
+          head(n=max_feat_label)
 
-    voi <- voi[!duplicated(voi$gene),]
+    voi <- voi[!duplicated(voi$feature),]
 
-    goi <- unique(voi$gene)
+    goi <- unique(voi$feature)
 
-    ripk_sub <- ripk[ripk$gene %in% goi, ]
+    ripk_sub <- ripk[ripk$feature %in% goi, ]
 
     p <- ggplot2::ggplot(data= ripk) +
-      ggplot2::geom_line(mapping = ggplot2::aes(x=r, y=border, group=gene), color="black") +
+      ggplot2::geom_line(mapping = ggplot2::aes(x=r, y=border, group=feature), color="black") +
       ggplot2::theme_bw() +
       ggplot2::theme(legend.text = ggplot2::element_text(size=4),
                       legend.position = "none",
@@ -609,11 +620,11 @@ setMethod(
       ggplot2::geom_line(data=ripk_sub,
                  mapping=ggplot2::aes(x=r,
                                       y=border,
-                                      group=gene,
-                                      color=gene),
+                                      group=feature,
+                                      color=feature),
                  inherit.aes = FALSE) +
       ggrepel::geom_label_repel(data=voi,
-                                mapping=ggplot2::aes(x=r, y=border, label=gene, color=gene),
+                                mapping=ggplot2::aes(x=r, y=border, label=feature, color=feature),
                                 inherit.aes = FALSE,
                                 size = size,
                                 force=20) +
@@ -630,7 +641,7 @@ setMethod(
 # -------------------------------------------------------------------------
 
 cmp_images <- function(...,
-                       gene_list=NULL,
+                       feat_list=NULL,
                        names=NULL,
                        saturation=0.75,
                        colors=c('#000000',
@@ -641,7 +652,7 @@ cmp_images <- function(...,
                                 '#FCFEA4'),
                        condition_vs_gene=TRUE){
 
-  if(is.null(gene_list))
+  if(is.null(feat_list))
     print_msg("Please provide a gene list.", msg_type = "STOP")
 
   st_list <- list(...)
@@ -653,8 +664,8 @@ cmp_images <- function(...,
   }
 
   for(i in 1:length(st_list)){
-    if(any(!gene_list %in% gene_names(st_list[[i]], del_control = FALSE, all_genes = TRUE))){
-      print_msg("Some genes were not found in sample ", i, ".", msg_type = "STOP")
+    if(any(!feat_list %in% feat_names(st_list[[i]], del_control = FALSE))){
+      print_msg("Some features were not found in sample ", i, ".", msg_type = "STOP")
     }
   }
 
@@ -671,11 +682,11 @@ cmp_images <- function(...,
                     bin_mat,
                     melt_tab = TRUE,
                     as_factor = TRUE,
-                    gene_list =gene_list)
+                    feat_list =feat_list)
 
 
     for(i in 1:length(st_list)){
-      for(j in gene_list){
+      for(j in feat_list){
 
         if(max(st_list[[i]]$value[st_list[[i]]$gene == j]) > 1){
           tmp <- st_list[[i]]$value[st_list[[i]]$gene == j]
@@ -702,7 +713,7 @@ cmp_images <- function(...,
                               ordered = TRUE)
 
   st_list$gene <- factor(st_list$gene,
-                              levels=gene_list,
+                              levels=feat_list,
                               ordered = TRUE)
 
   p <- ggplot2::ggplot(data=st_list,

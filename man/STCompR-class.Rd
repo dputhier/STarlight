@@ -21,7 +21,7 @@ scaling factors, and statistical test results.
 \item{\code{scaling_factor}}{A numeric vector representing the scaling factors used during normalization (to be divided).}
 
 \item{\code{stat_test}}{A data frame containing statistical test results, including log2 ratios,
-odds ratios, and p-values for each gene.}
+odds ratios, and p-values for each feature.}
 
 \item{\code{pseudo_count}}{The value for the pseudo_count.}
 }}

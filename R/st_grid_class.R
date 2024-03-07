@@ -4,23 +4,21 @@
 
 #' Spatial transcriptomic anlysis class (STGrid).
 #'
-#' A class for representing spatial transcriptomic analysis results using (currently) the "merscope" method.
-#' This class store transcript molecule coordinates as a grid.
+#' A class for representing spatial transcriptomic analysis results as x/y coordinates.
+#' This class stores transcript molecules or cell coordinates as a grid.
 #'
-#' @slot coordinate A data frames representing spatial coordinates (empty by default).
-#' May accept several layers in the future.
+#' @slot coord A data frames representing spatial coordinates (empty by default).
 #' @slot bin_mat A data frames representing the matrix (empty by default).
-#' May accept several layers in the future.
 #' @slot y_max Numeric value representing the maximum y-coordinate (default is 0).
 #' @slot y_min Numeric value representing the minimum y-coordinate (default is 0).
 #' @slot x_min Numeric value representing the minimum x-coordinate (default is 0).
 #' @slot x_max Numeric value representing the maximum x-coordinate (default is 0).
 #' @slot path Character value representing the file path to the original data.
-#' @slot meta A list containing meta-information.
+#' @slot method The technology used.
+#' @slot meta A list containing meta-information about bins.
 #' @slot bin_size Numeric value representing the bin size.
 #' @slot bin_x Character vector containing the names of bins/windows along the x-axis.
 #' @slot bin_y Character vector containing the names of bins/windows along the y-axis.
-#'
 #' @export
 setClass(
   "STGrid",
@@ -68,9 +66,9 @@ setClass(
 #' The number of columns of a STGrid object.
 #' @param x The STGrid object
 #' @keywords internal
-  ncol.STGrid <- function (x) {
-    length(x@bin_x)
-  }
+ncol.STGrid <- function (x) {
+  length(x@bin_x)
+}
 
 #' @title
 #' nrow.STGrid
@@ -252,7 +250,7 @@ setMethod("coord", "STGrid",
 #' The binned matrix stored in a STGrid object
 #' @param object The STGrid object
 #' @param as_factor Should bin_x and bin_y columns be returned as ordered factor ?
-#' @param gene_list Whether to subset to some genes.
+#' @param feat_list Whether to subset to some features.
 #' @param melt_tab Whether to melt.
 #' @param del_bin Whether to delete the bin_x, bin_y columns.
 #' @keywords internal
@@ -260,10 +258,9 @@ setMethod("coord", "STGrid",
 setGeneric("bin_mat",
            function(object,
                     as_factor = FALSE,
-                    gene_list = character(),
+                    feat_list = character(),
                     melt_tab = FALSE,
-                    del_bin = FALSE,
-                    all_genes=FALSE)
+                    del_bin = FALSE)
              standardGeneric("bin_mat"))
 
 #' @title The binned matrix stored in a STGrid object.
@@ -271,32 +268,29 @@ setGeneric("bin_mat",
 #' The binned matrix stored in a STGrid object.
 #' @param object The STGrid object
 #' @param as_factor Should bin_x and bin_y columns be returned as ordered factor ?
-#' @param gene_list Whether to subset to some genes.
+#' @param feat_list Whether to subset to some features.
 #' @param melt_tab Whether to melt.
 #' @param del_bin Whether to delete the bin_x, bin_y columns.
-#' @param all_genes Whether to delete the 'all_genes' columns.
 #' @export
 setMethod("bin_mat", "STGrid",
           function(object,
                    as_factor = FALSE,
-                   gene_list = character(),
+                   feat_list = character(),
                    melt_tab = FALSE,
-                   del_bin = FALSE,
-                   all_genes=FALSE) {
-
-            if (length(gene_list) == 0) {
-              gene_list <- gene_names(object, all_genes = all_genes)
+                   del_bin = FALSE) {
+            if (length(feat_list) == 0) {
+              feat_list <- feat_names(object)
             }
 
             this_bin_mat <- object@bin_mat
             if (del_bin) {
-              this_bin_mat <- this_bin_mat[, gene_list]
+              this_bin_mat <- this_bin_mat[, feat_list]
             } else{
-              this_bin_mat <- this_bin_mat[, c("bin_x", "bin_y", gene_list)]
+              this_bin_mat <- this_bin_mat[, c("bin_x", "bin_y", feat_list)]
             }
 
 
-            if(as_factor) {
+            if (as_factor) {
               this_bin_mat$bin_x <- factor(this_bin_mat$bin_x,
                                            levels = bin_x(object),
                                            ordered = TRUE)
@@ -309,16 +303,16 @@ setMethod("bin_mat", "STGrid",
 
             if (melt_tab) {
               print_msg("Melting data.frame...", msg_type = "DEBUG")
-              if(del_bin){
+              if (del_bin) {
                 this_bin_mat <- reshape2::melt(this_bin_mat)
-                colnames(this_bin_mat) <- c("gene",
+                colnames(this_bin_mat) <- c("feature",
                                             "value")
-              }else{
+              } else{
                 this_bin_mat <- reshape2::melt(this_bin_mat,
                                                id.vars = c("bin_x", "bin_y"))
                 colnames(this_bin_mat) <- c("bin_x",
                                             "bin_y",
-                                            "gene",
+                                            "feature",
                                             "value")
               }
 
@@ -327,7 +321,7 @@ setMethod("bin_mat", "STGrid",
 
 
             return(this_bin_mat)
-})
+          })
 
 #' @title The number of molecules stored in a STGrid object
 #' @description
@@ -349,78 +343,68 @@ setMethod("nb_molec", "STGrid",
             nrow(x@coord))
 
 
-#' @title The number of genes stored in a STGrid object
+#' @title The number of features stored in a STGrid object
 #' @description
-#' The number of genes stored in a STGrid object
-#' @param x The STGrid object
+#' The number of features stored in a STGrid object
+#' @param object The STGrid object
 #' @keywords internal
-#' @export
-setGeneric("nb_genes",
+#' @export nb_feat
+setGeneric("nb_feat",
            function(object) {
-             standardGeneric("nb_genes")
+             standardGeneric("nb_feat")
            })
 
 
-#' @title The number of genes stored in a STGrid object
+#' @title The number of features stored in a STGrid object
 #' @description
-#' The number of genes stored in a STGrid object
+#' The number of features stored in a STGrid object
 #' @param object The STGrid object
-#' @export
-setMethod("nb_genes", signature(object = "STGrid"),
+#' @export nb_feat
+setMethod("nb_feat", signature(object = "STGrid"),
           function(object) {
-            length(gene_names(object))
+            length(feat_names(object))
           })
 
 
-#' @title The genes stored in a STGrid object
+#' @title The features stored in a STGrid object
 #' @description
-#' The genes stored in a STGrid object
+#' The features stored in a STGrid object
 #' @param object The STGrid object
-#' @param all_genes Whether "all_genes" should be included. Default to FALSE.
 #' @param del_control Whether to delete controls.
 #' @keywords internal
 #' @export
-setGeneric("gene_names",
+setGeneric("feat_names",
            function(object,
-                    all_genes = FALSE,
-                    del_control=FALSE)
-             standardGeneric("gene_names"))
+                    del_control = FALSE)
+             standardGeneric("feat_names"))
 
-#' @title The genes stored in a STGrid object
+#' @title The features stored in an STGrid object
 #' @description
-#' The genes stored in a STGrid object
-#' @param object The STGrid object
-#' @param all_genes Whether "all_genes" should be included. Default to FALSE.
-#' @param del_control Whether.
+#' The features stored in a STGrid object
+#' @param object The STGrid object.
+#' @param del_control Whether to delete controls.
 #' @export
-setMethod("gene_names", signature(object = "STGrid"),
+setMethod("feat_names", signature(object = "STGrid"),
           function(object,
-                   all_genes = FALSE,
-                   del_control=FALSE) {
+                   del_control = FALSE) {
 
-            if (all_genes) {
-              gn <- grep("^bin_[xy]$",
-                   colnames(object@bin_mat),
-                   invert = TRUE,
-                   val = TRUE)
-            } else{
-              gn <- grep(
-                "(^bin_[xy]$)|(^all_genes$)",
+            fn <- grep(
+                "^bin_[xy]$",
                 colnames(object@bin_mat),
                 invert = TRUE,
                 perl = TRUE,
                 val = TRUE
-              )
-            }
+            )
 
-            if(del_control){
-              print("yes")
+
+            if (del_control) {
               print(object@control)
-              gn <- gn[!gn %in% grep(object@control, gn, val=TRUE)]
+              fn <-
+                fn[!fn %in% grep(object@control, fn, val = TRUE)]
             }
 
-            gn
-})
+            fn
+          })
 
 
 #' @title The size of the bins stored in an STGrid object
@@ -442,31 +426,33 @@ setMethod("bin_size", "STGrid",
           function(x)
             x@bin_size)
 
-#' @title Remove control (Blank-*) "genes" from a STGrid object.
+#' @title Remove control (Blank-*) features from a STGrid object.
 #' @description
-#'  Remove control (Blank-*) "genes".
+#'  Remove control (Blank-*) features.
 #' @param object The STGrid object
+#' @param regexp A regexp to search for internal controls.
 #' @keywords internal
+#' @export
 setGeneric("rm_controls",
            function(object,
                     regexp = NULL)
              standardGeneric("rm_controls"))
 
-#' @title Remove control (Blank-*) "genes" from a STGrid object.
+#' @title Remove control (Blank-*) features from a STGrid object.
 #' @description
-#'  Remove control (Blank-*) "genes".
+#'  Remove control (Blank-*) features.
 #' @param object The STGrid object
-#' @export rm_controls
+#' @param regexp A regexp to search for internal controls.
+#' @export
 setMethod("rm_controls", "STGrid",
           function(object,
-                   regexp = NULL){
-            if(is.null(regexp)){
+                   regexp = NULL) {
+            if (is.null(regexp)) {
               regexp <- object@control
             }
 
-            return(object[-grep(regexp, gene_names(object)), ])
-          }
-)
+            return(object[-grep(regexp, feat_names(object)), ])
+          })
 
 #' @title  Get Ripley's K function slot from a STGrid object.
 #' @description
@@ -505,8 +491,8 @@ setMethod("show", signature("STGrid"),
           function(object) {
             print_msg("An object of class STGrid")
             print_msg("Memory used: ", object.size(object))
-            print_msg("Number of molecules: ", nb_molec(object))
-            print_msg("Number of genes: ", nb_genes(object))
+            print_msg("Number of counts: ", nb_molec(object))
+            print_msg("Number of features: ", nb_feat(object))
             print_msg("Bin size: ", bin_size(object))
             print_msg("Number of bins (x axis): ", length(bin_x(object)))
             print_msg("Number of bins (y axis): ", length(bin_y(object)))
@@ -533,7 +519,7 @@ setMethod("summary", signature("STGrid"),
             print_msg("An object of class STGrid")
             print_msg("Method:", object@method)
             print_msg("Bin size:", object@bin_size)
-            print_msg("Genes:", c(head(gene_names(object), 4), "..."))
+            print_msg("Features:", c(head(feat_names(object), 4), "..."))
             print_msg("x_min:", object@x_min)
             print_msg("x_max:", object@x_max)
             print_msg("y_min:", object@y_min)
@@ -541,7 +527,7 @@ setMethod("summary", signature("STGrid"),
             print_msg("path:", object@path)
             print_msg("bin_x:", head(bin_x(object), 4), "...")
             print_msg("bin_y:", head(bin_y(object), 4), "...")
-            print_msg("Meta data:", object@meta)
+            print_msg("Meta data:", paste0(colnames(object@meta), collapse=" , "))
           })
 
 # -------------------------------------------------------------------------
@@ -551,14 +537,14 @@ setMethod("summary", signature("STGrid"),
 #' Extract
 #' @description
 #' The subsetting operator of a STGrid object.
-#' The i axis correspond to genes. j axis is not implemented yet.
-#' @param i indices specifying genes to extract or substract.
+#' The i axis correspond to features (i.e. genes) or bins (x axis). The j axis corresponds to bins
+#' @param features (i.e. genes) or bins (x axis) to extract or substract.
 #' @param ... See ?'['. Not functionnal here.
 #' @param drop For matrices and arrays. If TRUE the result is coerced to the lowest possible dimension. Not functionnal here.
 #' @keywords internal
 setMethod("[", signature(x = "STGrid"),
           function (x, i, j, ..., drop = FALSE) {
-            x_is_gene <- FALSE
+            x_is_feat <- FALSE
             x_is_bin <- FALSE
 
             if (!missing(i)) {
@@ -568,19 +554,19 @@ setMethod("[", signature(x = "STGrid"),
                 x_is_bin <- TRUE
               } else{
                 x_is_bin <- FALSE
-                if (any(i %in% gene_names(x, all_genes = TRUE))) {
-                  x_is_gene <- TRUE
+                if (any(i %in% feat_names(x))) {
+                  x_is_feat <- TRUE
                 } else{
                   if (is.numeric(i)) {
                     i <- round(i, 0)
-                    if (any(i > nb_genes(x))) {
-                      print_msg("Numering value i is out of range (should be < nb_genes(x)).",
+                    if (any(i > nb_feat(x))) {
+                      print_msg("Numering value i is out of range (should be < nb_feat(x)).",
                                 msg_type = "STOP")
                     }
-                    i <- gene_names(x, all_genes = TRUE)[i]
-                    x_is_gene <- TRUE
-                  }else{
-                    print_msg("Check i... Should be a set of genes or bins.",
+                    i <- feat_names(x)[i]
+                    x_is_feat <- TRUE
+                  } else{
+                    print_msg("Check i... Should be a set of features or bins.",
                               msg_type = "STOP")
                   }
 
@@ -588,8 +574,8 @@ setMethod("[", signature(x = "STGrid"),
 
               }
 
-              if (!x_is_bin && !x_is_gene)
-                print_msg("Some gene or bin_x or indexes where not found in the object.",
+              if (!x_is_bin && !x_is_feat)
+                print_msg("Some features or bin_x or indexes where not found in the object.",
                           msg_type = "STOP")
             }
 
@@ -609,26 +595,20 @@ setMethod("[", signature(x = "STGrid"),
               if (missing(i)) {
                 return(x)
               } else {
-                if (x_is_gene) {
-                  n_coord <- n_coord[n_coord$gene %in% i, ]
+                if (x_is_feat) {
+                  n_coord <- n_coord[n_coord$feature %in% i, ]
                   n_bin_mat <-
                     n_bin_mat[, colnames(n_bin_mat) %in% c("bin_x", "bin_y", i)]
                   n_ripley_k_function <-
-                    n_ripley_k_function[n_ripley_k_function$gene %in% i, ]
+                    n_ripley_k_function[n_ripley_k_function$feature %in% i, ]
 
                 } else {
                   n_coord <- n_coord[n_coord$bin_x %in% i, ]
                   n_bin_mat <- n_bin_mat[n_bin_mat$bin_x %in% i, ]
-                  gene_left <- unique(n_coord$gene)
+                  feat_left <- unique(n_coord$feature)
 
-                  if ("all_genes" %in% colnames(n_bin_mat)) {
-                    n_bin_mat <-
-                      n_bin_mat[, colnames(n_bin_mat) %in% c("bin_x", "bin_y", "all_genes", gene_left)]
-                  } else{
-                    n_bin_mat <-
-                      n_bin_mat[, colnames(n_bin_mat) %in% c("bin_x", "bin_y", gene_left)]
-                  }
-
+                  n_bin_mat <-
+                      n_bin_mat[, colnames(n_bin_mat) %in% c("bin_x", "bin_y", feat_left)]
 
                 }
               }
@@ -638,32 +618,21 @@ setMethod("[", signature(x = "STGrid"),
                 n_bin_mat <- n_bin_mat[n_bin_mat$bin_y %in% j, ]
 
               } else{
-                if (x_is_gene) {
-                  n_coord <- n_coord[n_coord$gene %in% i, ]
+                if (x_is_feat) {
+                  n_coord <- n_coord[n_coord$feature %in% i, ]
 
-                  if ("all_genes" %in% colnames(n_bin_mat)) {
-                    n_bin_mat <-
-                      n_bin_mat[, colnames(n_bin_mat) %in% c("bin_x", "bin_y", "all_genes", i)]
-                  } else{
-                    n_bin_mat <-
+                  n_bin_mat <-
                       n_bin_mat[, colnames(n_bin_mat) %in% c("bin_x", "bin_y", i)]
-                  }
+
 
 
                 } else {
                   n_coord <- n_coord[n_coord$bin_x %in% i, ]
                   n_bin_mat <- n_bin_mat[n_bin_mat$bin_x %in% i, ]
-                  gene_left <- unique(n_coord$gene)
+                  feat_left <- unique(n_coord$feature)
 
-                  if ("all_genes" %in% colnames(n_bin_mat)) {
-                    n_bin_mat <-
-                      n_bin_mat[, colnames(n_bin_mat) %in% c("bin_x", "bin_y", "all_genes", gene_left)]
-                  } else{
-                    n_bin_mat <-
-                      n_bin_mat[, colnames(n_bin_mat) %in% c("bin_x", "bin_y", gene_left)]
-                  }
-
-
+                  n_bin_mat <-
+                      n_bin_mat[, colnames(n_bin_mat) %in% c("bin_x", "bin_y", feat_left)]
 
                 }
 
@@ -693,7 +662,7 @@ setMethod("[", signature(x = "STGrid"),
 
             return(STGrid_obj)
 
-})
+          })
 
 # -------------------------------------------------------------------------
 ##    Method for function "[[". Set/Extract/Replace metadata.
@@ -764,9 +733,9 @@ setMethod ("[[<-", "STGrid",
 # -------------------------------------------------------------------------
 ##    Compute Ripley's K function
 # -------------------------------------------------------------------------
-#' Estimate Ripley's reduced second moment function for each gene in a spatial grid.
+#' Estimate Ripley's reduced second moment function for each feature in a spatial grid.
 #'
-#' This method calculates Ripley's reduced second moment function, K(r), for each gene in a spatial grid.
+#' This method calculates Ripley's reduced second moment function, K(r), for each feature in a spatial grid.
 #'
 #' @param object An object of class "STGrid".
 #' @param rmax Maximum desired value of the argument r.
@@ -787,12 +756,12 @@ setGeneric("compute_k_ripley",
                     nlarge = 1e6,
                     var.approx = FALSE,
                     ratio = FALSE,
-                    verbose=TRUE)
+                    verbose = TRUE)
              standardGeneric("compute_k_ripley"))
 
-#' Estimate Ripley's reduced second moment function for each gene in a spatial grid.
+#' Estimate Ripley's reduced second moment function for each feature in a spatial grid.
 #'
-#' This method calculates Ripley's reduced second moment function, K(r), for each gene in a spatial grid.
+#' This method calculates Ripley's reduced second moment function, K(r), for each feature in a spatial grid.
 #'
 #' @param object An object of class "STGrid".
 #' @param rmax Maximum desired value of the argument r.
@@ -816,8 +785,9 @@ setMethod("compute_k_ripley", signature("STGrid"),
                    nlarge = 1e6,
                    var.approx = FALSE,
                    ratio = FALSE,
-                   verbose=TRUE) {
-            molecules <- coord(object)[, c("x", "y", "gene")]
+                   verbose = TRUE) {
+
+            molecules <- coord(object)[, c("x", "y", "feature")]
 
             data_out <- data.frame(
               r = NA,
@@ -825,7 +795,7 @@ setMethod("compute_k_ripley", signature("STGrid"),
               border = NA,
               trans = NA,
               iso = NA,
-              gene = NA
+              feature = NA
             )
 
             x_min <- object@x_min
@@ -835,15 +805,14 @@ setMethod("compute_k_ripley", signature("STGrid"),
 
             rownames(molecules) <- paste0(1:nrow(molecules),
                                           '|',
-                                          molecules$gene)
+                                          molecules$feature)
 
 
-            print_msg(">>> Estimating Ripley's reduced second moment function for all genes.")
+            print_msg(">>> Estimating Ripley's reduced second moment function for all features.")
 
-            n_iter <- length(unique(molecules$gene))
+            n_iter <- length(unique(molecules$feature))
 
-            if(verbose){
-
+            if (verbose) {
               pb <- txtProgressBar(
                 min = 0,
                 max = n_iter,
@@ -855,9 +824,8 @@ setMethod("compute_k_ripley", signature("STGrid"),
               n <- 0
             }
 
-            for (g in unique(molecules$gene)) {
-
-              if(verbose){
+            for (g in unique(molecules$feature)) {
+              if (verbose) {
                 n <- n + 1
                 setTxtProgressBar(pb, n)
               }
@@ -867,7 +835,7 @@ setMethod("compute_k_ripley", signature("STGrid"),
                                            Var2 = NA,
                                            value = NA)
 
-              is_g <- molecules[molecules$gene == g, ]
+              is_g <- molecules[molecules$feature == g, ]
 
               X <- spatstat.geom::ppp(is_g$x,
                                       is_g$y,
@@ -885,13 +853,13 @@ setMethod("compute_k_ripley", signature("STGrid"),
               )
 
               u <- as.data.frame(as.matrix(u))
-              u$gene <- g
+              u$feature <- g
 
               data_out <- rbind(data_out, u)
             }
 
-            if(verbose)
-            close(pb)
+            if (verbose)
+              close(pb)
 
             data_out <- na.omit(data_out)
 
@@ -905,7 +873,6 @@ setMethod("compute_k_ripley", signature("STGrid"),
 # -------------------------------------------------------------------------
 ##    Constructor for SpatialTranscriptomicAnalysis class (STGrid)
 # -------------------------------------------------------------------------
-
 #' @title Create a Spatial Transcriptomic Grid class (STGrid)
 #' @description
 #' The load_spatial() function is the entry point of the stcompr package.
@@ -913,11 +880,11 @@ setMethod("compute_k_ripley", signature("STGrid"),
 #'
 #' @param path Either a file (if method is set to "coordinates") or a directory (if method
 #' is set to "merscope"). If method is set to "coordinates" the file should contain 3 columns
-#' ("x", "y", "gene").
-#' @param method The type of technology ("merscope" in the only supported method at the moment).
+#' ("x", "y", "gene"), ("x", "y", "feature") or ("x", "y", "cell").
+#' @param method The type of technology.
 #' @param bin_size Numeric value representing the bin size (default to 25).
 #' @param control A regular expression to identify controls. As the function computes the sum of
-#' expression levels ("all_genes" features), this will allow to delete these blanks/controls for computation.
+#' counts, this will allow to delete these blanks/controls for computation.
 #' @param verbose Whether to display the progress bar.
 #' @return An object of class STGrid.
 #'
@@ -928,8 +895,7 @@ load_spatial <- function(path = "",
                                     "xenium"),
                          bin_size = 25,
                          control = NULL,
-                         verbose=TRUE) {
-
+                         verbose = TRUE) {
   method <- match.arg(method)
 
   print_msg("Technology is '", method, "'.")
@@ -938,16 +904,17 @@ load_spatial <- function(path = "",
   if (method == "merscope") {
     spat_input <-
       Seurat::ReadVizgen(data.dir = path, type = "centroids")
-    spat_input <- spat_input$microns
+    spat_input <- spat_input$microns[, c("x", "y", "gene")]
 
-    if(is.null(control))
+    if (is.null(control))
       control <- "^Blank\\-[0-9]+"
 
   }  else if (method == "xenium") {
-    spat_input <- Seurat::ReadXenium(data.dir = path, type = "centroids")
-    spat_input <- spat_input$microns
+    spat_input <-
+      Seurat::ReadXenium(data.dir = path, type = "centroids")
+    spat_input <- spat_input$microns[, c("x", "y", "gene")]
 
-    if(is.null(control))
+    if (is.null(control))
       control <-  "(NegControl)|(^BLANK)"
 
   }  else if (method == "coordinates") {
@@ -955,22 +922,37 @@ load_spatial <- function(path = "",
     spat_input <- as.data.frame(data.table::fread(path,
                                                   sep = "\t",
                                                   head = TRUE))
+    col_needed <- c("x", "y")
 
-    if (any(!c("x", "y", "gene") %in% colnames(spat_input))) {
+    if("cell" %in% colnames(spat_input)){
+      col_needed <- c(col_needed, "cell")
+    }else if("feature" %in% colnames(spat_input)){
+      col_needed <- c(col_needed, "feature")
+    }else if("gene" %in% colnames(spat_input)){
+      col_needed <- c(col_needed, "gene")
+    }else{
+      print_msg("Could not find a cell/feature/gene columns.", msg_type = "STOP")
+    }
+
+    if (any(!col_needed %in% colnames(spat_input))) {
       print_msg("Please check the column name of the input file.", msg_type = "STOP")
     }
 
-    spat_input <- spat_input[, c("x", "y", "gene")]
+    spat_input <- spat_input[, col_needed]
 
-    if(is.null(control))
+    if (is.null(control))
       control <- "^Blank\\-[0-9]+"
 
   }
 
+  colnames(spat_input)[3] <- "feature"
+
   bin_matrix <- bin_this_matrix(coord = spat_input,
                                 bin_size = bin_size,
-                                control = control,
-                                verbose=verbose)
+                                verbose = verbose)
+
+  sum_of_cts <- sum_of_counts(bin_matrix$spatial_matrix,
+                              control = control)
 
   # create a STGrid object                             ---------
 
@@ -986,7 +968,8 @@ load_spatial <- function(path = "",
   STGrid_obj@path <- path
   STGrid_obj@method <- method
   STGrid_obj@meta <-
-    data.frame(row.names = rownames(STGrid_obj@bin_mat))
+    data.frame(row.names = rownames(STGrid_obj@bin_mat),
+               count_sums = sum_of_cts)
   STGrid_obj@bin_size <- bin_size
   STGrid_obj@bin_x <- bin_matrix$possible_levels_x
   STGrid_obj@bin_y <- bin_matrix$possible_levels_y
@@ -995,17 +978,65 @@ load_spatial <- function(path = "",
   return(STGrid_obj)
 }
 
+# -------------------------------------------------------------------------
+#      Bin a matrix
+# -------------------------------------------------------------------------
+#' Compute the Sum of Counts
+#'
+#' This function calculates the sum of counts for each row in a spatial matrix.
+#'
+#' @param spatial_matrix The spatial matrix containing molecule counts, typically obtained from a spatial transcriptomics experiment.
+#' @param control A regular expression pattern indicating the controls in the dataset. Controls are internal features used for for monitoring experiments.
+#'
+#' @return A numeric vector containing the sum of counts for each row in the spatial matrix.
+#' @export
+sum_of_counts <- function(spatial_matrix = NULL,
+                          control = NULL) {
+
+  if (is.null(spatial_matrix)) {
+    print_msg("Please provide a spatial matrix.", msg_type = "STOP")
+  }
+
+  print_msg("Regexp for controls:", control, msg_type = "DEBUG")
+
+  print_msg("Computing sum of counts.")
+
+  pos_bin_xy <- grep("^bin_[xy]$",
+                     colnames(spatial_matrix))
+
+  tmp <- spatial_matrix[, -pos_bin_xy, drop=FALSE]
+
+  if(!is.null(control)) {
+    pos_ctrl <- grep(control, colnames(tmp), perl = TRUE)
+  } else{
+    pos_ctrl <- integer(0)
+  }
+
+  if (length(pos_ctrl) > 0) {
+    print_msg("Found the following controls:",
+              paste0(head(colnames(tmp)[pos_ctrl], 3),
+                     collapse = ", "),
+              "...")
+    sum_of_cts <- rowSums(tmp[, -pos_ctrl, drop=FALSE])
+
+  } else{
+    sum_of_cts <- rowSums(tmp)
+  }
+
+  return(sum_of_cts)
+
+}
 
 # -------------------------------------------------------------------------
 #      Bin a matrix
 # -------------------------------------------------------------------------
 #' Create a 2D binned grid (rasterization) from molecule coordinates
 #'
-#' This function takes molecule coordinates as input (with columns named 'x', 'y', 'gene') and creates a 2D
+#' This function takes molecule coordinates as input (with columns named 'x', 'y', 'feature') and creates a 2D
 #' binned grid by dividing the x and y axes into bins. It returns the counts of the number of molecules in
 #' each bin along with additional information about the binning process.
 #'
-#' @param coord A data frame containing molecule coordinates with columns 'x', 'y', and 'gene'. Defaults to NULL.
+#' @param coord A data frame containing molecule coordinates with columns 'x', 'y', and 'feature'. Defaults to NULL.
 #' @param bin_size An integer specifying the size of each bin. Defaults to 25.
 #' @param verbose Whether to display the progress bar.
 #' @return A list containing the binned spatial matrix, updated molecule coordinates, and information about the binning process.
@@ -1016,8 +1047,7 @@ load_spatial <- function(path = "",
 #' @export bin_this_matrix
 bin_this_matrix <- function(coord = NULL,
                             bin_size = 25,
-                            control = NULL,
-                            verbose=TRUE) {
+                            verbose = TRUE) {
   print_msg("Binning a matrix...")
 
   x_min <- min(coord$x)
@@ -1095,10 +1125,10 @@ bin_this_matrix <- function(coord = NULL,
   coord$bin_x <- NA
   coord$bin_y <- NA
 
-  if(verbose){
+  if (verbose) {
     pb <- txtProgressBar(
       min = 0,
-      max = length(unique(coord$gene)),
+      max = length(unique(coord$feature)),
       style = 3,
       width = 50,
       char = "="
@@ -1107,29 +1137,29 @@ bin_this_matrix <- function(coord = NULL,
     n_loop <- 0
   }
 
-  for (goi in unique(coord$gene)) {
+  for (goi in unique(coord$feature)) {
     x_molec <- cut(
-      coord$x[coord$gene == goi],
+      coord$x[coord$feature == goi],
       breaks = x_lim,
       include.lowest = TRUE,
       right = FALSE
     )
 
-    coord$bin_x[coord$gene == goi] <- as.character(x_molec)
+    coord$bin_x[coord$feature == goi] <- as.character(x_molec)
 
     y_molec <- cut(
-      coord$y[coord$gene == goi],
+      coord$y[coord$feature == goi],
       breaks = y_lim,
       include.lowest = TRUE,
       right = FALSE
     )
-    coord$bin_y[coord$gene == goi] <- as.character(y_molec)
+    coord$bin_y[coord$feature == goi] <- as.character(y_molec)
 
     nb_molec <- table(paste(x_molec, y_molec, sep = "~"))
     spatial_matrix[, goi] <- 0
     spatial_matrix[names(nb_molec), goi] <- nb_molec
 
-    if(verbose){
+    if (verbose) {
       n_loop <- n_loop + 1
       setTxtProgressBar(pb, n_loop)
     }
@@ -1137,35 +1167,10 @@ bin_this_matrix <- function(coord = NULL,
 
   cat("\n")
 
-  print_msg("Compute sum of counts ('all_genes').")
-
-
-  pos_bin_xy <- grep("^bin_[xy]$",
-                     colnames(spatial_matrix))
-
-  spatial_matrix$all_genes <- 0
-
-  tmp <- spatial_matrix[, -pos_bin_xy]
-
-  pos_ctrl <- grep(control, colnames(tmp), perl = TRUE)
-
-  if (length(pos_ctrl) > 0) {
-    print_msg("Found the following controls:",
-              paste0(head(colnames(tmp)[pos_ctrl], 3),
-                     collapse = ", "),
-              "...")
-    all_genes <- rowSums(tmp[, -pos_ctrl])
-  } else{
-    print_msg("No control found")
-    all_genes <- rowSums(tmp)
-  }
-
-  spatial_matrix$all_genes <- all_genes
-
   spatial_matrix <-
     spatial_matrix[, order(colnames(spatial_matrix))]
 
-  if(verbose)
+  if (verbose)
     close(pb)
 
   return(
@@ -1195,34 +1200,36 @@ bin_this_matrix <- function(coord = NULL,
 setGeneric("re_bin",
            function(object,
                     bin_size,
-                    verbose=TRUE)
+                    verbose = TRUE)
              standardGeneric("re_bin"))
 
 
 #' @title Re-bin a STGrid object.
 #' @description Re-bin a STGrid object.
-#' @param x The STGrid object.
+#' @param object The STGrid object.
 #' @param bin_size The size of the bin.
 #' @param verbose Whether to be display progress bar.
 #' @export re_bin
 setMethod("re_bin", signature(object = "STGrid"),
           function(object,
                    bin_size,
-                   verbose=TRUE) {
+                   verbose = TRUE) {
             if (object@bin_size == bin_size) {
               print_msg("The bin_size is unchanged.")
               return(object)
             }
 
-            bin_matrix <- bin_this_matrix(
-              coord = object@coord,
-              bin_size = bin_size,
-              control = object@control,
-              verbose=verbose
-            )
+            bin_matrix <- bin_this_matrix(coord = object@coord,
+                                          bin_size = bin_size,
+                                          verbose = verbose)
+
+            print_msg("Re-computing sum of counts .")
+            sum_of_cts <- sum_of_counts(bin_matrix$spatial_matrix,
+                                        control=object@control)
 
             # create a STGrid object                             ---------
             print_msg("Creating an STGrid object")
+            print_msg("Note that meta data will be lost (except 'sum_of_cts').")
 
             STGrid_obj <- new("STGrid",
                               path = object@path)
@@ -1236,6 +1243,9 @@ setMethod("re_bin", signature(object = "STGrid"),
             STGrid_obj@path <- object@path
             STGrid_obj@method <- object@method
             STGrid_obj@meta <- object@meta
+
+            STGrid_obj@meta <- data.frame(row.names = rownames(STGrid_obj@bin_mat),
+                                          count_sums = sum_of_cts)
             STGrid_obj@bin_size <- bin_size
             STGrid_obj@bin_x <- bin_matrix$possible_levels_x
             STGrid_obj@bin_y <- bin_matrix$possible_levels_y
@@ -1244,50 +1254,51 @@ setMethod("re_bin", signature(object = "STGrid"),
 
             return(STGrid_obj)
 
-})
+
+          })
 
 
 # -------------------------------------------------------------------------
-#      Return the x/y coordinates of genes from a STGrid object
+#      Return the x/y coordinates of features from a STGrid object
 # -------------------------------------------------------------------------
-#' @title The x/y coordinates of genes from a STGrid object.
-#' @description Return the x/y coordinates of genes from a STGrid object
+#' @title The x/y coordinates of features from a STGrid object.
+#' @description Return the x/y coordinates of features from a STGrid object
 #' @param object The STGrid object
-#' @param gene_list The list of genes
-#' @param as.factor Whether the gene column should be returned as an ordered factor.
+#' @param feat_list The list of features.
+#' @param as.factor Whether the 'feature' column should be returned as an ordered factor.
 #' @export
 #' @keywords internal
 setGeneric("get_coord",
            function(object,
-                    gene_list = character(),
+                    feat_list = character(),
                     as.factor = TRUE)
              standardGeneric("get_coord"))
 
-#' @title The x/y coordinates of genes from a STGrid object.
-#' @description Return the x/y coordinates of genes from a STGrid object
+#' @title The x/y coordinates of features from a STGrid object.
+#' @description Return the x/y coordinates of features from a STGrid object
 #' @param object The STGrid object
-#' @param gene_list The list of genes
-#' @param as.factor Whether the gene column should be returned as an ordered factor
+#' @param feat_list The list of features.
+#' @param as.factor Whether the 'feature' column should be returned as an ordered factor
 #' @export
 setMethod("get_coord", "STGrid",
           function(object,
-                   gene_list = character(),
+                   feat_list = character(),
                    as.factor = TRUE) {
-            if (!all(gene_list %in% gene_names(object))) {
-              print_msg("Some genes were not found...",
+            if (!all(feat_list %in% feat_names(object))) {
+              print_msg("Some features were not found...",
                         msg_type = "STOP")
             }
 
-            if (length(gene_list) == 0) {
-              gene_list <- gene_names(object)
+            if (length(feat_list) == 0) {
+              feat_list <- feat_names(object)
             }
 
             coord <- object@coord
-            coord <- coord[coord$gene %in% gene_list, ]
+            coord <- coord[coord$feature %in% feat_list, ]
 
             if (as.factor)
-              coord$gene <- factor(as.character(coord$gene),
-                                   levels = gene_list,
+              coord$feature <- factor(as.character(coord$feature),
+                                   levels = feat_list,
                                    ordered = TRUE)
 
             return(coord)
@@ -1314,8 +1325,8 @@ setGeneric("hc_tree",
                     layout = "circular",
                     dist_method = "pearson",
                     branch_length = "none",
-                    class_nb=1,
-                    class_name=NULL,
+                    class_nb = 1,
+                    class_name = NULL,
                     size = 2.25)
              standardGeneric("hc_tree"))
 
@@ -1328,6 +1339,10 @@ setGeneric("hc_tree",
 #' @param branch_length A variable for scaling branch, if 'none' draw cladogram. See ggtree::ggtree().
 #' @param class_nb An integer indicating the desired number of groups.
 #' @param size The size of the labels.
+#' @importFrom ggtree ggtree geom_hilight geom_tippoint geom_tiplab MRCA
+#' @importFrom ggnewscale new_scale_fill
+#' @importFrom ggplot2 aes scale_color_viridis_d
+#' @importFrom ggsci scale_fill_jco
 #' @export
 #' @keywords internal
 setMethod("hc_tree", "STGrid",
@@ -1338,20 +1353,20 @@ setMethod("hc_tree", "STGrid",
                    dist_method = "pearson",
                    branch_length = "none",
                    class_nb = 1,
-                   class_name="All",
+                   class_name = "All",
                    size = 2.25) {
-
-            if(class_nb > 0){
-              if(length(class_name) != class_nb){
+            if (class_nb > 0) {
+              if (length(class_name) != class_nb) {
                 print_msg("Please set the right number of class names.",
                           msg_type = "STOP")
               }
-            }else{
+            } else{
               print_msg("The class_nb argument should be an integer > than 0...",
                         msg_type = "STOP")
             }
 
-            bin_mat <- bin_mat(object, del_bin = TRUE, all_genes=FALSE)
+            bin_mat <-
+              bin_mat(object, del_bin = TRUE)
 
             hc_clust <- hclust(as.dist((1 - cor(bin_mat,
                                                 method = dist_method)) / 2),
@@ -1361,26 +1376,31 @@ setMethod("hc_tree", "STGrid",
                                 layout = layout,
                                 branch.length = branch_length)
 
-              tree_classes <- cutree(hc_clust, k = class_nb)
-              groups <- split(names(tree_classes), tree_classes)
-              clades <- sapply(groups, function(n) tidytree::MRCA(p, n))
-              annotation <- data.frame(id = clades[1:class_nb],
-                                       Class=class_name)
+            tree_classes <- cutree(hc_clust, k = class_nb)
+            groups <- split(names(tree_classes), tree_classes)
+            clades <-
+              sapply(groups, function(n)
+                tidytree::MRCA(p, n))
+            annotation <- data.frame(id = clades[1:class_nb],
+                                     Class = class_name)
 
 
             #p$data$cell_type <- "ND"
             #pmath <- match(p$data$label, names(ginfo))
             #p$data$cell_type[!is.na(pmath)] <- names(ginfo)[pmath[!is.na(pmath)]]
 
-            p <- p + ggtree::geom_hilight(data=annotation,
-                             extend=0.2,
-                             mapping=aes(node = id, fill=Class), alpha=0.3) +
-                ggsci::scale_fill_jco() +
-                ggtree::geom_tiplab(
-                  ggplot2::aes(label = label),
-                  offset = 1,
-                  size = 2.25,
-                  color = 'black'
+            p <- p + ggtree::geom_hilight(
+              data = annotation,
+              extend = 0.2,
+              mapping = aes(node = id, fill = Class),
+              alpha = 0.3
+            ) +
+              ggsci::scale_fill_jco() +
+              ggtree::geom_tiplab(
+                ggplot2::aes(label = label),
+                offset = 1,
+                size = 2.25,
+                color = 'black'
               ) +
               ggnewscale::new_scale_fill() +
               ggplot2::scale_color_viridis_d()
@@ -1392,4 +1412,4 @@ setMethod("hc_tree", "STGrid",
             #show.legend = FALSE
             #) +
             return(p)
-})
+          })

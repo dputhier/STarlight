@@ -7,10 +7,9 @@
 \S4method{bin_mat}{STGrid}(
   object,
   as_factor = FALSE,
-  gene_list = character(),
+  feat_list = character(),
   melt_tab = FALSE,
-  del_bin = FALSE,
-  all_genes = FALSE
+  del_bin = FALSE
 )
 }
 \arguments{
@@ -18,13 +17,11 @@
 
 \item{as_factor}{Should bin_x and bin_y columns be returned as ordered factor ?}
 
-\item{gene_list}{Whether to subset to some genes.}
+\item{feat_list}{Whether to subset to some features.}
 
 \item{melt_tab}{Whether to melt.}
 
 \item{del_bin}{Whether to delete the bin_x, bin_y columns.}
-
-\item{all_genes}{Whether to delete the 'all_genes' columns.}
 }
 \description{
 The binned matrix stored in a STGrid object.

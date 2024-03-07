@@ -1,5 +1,5 @@
 Package: stcompr
-Title: Comparison of Merscope spatial transcriptomic datasets using segmentation-free approach.
+Title: Comparison of Merscope spatial transcriptomic datasets using segmentation-free approach
 Version: 0.0.1
 Depends: R (>= 4.0.0), methods
 biocViews: Transcriptomics, ReportWriting
@@ -10,7 +10,7 @@ Authors@R: c(
 Description: This package is intended to compare Merscope spatial transcriptomic datasets using segmentation-free approach.
 Collate: comparison.R st_grid_class.R st_compr_class.R utils.R visualization.R 
 Encoding: UTF-8
-Imports: reshape2, ggplot2, dplyr, stats, magrittr, testthat, data.table, ggstar, patchwork, biomaRt, ggh4x, WriteXLS, pracma, jinjar, cluster, DT
+Imports: reshape2, ggplot2, dplyr, magrittr, data.table, patchwork, ggpol, ggrepel, ggsci, spatstat.explore, spatstat.geom
 Suggests: knitr, rmarkdown, tidyr, testthat (>= 3.0.0)
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3

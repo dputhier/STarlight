@@ -28,9 +28,9 @@ Options are "p_values", "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", 
 
 \item{colors}{Color palette for the plot. Default is RColorBrewer::brewer.pal(7, "Spectral").}
 
-\item{text_y_lim}{Numeric value specifying the threshold for gene labels on the y-axis. Genes with -log10(p-value) less than this threshold will not be labeled. Default is 100.}
+\item{text_y_lim}{Numeric value specifying the threshold for feature labels on the y-axis. Features with -log10(p-value) less than this threshold won't be labeled. Default is 100.}
 
-\item{text_x_lim}{Numeric value specifying the threshold for gene labels on the x-axis. Genes with absolute x-values less than this threshold will not be labeled. Default is 2.}
+\item{text_x_lim}{Numeric value specifying the threshold for feature labels on the x-axis. Features with absolute x-values less than this threshold won't not be labeled. Default is 2.}
 
 \item{text_size}{Numeric value specifying the size of text labels in the plot. Default is 5.}
 }

@@ -11,11 +11,10 @@
 }
 \description{
 The show method of a STCompR object displays information about the object,
-including conditions, memory usage, and the number of genes.
+including conditions, memory usage, and the number of features
 }
 \examples{
 # Example usage:
 show(st_compr_result)
-
 }
 \keyword{internal}

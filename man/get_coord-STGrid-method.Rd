@@ -2,17 +2,17 @@
 % Please edit documentation in R/st_grid_class.R
 \name{get_coord,STGrid-method}
 \alias{get_coord,STGrid-method}
-\title{The x/y coordinates of genes from a STGrid object.}
+\title{The x/y coordinates of features from a STGrid object.}
 \usage{
-\S4method{get_coord}{STGrid}(object, gene_list = character(), as.factor = TRUE)
+\S4method{get_coord}{STGrid}(object, feat_list = character(), as.factor = TRUE)
 }
 \arguments{
 \item{object}{The STGrid object}
 
-\item{gene_list}{The list of genes}
+\item{feat_list}{The list of features.}
 
-\item{as.factor}{Whether the gene column should be returned as an ordered factor}
+\item{as.factor}{Whether the 'feature' column should be returned as an ordered factor}
 }
 \description{
-Return the x/y coordinates of genes from a STGrid object
+Return the x/y coordinates of features from a STGrid object
 }

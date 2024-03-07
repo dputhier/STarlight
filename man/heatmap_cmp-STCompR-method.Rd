@@ -10,8 +10,8 @@
   hclust_method = c("ward.D", "ward.D2", "single", "complete", "average", "mcquitty",
     "median", "centroid"),
   dist_method = c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski"),
-  del_gene = NULL,
-  only_genes = NULL,
+  del_feat = NULL,
+  only_feat = NULL,
   filter = 0.2,
   size = 6
 )
@@ -29,9 +29,9 @@
 \item{dist_method}{A character string specifying the distance method to be used ("euclidean",
 "maximum", "manhattan", "canberra", "binary","minkowski").}
 
-\item{del_gene}{A character vector specifying genes to be excluded from the heatmap.}
+\item{del_feat}{A character vector specifying feature to be excluded from the heatmap.}
 
-\item{only_genes}{A character vector specifying genes to be included in the heatmap.}
+\item{only_feat}{A character vector specifying features to be included in the heatmap.}
 
 \item{filter}{A numeric value specifying the threshold for filtering out low values in the heatmap.}
 

@@ -7,10 +7,9 @@
 bin_mat(
   object,
   as_factor = FALSE,
-  gene_list = character(),
+  feat_list = character(),
   melt_tab = FALSE,
-  del_bin = FALSE,
-  all_genes = FALSE
+  del_bin = FALSE
 )
 }
 \arguments{
@@ -18,7 +17,7 @@ bin_mat(
 
 \item{as_factor}{Should bin_x and bin_y columns be returned as ordered factor ?}
 
-\item{gene_list}{Whether to subset to some genes.}
+\item{feat_list}{Whether to subset to some features.}
 
 \item{melt_tab}{Whether to melt.}
 

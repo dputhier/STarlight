@@ -539,3 +539,74 @@ reload_pac <- function(){
   tryCatch(detach("package:stcompr", unload = TRUE))
  library(stcompr)
 }
+
+# -------------------------------------------------------------------------
+# load_example_dataset()   ------------------------------------------------
+# -------------------------------------------------------------------------
+#' @title Load/download a Seurat or ClusterSet example dataset.
+#' @description
+#' Load/download a Seurat or ClusterSet example dataset.
+#' @param dataset The name of the dataset.
+#' @param timeout Set the timout for download (options(timeout=timeout))
+#' @param force Reload the dataset even if already in globalEnv.
+#' @returns Load the dataset.
+#' @examples
+#' # An example Seurat/Visium dataset
+#' load_example_dataset("7870305/files/lymph_node_tiny_2")
+#' lymph_node_tiny_2
+#' # An example clusterSet dataset
+#' load_example_dataset("7870305/files/lymph_node_tiny_clusters_2")
+#' lymph_node_tiny_clusters_2
+#' @export
+load_an_example_dataset <- function(dataset=c("7871581/files/pbmc3k_medium",
+                                           "7871581/files/pbmc3k_medium_clusters",
+                                           "8028126/files/pbmc3k_medium_clusters_enr",
+                                           "8028226/files/pbmc3k_medium_clusters_enr_sub",
+                                           "7870305/files/lymph_node_tiny_2",
+                                           "7870305/files/lymph_node_tiny_clusters_2",
+                                           "7869307/files/lymph_node_tiny",
+                                           "7869307/files/lymph_node_tiny_clusters"),
+                                 timeout=NULL,
+                                 force=FALSE){
+
+  dataset <- match.arg(dataset)
+
+  if(!is.null(timeout))
+    options(timeout=timeout)
+
+  file_data <- gsub(".*\\/", "", dataset)
+  dir_path <- file.path(path.expand('~'), ".scigenex", "datasets")
+
+  if(!dir.exists(dir_path)){
+    print_msg(paste0("Creating a path for dataset installation: ",
+                     dir_path),
+              msg_type = "INFO")
+    dir.create(dir_path, showWarnings = FALSE, recursive = TRUE)
+
+  }
+
+  old_path <- getwd()
+  setwd(dir_path)
+
+  if(!file.exists(paste0(file_data, ".rda"))){
+    download.file(url=paste0("https://zenodo.org/record/",
+                             dataset, ".rda"),
+                  destfile = paste0(file_data, ".rda"))
+  }
+
+  dataset_short <- gsub(".*/", "", dataset)
+
+  if(!dataset_short %in% ls(envir = globalenv()) | force){
+    load(file.path(dir_path, paste0(file_data, ".rda")), envir = .GlobalEnv)
+    print_msg(paste0("Dataset ", dataset, " has been loaded."),
+              msg_type = "INFO")
+
+  }else{
+    print_msg(paste0("Dataset ", dataset, " was already loaded."),
+              msg_type = "INFO")
+  }
+
+  setwd(old_path)
+
+}
+

@@ -13,7 +13,7 @@
 #' @slot raw_counts A list storing raw count data for each condition.
 #' @slot scaling_factor A numeric vector representing the scaling factors used during normalization (to be divided).
 #' @slot stat_test A data frame containing statistical test results, including log2 ratios,
-#'                odds ratios, and p-values for each gene.
+#'                odds ratios, and p-values for each feature.
 #' @slot pseudo_count The value for the pseudo_count.
 #'
 #' @export
@@ -139,18 +139,18 @@ stcompr <- function(object_1,
     print_msg("Please provide STGrid objects.")
   }
 
-  gn_1 <- gene_names(object_1)
-  gn_2 <- gene_names(object_1)
+  gn_1 <- feat_names(object_1)
+  gn_2 <- feat_names(object_1)
 
   if(!all(gn_1 %in% gn_2) | !all(gn_2 %in% gn_1)){
-    print_msg("Objects do not contain the same genes.")
+    print_msg("Objects do not contain the same features")
   }
 
-  tb_1 <- data.frame(row.names = names(table(coord(object_1)$gene)),
-                     counts=as.numeric(table(coord(object_1)$gene)))
+  tb_1 <- data.frame(row.names = names(table(coord(object_1)$feature)),
+                     counts=as.numeric(table(coord(object_1)$feature)))
 
-  tb_2 <- data.frame(row.names = names(table(coord(object_2)$gene)),
-                     counts=as.numeric(table(coord(object_2)$gene)))
+  tb_2 <- data.frame(row.names = names(table(coord(object_2)$feature)),
+                     counts=as.numeric(table(coord(object_2)$feature)))
 
   raw_counts <- cbind(tb_1, tb_2)
   colnames(raw_counts) <- c(name_1, name_2)
@@ -199,8 +199,8 @@ stcompr <- function(object_1,
 
   print_msg("Preparing neighborhood analysis...")
 
-  bin_mat_1 <- bin_mat(object_1, all_genes = FALSE, del_bin = TRUE)
-  bin_mat_2 <- bin_mat(object_2, all_genes = FALSE, del_bin = TRUE)
+  bin_mat_1 <- bin_mat(object_1, del_bin = TRUE)
+  bin_mat_2 <- bin_mat(object_2, del_bin = TRUE)
 
   bin_mat_2 <- bin_mat_2[, colnames(bin_mat_1)]
 
@@ -264,8 +264,8 @@ stcompr <- function(object_1,
 #' "single", "complete", "average", "mcquitty", "median", "centroid").
 #' @param dist_method A character string specifying the distance method to be used ("euclidean",
 #' "maximum", "manhattan", "canberra", "binary","minkowski").
-#' @param del_gene A character vector specifying genes to be excluded from the heatmap.
-#' @param only_genes A character vector specifying genes to be included in the heatmap.
+#' @param del_feat A character vector specifying features to be excluded from the heatmap.
+#' @param only_feat A character vector specifying features to be included in the heatmap.
 #' @param filter A numeric value specifying the threshold for filtering out low values in the heatmap.
 #' @param size A numeric value specifying the size of text in the heatmap.
 #'
@@ -288,8 +288,8 @@ setGeneric("heatmap_cmp",
                                   "canberra",
                                   "binary",
                                   "minkowski"),
-                    del_gene=NULL,
-                    only_genes=NULL,
+                    del_feat=NULL,
+                    only_feat=NULL,
                     filter=0.2,
                     size=6)
              standardGeneric("heatmap_cmp")
@@ -311,8 +311,8 @@ setGeneric("heatmap_cmp",
 #' "single", "complete", "average", "mcquitty", "median", "centroid").
 #' @param dist_method A character string specifying the distance method to be used ("euclidean",
 #' "maximum", "manhattan", "canberra", "binary","minkowski").
-#' @param del_gene A character vector specifying genes to be excluded from the heatmap.
-#' @param only_genes A character vector specifying genes to be included in the heatmap.
+#' @param del_feat A character vector specifying feature to be excluded from the heatmap.
+#' @param only_feat A character vector specifying features to be included in the heatmap.
 #' @param filter A numeric value specifying the threshold for filtering out low values in the heatmap.
 #' @param size A numeric value specifying the size of text in the heatmap.
 #'
@@ -321,6 +321,8 @@ setGeneric("heatmap_cmp",
 #' @examples
 #' # Example usage:
 #' heatmap_cmp(object = my_STCompR_object, hclust_method = "ward.D", dist_method = "euclidean")
+#' @importFrom ggheatmap ggheatmap ggheatmap_theme
+#' @importFrom RColorBrewer brewer.pal
 #' @export
 setMethod(
   "heatmap_cmp", signature("STCompR"),
@@ -335,8 +337,8 @@ setMethod(
                          "canberra",
                          "binary",
                          "minkowski"),
-           del_gene=NULL,
-           only_genes=NULL,
+           del_feat=NULL,
+           only_feat=NULL,
            filter=0.2,
            size=6) {
 
@@ -361,28 +363,28 @@ setMethod(
     legend_name <- "Dist"
   }
 
-  if(!is.null(del_gene)){
-    del_gene <- unique(del_gene)
-    if(all(del_gene %in% gene_names(object))){
-      obj <- obj[!rownames(obj) %in% del_gene,
-                 !colnames(obj) %in% del_gene]
+  if(!is.null(del_feat)){
+    del_feat <- unique(del_feat)
+    if(all(del_feat %in% feat_names(object))){
+      obj <- obj[!rownames(obj) %in% del_feat,
+                 !colnames(obj) %in% del_feat]
     }else{
-      print_msg("Some gene to delete were not found in the object", msg_type = "STOP")
+      print_msg("Some feature to delete were not found in the object", msg_type = "STOP")
     }
   }
 
-    if(!is.null(only_genes)){
-      only_genes <- unique(only_genes)
-      if(all(del_gene %in% gene_names(object))){
-        obj <- obj[rownames(obj) %in% only_genes,
-                   colnames(obj) %in% only_genes]
+    if(!is.null(only_feat)){
+      only_feat <- unique(only_feat)
+      if(all(del_feat %in% feat_names(object))){
+        obj <- obj[rownames(obj) %in% only_feat,
+                   colnames(obj) %in% only_feat]
       }else{
-        print_msg("Some gene to delete were not found in the object", msg_type = "STOP")
+        print_msg("Some feature to delete were not found in the object", msg_type = "STOP")
       }
     }
 
   if(ncol(obj) == 0){
-    print_msg("No more gene left", msg_type = "STOP")
+    print_msg("No more feature left", msg_type = "STOP")
   }
 
   if(!is.null(filter)){
@@ -421,16 +423,15 @@ setMethod(
 #' @title The show method of a STCompR object
 #' @description
 #' The show method of a STCompR object displays information about the object,
-#' including conditions, memory usage, and the number of genes.
+#' including conditions, memory usage, and the number of features
 #'
 #' @param object A STCompR object.
-#' @export show
 #' @keywords internal
 #'
 #' @examples
 #' # Example usage:
 #' show(st_compr_result)
-#'
+#' @export
 setMethod(
   "show", signature("STCompR"),
   function(object) {
@@ -439,7 +440,7 @@ setMethod(
       print_msg("Condition", i, object@conditions[i])
     }
     print_msg("Memory used: ", object.size(object))
-    print_msg("Number of genes: ", nrow(object@raw_counts))
+    print_msg("Number of features: ", nrow(object@raw_counts))
     print_msg(">>> Please, use show_methods(class = 'STCompR') to show availables methods <<<")
   }
 )
@@ -448,37 +449,52 @@ setMethod(
 # -------------------------------------------------------------------------
 ##    Some basic functions
 # -------------------------------------------------------------------------
-
-if(!isGeneric("nb_genes")){
-  setGeneric("nb_genes",
+#' @title The number of features stored in a STCompR object
+#' @description
+#' The number of features stored in a STCompR object
+#' @param object The STCompR object
+#' @keywords internal
+#' @export nb_feat
+#' @name nb_feat
+if(!isGeneric("nb_feat")){
+  setGeneric("nb_feat",
             function(object)
-              standardGeneric("nb_genes")
+              standardGeneric("nb_feat")
   )
 }
 
-#' @title The number of genes stored in a STCompR object
+#' @title The number of features stored in a STCompR object
 #' @description
-#' The number of genes stored in a STCompR object
+#' The number of features stored in a STCompR object
 #' @param object The STCompR object
-#' @export nb_genes
-setMethod("nb_genes", signature(object = "STCompR"),
+#' @keywords internal
+#' @export nb_feat
+#' @name nb_feat
+setMethod("nb_feat", signature(object = "STCompR"),
            function(object)
              nrow(object@stat_test)
 )
 
-
-if(!isGeneric("gene_names")){
-  setGeneric("gene_names",
+#' @title The features stored in a STCompR object
+#' @description
+#' The features stored in a STCompR object
+#' @param object The STCompR object
+#' @keywords internal
+#' @export
+#' @name feat_names
+if(!isGeneric("feat_names")){
+  setGeneric("feat_names",
              function(object)
-               standardGeneric("gene_names")
+               standardGeneric("feat_names")
   )
 }
-#' @title The genes stored in a STCompR object
+
+#' @title The features stored in a STCompR object
 #' @description
-#' The genes stored in a STCompR object
-#' @param x The STCompR object
+#' The features stored in a STCompR object
+#' @param object The STCompR object
 #' @export
-setMethod("gene_names", signature(object="STCompR"),
+setMethod("feat_names", signature(object="STCompR"),
            function(object)
              rownames(object@stat_test)
 )
@@ -490,12 +506,12 @@ setMethod("gene_names", signature(object="STCompR"),
 #' @title The normalized counts and test results of a STCompR object.
 #' @description
 #' The normalized counts and test results of a STCompR object.
-#' @param x The STCompR object
+#' @param object The STCompR object
 #' @param transform Whether the count are transformed (the pseudo count defined for the object is added).
 #' @param count_only Returns only counts.
 #' @param melted_count Returns a melted table with counts.
 #' @param normalized Counts are normalized.
-#' @param genes The genes that should be returned. Default to all (NULL).
+#' @param features The features that should be returned. Default to all (NULL).
 #' @keywords internal
 setGeneric("stat_test",
            function(object,
@@ -503,19 +519,19 @@ setGeneric("stat_test",
                     count_only=FALSE,
                     melted_count=FALSE,
                     normalized=TRUE,
-                    genes=NULL)
+                    features=NULL)
              standardGeneric("stat_test")
 )
 
 #' @title The normalized counts and test results of a STCompR object.
 #' @description
 #' The normalized counts and test results of a STCompR object.
-#' @param x The STCompR object
+#' @param object The STCompR object
 #' @param transform Whether the count are transformed (the pseudo count defined for the object is added).
 #' @param count_only Returns only counts.
 #' @param melted_count Returns a melted table with counts.
 #' @param normalized Counts are normalized.
-#' @param genes The genes that should be returned. Default to all (NULL).
+#' @param features The features that should be returned. Default to all (NULL).
 #' @export stat_test
 setMethod("stat_test", "STCompR",
            function(object,
@@ -523,18 +539,18 @@ setMethod("stat_test", "STCompR",
                     count_only=FALSE,
                     melted_count=FALSE,
                     normalized=TRUE,
-                    genes=NULL){
+                    features=NULL){
 
              transform <- match.arg(transform)
 
              counts <- object@raw_counts
 
-             if(!is.null(genes)){
-               if(!all(genes %in% gene_names(object))){
-                 print_msg("Some genes where not found.", msg_type = "STOP")
+             if(!is.null(features)){
+               if(!all(features %in% feat_names(object))){
+                 print_msg("Some features where not found.", msg_type = "STOP")
                }
              }else{
-               genes <- gene_names(object)
+               features <- feat_names(object)
              }
 
              if(normalized)
@@ -552,7 +568,7 @@ setMethod("stat_test", "STCompR",
                d <- counts
                if(melted_count){
                  d <- reshape2::melt(as.matrix(d), id.vars=integer())
-                 colnames(d) <- c("Genes", "Conditions", "Counts")
+                 colnames(d) <- c("Features", "Conditions", "Counts")
                }
              }else{
                d <- cbind(counts,
@@ -560,9 +576,9 @@ setMethod("stat_test", "STCompR",
              }
 
              if(melted_count){
-               return(d[d$Genes %in% genes, ])
+               return(d[d$Features %in% features, ])
              }else{
-               return(d[genes,])
+               return(d[features,])
              }
 
 }

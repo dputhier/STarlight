@@ -2,13 +2,15 @@
 % Please edit documentation in R/st_grid_class.R
 \name{rm_controls,STGrid-method}
 \alias{rm_controls,STGrid-method}
-\title{Remove control (Blank-*) "genes" from a STGrid object.}
+\title{Remove control (Blank-*) features from a STGrid object.}
 \usage{
 \S4method{rm_controls}{STGrid}(object, regexp = NULL)
 }
 \arguments{
 \item{object}{The STGrid object}
+
+\item{regexp}{A regexp to search for internal controls.}
 }
 \description{
-Remove control (Blank-*) "genes".
+Remove control (Blank-*) features.
 }
