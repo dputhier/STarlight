@@ -20,23 +20,26 @@ library(matrixStats)
 library(stcompr)
 library(patchwork)
 library(ggplot2)
-st_obj_1 <- load_spatial("~/Downloads/Xenium_V1_FF_Mouse_Brain_Coronal_Subset_CTX_HP_outs/", 
+library(dplyr)
+stcompr::set_verbosity(1)
+st_obj <- load_spatial("~/Downloads/Xenium_V1_FF_Mouse_Brain_Coronal_Subset_CTX_HP_outs/", 
                          method = "xenium",
                          verbose = FALSE)
 ```
+
 # The STGrid object
 
 The Spatial Transcriptomic Grid class (STGrid), serves as a fundamental structure for representing spatial transcriptomic analysis results. It provides a structured framework for managing and analyzing spatial transcriptomic data, facilitating comprehensive exploration and interpretation of spatial gene expression patterns within tissue sections.
 
 ```{r show, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
-st_obj_1
+st_obj
 ```
 ```{r summary}
-summary(st_obj_1)
+summary(st_obj)
 ```
 
 ```{r slots, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
-slotNames(st_obj_1)
+slotNames(st_obj)
 ```
 
 ```{r show_methods, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
@@ -49,59 +52,59 @@ The subsetting function, implemented as a method for the "[" operator in the STG
 
 ### Subsetting using bin_x / bin_y
 
-We can explore the binning information stored within our `st_obj_1` STGrid object using the `bin_x()` and `bin_y()` methods. Let's take a look at the first few entries of the bin_x and bin_y vectors:
+We can explore the binning information stored within our `st_obj` STGrid object using the `bin_x()` and `bin_y()` methods. Let's take a look at the first few entries of the bin_x and bin_y vectors:
 
 ```{r binx_1, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
-head(bin_x(st_obj_1))
+head(bin_x(st_obj))
 ```
 
 This command retrieves the first few entries of the bin_x vector, providing insights into the bins along the x-axis.
 
 ```{r binx_2, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
-head(bin_y(st_obj_1))
+head(bin_y(st_obj))
 ```
 
 Similarly, this command retrieves the first few entries of the `bin_y` vector, offering insights into the bins along the y-axis. Now, let's leverage the subsetting function to extract data corresponding to specific bins along the x-axis. Here, we retrieve data associated with bins ranging from the 50th to the 100th entry of the bin_x vector:
 
 ```{r binx_3, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
-st_obj_1[bin_x(st_obj_1)[50:100], ]
+st_obj[bin_x(st_obj)[50:100], ]
 ```
 
-This command retrieves data from the STGrid object `st_obj_1` corresponding to the specified range of bins along the x-axis, providing a subset of spatial transcriptomic data for further analysis.
+This command retrieves data from the STGrid object `st_obj` corresponding to the specified range of bins along the x-axis, providing a subset of spatial transcriptomic data for further analysis.
 
 ### Subsetting using genes
 
-We can retrieve spatial transcriptomic data associated with specific genes from our st_obj_1 STGrid object using the subsetting operator. Here we extract data corresponding to the "Rag1" and "Cd3e" genes:
+We can retrieve spatial transcriptomic data associated with specific genes from our st_obj STGrid object using the subsetting operator. Here we extract data corresponding to the "Rag1" and "Cd3e" genes:
 
 ```{r genes, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
-st_obj_1[c("Nrp2", "Rfx4"), ]
+st_obj[c("Nrp2", "Rfx4"), ]
 ```
 
 We may also remove all control probes from the STGrid object to focus our analysis on genes with meaningful expression levels.
 
 ```{r delete, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
-st_obj_1 <- rm_controls(st_obj_1)
+st_obj <- rm_controls(st_obj)
 ```
 
 ### Subsetting using numeric
 
-We can retrieve spatial transcriptomic data based on the position of genes within the `feat_names()` vector of our `st_obj_1` STGrid object. Let's extract data for the first 10 genes according to their position in the feat_names() vector:
+We can retrieve spatial transcriptomic data based on the position of genes within the `feat_names()` vector of our `st_obj` STGrid object. Let's extract data for the first 10 genes according to their position in the feat_names() vector:
 
 ```{r numerics_1, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
-st_obj_1[feat_names(st_obj_1)[1:10], ]
+st_obj[feat_names(st_obj)[1:10], ]
 ```
 
 Next, let's explore data for the 10th to 12th genes using numeric indices. To begin, let's determine the total number of genes in our STGrid object:
 
 ```{r numerics_2, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
-nb_feat(st_obj_1)
-st_obj_1[10:12, ]
+nb_feat(st_obj)
+st_obj[10:12, ]
 ```
 
 With this information, we can retrieve data for the 10th to 12th genes:
 
 ```{r index_10_12, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
-st_obj_1[10:12, ]
+st_obj[10:12, ]
 ```
 
 This command retrieves spatial transcriptomic data for genes positioned 10 through 12 in the `feat_names()` vector, facilitating targeted analysis of specific gene subsets.
@@ -113,18 +116,19 @@ This command retrieves spatial transcriptomic data for genes positioned 10 throu
 The `spatial_image()` function allows for the visualization of the density of spatial molecules across the tisse section. The following examples demonstrate the visualization of a single gene. The grid=TRUE argument allow to show bin numbering in x and y dimension. This eases the selection of particular regions.
 
 ```{r single_gene, warning=FALSE, results='hide', echo = FALSE, eval=TRUE}
-spatial_image(st_obj_1, feat="Ano1", grid = 20, 
+spatial_image(st_obj, feat="Ano1", grid = 20, 
               logb = 10, scale = TRUE, saturation = 0.9)
 ```
 
 One can **zoom** for instance in the region with high "Ano1" molecule density in the upper right corner of the previous image. Here we use `rebin()` to increase the resolution specifically on "Ano1".
 
 ```{r zoom}
-x_bins <-  bin_x(st_obj_1)[181:length(bin_x(st_obj_1))]
-y_bins <-  bin_y(st_obj_1)[101:length(bin_y(st_obj_1))]
-st_obj_2 <- st_obj_1[x_bins, y_bins]
-spatial_image(re_bin(st_obj_2["Ano1",], bin_size = 5, verbose = FALSE), 
-              feat="Ano1", logb = 10, scale = TRUE, saturation = 0.9)
+x_bins <-  bin_x(st_obj)[181:length(bin_x(st_obj))]
+y_bins <-  bin_y(st_obj)[101:length(bin_y(st_obj))]
+st_obj_r1 <- st_obj[x_bins, y_bins]
+spatial_image(re_bin(st_obj_r1[c("Ano1", "Chat"),], bin_size = 5, verbose = FALSE), 
+              feat=c("Ano1", "Chat"), logb = 10,
+              scale = TRUE, saturation = 0.9)
 ```
 
 ### The spatial_plot() function
@@ -132,7 +136,7 @@ spatial_image(re_bin(st_obj_2["Ano1",], bin_size = 5, verbose = FALSE),
 The `spatial_plot()`function is intented to create a scatter plot of molecule x/y coordinates. We may for example highlight other molecules with same pattern as "Ano1"
 
 ```{r spatial_plot}
-spatial_plot(st_obj_1[x_bins, y_bins], feat_list = c("Ano1", 
+spatial_plot(st_obj[x_bins, y_bins], feat_list = c("Ano1", 
                                                      "Chat",
                                                      "Ebf3"), 
              colors = ggsci::pal_aaas()(3),
@@ -145,25 +149,26 @@ The stcompr() function allows to compare two datasets or regions of the organ. H
 
 ## Creating an STCompR object
 
-First we prepare an stgrid object containing another region of the tissue. 
+First we prepare an stgrid object containing another region of the tissue. We will compare the two subregions (but two datasets/experiments could be also compared).
 
 ```{r stcompr}
-x_bins <-  bin_x(st_obj_1)[61:101]
-y_bins <-  bin_y(st_obj_1)[101:length(bin_y(st_obj_1))]
-st_obj_3 <- st_obj_1[x_bins, y_bins]
+x_bins <-  bin_x(st_obj)[61:101]
+y_bins <-  bin_y(st_obj)[101:length(bin_y(st_obj))]
+st_obj_r2 <- st_obj[x_bins, y_bins]
 ```
 
 Below is the density of molecules counts in this regions:
 
 ```{r all_genes}
-spatial_image(st_obj_2, feature=sum_of_cts) + Seurat::NoLegend() + 
-  spatial_image(st_obj_3, gene=sum_of_cts) 
+spatial_image(st_obj_r1, feature="sum_of_cts") + Seurat::NoLegend() + 
+  spatial_image(st_obj_r2, feature="sum_of_cts") 
 ```
 Now we can create an STCompR object using the stcompr() function. 
 
 ```{r stcompr_create}
-cmp <- stcompr(st_obj_2, st_obj_3, name_1="region_1", name_2="region_2")
+cmp <- stcompr(st_obj_r1, st_obj_r2, name_1="region_1", name_2="region_2")
 ```
+
 ## Count distributions
 
 Here are the distribution of the counts:
@@ -178,7 +183,20 @@ As we can see below the two regions differ in the expression levels of several g
 ```{r cmp_volcano}
 cmp_volcano(cmp, text_y_lim = 200, text_size = 2, text_x_lim = 4)
 ```
+We may check these molecules using the `cmp_images()` function:
 
+```{r}
+markers <- cmp@stat_test %>% 
+              dplyr::filter(abs(log2_ratio) > 5) %>% 
+              dplyr::filter(-log10(p_values) > 200) %>% rownames()
+
+cmp_images(st_obj_r1,
+           st_obj_r2,
+           feat_list = markers)
+```
+
+
+           
 # Molecule clustering
 
 ## K Ripley's function
@@ -186,34 +204,27 @@ cmp_volcano(cmp, text_y_lim = 200, text_size = 2, text_x_lim = 4)
 First we may use the K-Ripley's function to assess the level of clustering of each molecules in the two regions. Not that this step may be quite long as the density of molecule increases.
 
 
-
 ```{r compute_k_ripley}
-st_obj_2 <- compute_k_ripley(st_obj_2, rmax = 200, verbose = FALSE)
-st_obj_3 <- compute_k_ripley(st_obj_3, rmax = 200, verbose = FALSE)
+st_obj_r1 <- compute_k_ripley(st_obj_r1, rmax = 200, verbose = FALSE)
+st_obj_r2 <- compute_k_ripley(st_obj_r2, rmax = 200, verbose = FALSE)
 ```
 
 Plotting the results highlight the clustering levels of molecules in both regions:
 
 ```{r plot_rip_k}
-plot_rip_k(st_obj_2, size=2) +
-plot_rip_k(st_obj_3, size=2)
+plot_rip_k(st_obj_r1, size=2) +
+plot_rip_k(st_obj_r2, size=2)
 ```
 
-We may have a look at these molecules using the `spatial_image()` function:
+We can confirm that these molecules are highly packed in the first and/or the second region.
 
 ```{r ripley_image}
-spatial_image(st_obj_2, feat = c("Strip2", "Pdyn", "Igf2", "Slc13a4", "Chat", "Rasl10a"))
+cmp_images(st_obj_r1,
+           feat_list = head(order_feat_by_ripley(st_obj_r1)))
 ```
-
-```{r ripley_image_2}
-spatial_image(st_obj_3, feat = c("Trp73", "Nts", "Spag16", "Slc13a4", "Penk", "Igf2"))
-```
-
 ```{r}
-cmp_images(st_obj_2, feat_list=head(order_feat_by_ripley(st_obj_2)))
-cmp_images(st_obj_2, feat_list=tail(order_feat_by_ripley(st_obj_2)))
-cmp_images(st_obj_3, feat_list=head(order_feat_by_ripley(st_obj_3)))
-cmp_images(st_obj_3, feat_list=tail(order_feat_by_ripley(st_obj_3)))
+cmp_images(st_obj_r2,
+           feat_list = head(order_feat_by_ripley(st_obj_r2)))
 ```
 
 ## Neighborhood dynamics
@@ -225,13 +236,13 @@ To this aim, the number of RNA molecules for a gene per bin is converted into a 
 heatmap_cmp(cmp, filter = 1, size = 4)
 ```
 
-As an example we can clearly see below the increased co-localization of Kctd8 and Nwd2:
+As an example we can clearly see that  Kctd8, Necab2, Nrp2 or Chat molecules relocate toward Nwd2. indeed, a negative value indictae 
 
 ```{r heatmap_cmp_img}
-cmp_images(st_obj_2, st_obj_3, feat_list = c("Nwd2",
+cmp_images(st_obj_r1, st_obj_r2, feat_list = c("Nwd2",
                                              "Kctd8",
                                              "Necab2",
-                                             "Chat", "Ano1"), names=c("Region_1", "Region_2"))
+                                             "Nrp2", "Chat"), names=c("Region_1", "Region_2"))
 ```
 
 ### Calling UMAP

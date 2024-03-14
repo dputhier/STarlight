@@ -15,6 +15,7 @@ vignette: >
 library(stcompr)
 library(ggplot2)
 library(patchwork)
+library(umap)
 stcompr::set_verbosity(3)
 ```
 
@@ -513,7 +514,7 @@ cmp_images(sto_1, sto_2, feat_list=c("Ighd", "Cd19", "Spib", "Tbx21"), names = c
 heatmap_cmp(cmp, what ="changes", hclust_method = "single", filter=0.3)
 ```
 ```{r}
-heatmap_cmp(cmp, what ="changes", only_feat = c("Ccl19", "Ccl25", "Rag1", "Dntt", "Pcna", "Mki67", "Ccl22", "Spib", "Cd19", "Ighd", "Cd3e", "Cd3d", "Ccr6", "Dcn", "Ccr9", "Cxcl12", "Aire", "fezf2", "Krt14", "H2-Aa", "S1pr1"), hclust_method = "single")
+heatmap_cmp(cmp, what ="changes", only_feat = c("Ms4a1", "Ccl19", "Ccl25", "Rag1", "Dntt", "Pcna", "Mki67", "Ccl22", "Spib", "Cd19", "Ighd", "Cd3e", "Cd3d", "Ccr6", "Dcn", "Ccr9", "Cxcl12", "Aire", "fezf2", "Krt14", "H2-Aa", "S1pr1"), hclust_method = "single")
 ```
 
 ## UMAP
@@ -522,7 +523,7 @@ heatmap_cmp(cmp, what ="changes", only_feat = c("Ccl19", "Ccl25", "Rag1", "Dntt"
 um <- umap(as.matrix(cmp@neighborhood_changes))
 um <- um$layout
 colnames(um) <- c("x", "y")
-ggplot(as.data.frame(um), aes(x=x, y=y, label=rownames(um))) + geom_point() + ggrepel::geom_text_repel(size=1)
+ggplot(as.data.frame(um), aes(x=x, y=y, label=rownames(um))) + geom_point() + ggrepel::geom_text_repel(size=2)
 ```
 
 ## Session info
