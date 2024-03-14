@@ -450,8 +450,13 @@ setMethod("rm_controls", "STGrid",
             if (is.null(regexp)) {
               regexp <- object@control
             }
+            pos <- -grep(regexp, feat_names(object))
+            if(length(pos) > 0){
+              return(object[pos, ])
+            }else{
+              return(object)
+            }
 
-            return(object[-grep(regexp, feat_names(object)), ])
           })
 
 #' @title  Get Ripley's K function slot from a STGrid object.
@@ -1020,6 +1025,7 @@ sum_of_counts <- function(spatial_matrix = NULL,
     sum_of_cts <- rowSums(tmp[, -pos_ctrl, drop=FALSE])
 
   } else{
+
     sum_of_cts <- rowSums(tmp)
   }
 
@@ -1413,3 +1419,24 @@ setMethod("hc_tree", "STGrid",
             #) +
             return(p)
           })
+
+
+# -------------------------------------------------------------------------
+#      Get the min / max value from ripley's k function
+# -------------------------------------------------------------------------
+
+setGeneric("order_feat_by_ripley",
+           function(object)
+             standardGeneric("order_feat_by_ripley"))
+
+setMethod("order_feat_by_ripley", "STGrid",
+          function(object){
+            ripk <- ripley_k_function(object)
+            voi <- ripk %>%
+              dplyr::group_by(feature) %>%
+              dplyr::filter(border == max(border)) %>%
+              dplyr::filter(r == max(r)) %>%
+              dplyr::arrange(desc(border))
+            return(voi$feature)
+})
+

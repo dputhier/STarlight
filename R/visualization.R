@@ -25,7 +25,7 @@ setGeneric("spatial_image",
                     features=NULL,
                     saturation=1,
                     scale=TRUE,
-                    colors=c('#000003', '#410967', '#932567', '#DC5039', '#FBA40A', '#FCFEA4'),
+                    colors=viridis::inferno(10),
                     coord_fixed=TRUE,
                     overlay_feature=NULL,
                     colors_overlay=c("#DEEBF7", "#9ECAE1", "#3182BD"),
@@ -56,6 +56,7 @@ setGeneric("spatial_image",
 #' @param pseudo_count a value for the pseudo count used for log transformation (default to 1).
 #' @importFrom ggplot2 aes coord_fixed facet_wrap geom_tile scale_fill_gradientn theme xlab ylab element_blank element_rect element_text
 #' @importFrom reshape2 melt
+#' @importFrom viridis inferno
 #' @export
 setMethod("spatial_image",
           signature(object = "STGrid"),
@@ -63,7 +64,7 @@ setMethod("spatial_image",
                    features=NULL,
                    saturation=1,
                    scale=TRUE,
-                   colors=c('#000003', '#410967', '#932567', '#DC5039', '#FBA40A', '#FCFEA4'),
+                   colors=viridis::inferno(10),
                    coord_fixed=TRUE,
                    overlay_feature=NULL,
                    colors_overlay=c("#DEEBF7", "#9ECAE1", "#3182BD"),
@@ -72,6 +73,8 @@ setMethod("spatial_image",
                    size=0.5,
                    logb=10,
                    pseudo_count=1) {
+
+            print_msg("Checking arguments", msg_type = "DEBUG")
 
             if(is.null(object))
                 print_msg("Please provide an STGrid object.",
@@ -84,31 +87,58 @@ setMethod("spatial_image",
 
             }
 
+            print_msg("Checking features", msg_type = "DEBUG")
+
             if(is.null(features))
               print_msg("Please provide a feature name (see feature arguments).", msg_type = "STOP")
 
 
-            if(!all(features %in% feat_names(object))){
+            if(!all(features %in% c(feat_names(object), "sum_of_cts"))){
               print_msg("The feature was not found in the object.", msg_type = "STOP")
             }
 
+            if("sum_of_cts" %in% features){
+
+              print_msg("Using sum_of_cts", msg_type = "DEBUG")
+
+              spatial_matrix <- object@bin_mat
+
+              if(length(features) == 1){
+                sub_feat <- feat_names(object)
+                spatial_matrix <- spatial_matrix[, c("bin_x", "bin_y", sub_feat)]
+                tmp <- spatial_matrix[, sub_feat]
+                tmp$sum_of_cts <- rowSums(tmp)
+                spatial_matrix$sum_of_cts <- tmp$sum_of_cts
+                spatial_matrix <- spatial_matrix[, c("bin_x", "bin_y","sum_of_cts")]
+                tmp <- tmp[, "sum_of_cts", drop=FALSE]
+              }else{
+                sub_feat <- setdiff(features, "sum_of_cts")
+                spatial_matrix <- spatial_matrix[, c("bin_x", "bin_y", sub_feat)]
+                tmp <- spatial_matrix[, sub_feat, drop=FALSE]
+                tmp$sum_of_cts <- rowSums(tmp)
+                spatial_matrix$sum_of_cts <- tmp$sum_of_cts
+              }
+
+            }else{
               spatial_matrix <- object@bin_mat[, c("bin_x", "bin_y", features)]
-              tmp <- spatial_matrix[, features]
-
-            if(saturation < 1){
-              q_sat <- quantile(tmp[tmp != 0], saturation)
-              tmp[tmp > q_sat] <- q_sat
+              tmp <- spatial_matrix[, features, drop=FALSE]
             }
 
-            if(!is.null(logb)){
-              tmp <- log(tmp + pseudo_count, base = logb)
-            }
+            for(i in 1:ncol(tmp)){
+              if(saturation < 1){
+                q_sat <- quantile(tmp[,i][tmp[,i] != 0], saturation)
+                tmp[tmp[,i] > q_sat, i] <- q_sat
+              }
 
-            if(scale){
-              if(max(tmp) > 1){
-                tmp <- (tmp - min(tmp)) / (max(tmp) - min(tmp))
+              if(!is.null(logb)){
+                tmp[,i] <- log(tmp[,i] + pseudo_count, base = logb)
+              }
+
+              if(scale){
+                tmp[,i] <- (tmp[,i] - min(tmp[,i])) / (max(tmp[,i]) - min(tmp[,i]))
               }
             }
+
 
             spatial_matrix[, features] <- tmp
 
@@ -121,6 +151,9 @@ setMethod("spatial_image",
                                            ordered=TRUE)
 
             spatial_matrix_melted <- reshape2::melt(spatial_matrix, id.vars=c("bin_x", "bin_y"))
+            spatial_matrix_melted$variable <- factor(spatial_matrix_melted$variable,
+                                                     levels = features,
+                                                     ordered=TRUE)
 
             p <- ggplot2::ggplot(data=spatial_matrix_melted,
                                  mapping = ggplot2::aes(x=bin_x, y=bin_y, fill= value)) +
@@ -306,6 +339,9 @@ setMethod(
     ylabel <- ifelse(transform %in% c("log2", "log10", "log"),
                      paste0(transform, "(Molecule counts)"),
                      "Molecule counts")
+    counts$Features <- factor(counts$Features,
+                              levels=features,
+                              ordered = TRUE)
 
     ggplot2::ggplot(data=counts,
                     mapping = ggplot2::aes(x=Features, y=Counts,
@@ -602,6 +638,7 @@ setMethod(
     voi <- ripk %>%
       dplyr::group_by(feature) %>%
       dplyr::filter(border == max(border)) %>%
+      dplyr::filter(r == max(r)) %>%
       dplyr::arrange(desc(border)) %>%
           head(n=max_feat_label)
 
@@ -635,40 +672,51 @@ setMethod(
 })
 
 
-
 # -------------------------------------------------------------------------
 ##    Compare Images
 # -------------------------------------------------------------------------
-
+#' Compare Images
+#'
+#' This function compares and visualizes multiple spatial images obtained from STGrid objects. It displays a color-coded representation of the feature (e.g., molecules) density observed in spatial transcriptomics experiments for different conditions.
+#'
+#' @param ... STGrid objects to be compared.
+#' @param feat_list A list of features for which the spatial images will be created.
+#' @param names Names for the conditions or experiments. Defaults to NULL.
+#' @param colors The colors to use for gradient fill in the spatial images. Defaults to viridis::inferno(10).
+#' @param saturation The ceiling level for the feature expression values. Defaults to 1 (no ceiling).
+#' @param coord_fixed Logical value indicating whether to keep the aspect ratio fixed. Defaults to TRUE.
+#' @param scale Logical value indicating whether to scale the feature expression values. Defaults to TRUE.
+#' @param logb The basis for the log transformation. Default to 10. If NULL, no log transformation.
+#' @param pseudo_count A value for the pseudo count used for log transformation (default to 1).
+#' @param condition_vs_feat Logical indicating whether to facet by condition vs. feature (TRUE) or by feature vs. condition (FALSE). Defaults to TRUE.
+#'
+#' @importFrom ggplot2 aes geom_tile scale_fill_gradientn theme xlab ylab element_blank element_rect element_text
+#' @importFrom ggh4x facet_grid2
+#' @export
 cmp_images <- function(...,
                        feat_list=NULL,
                        names=NULL,
-                       saturation=0.75,
-                       colors=c('#000000',
-                                '#410967',
-                                '#932567',
-                                '#DC5039',
-                                '#FBA40A',
-                                '#FCFEA4'),
-                       condition_vs_gene=TRUE){
+                       colors=viridis::inferno(10),
+                       saturation=1,
+                       coord_fixed=TRUE,
+                       scale=TRUE,
+                       logb=10,
+                       pseudo_count=1,
+                       condition_vs_feat=TRUE){
 
   if(is.null(feat_list))
-    print_msg("Please provide a gene list.", msg_type = "STOP")
+    print_msg("Please provide a feature list.", msg_type = "STOP")
+
+  print_msg("Checking STGrid objects", msg_type = "DEBUG")
 
   st_list <- list(...)
   if(any(unlist(lapply(lapply(st_list, class), "[", 1)) != "STGrid")){
     print_msg("Object should be of type STGrid", msg_type = "STOP")
   }
+
   if(length(st_list) < 1){
     print_msg("Need at least one experiment !!", msg_type = "STOP")
   }
-
-  for(i in 1:length(st_list)){
-    if(any(!feat_list %in% feat_names(st_list[[i]], del_control = FALSE))){
-      print_msg("Some features were not found in sample ", i, ".", msg_type = "STOP")
-    }
-  }
-
 
   if(is.null(names)){
     names <- paste("Condition_", 1:length(st_list), sep="")
@@ -678,43 +726,69 @@ cmp_images <- function(...,
                 msg_type = "STOP")
   }
 
+  print_msg("Subsetting STGrid objects.", msg_type = "DEBUG")
+
+  for(i in 1:length(st_list)){
+    st_list[[i]] <- st_list[[i]][feat_list, ]
+  }
+
   st_list <- lapply(st_list,
                     bin_mat,
                     melt_tab = TRUE,
                     as_factor = TRUE,
                     feat_list =feat_list)
 
+  print_msg("Preparing data.", msg_type = "DEBUG")
 
-    for(i in 1:length(st_list)){
+  for(i in 1:length(st_list)){
       for(j in feat_list){
 
-        if(max(st_list[[i]]$value[st_list[[i]]$gene == j]) > 1){
-          tmp <- st_list[[i]]$value[st_list[[i]]$gene == j]
-          if(saturation != 0){
+          tmp <- st_list[[i]]$value[st_list[[i]]$feature == j]
+
+          if(saturation < 1){
+            print_msg("Ceiling.", msg_type = "DEBUG")
             q_sat <- quantile(tmp[tmp != 0], saturation)
             tmp[tmp > q_sat] <- q_sat
           }
-          st_list[[i]]$value[st_list[[i]]$gene == j] <- (tmp - min(tmp)) / (max(tmp) - min(tmp))
-        }
+
+          if(!is.null(logb)){
+            print_msg("Transforming in log base ", logb, ".", msg_type = "DEBUG")
+            tmp <- log(tmp + pseudo_count, base = logb)
+          }
+
+          if(scale){
+            print_msg("Rescaling", msg_type = "DEBUG")
+            tmp <- (tmp - min(tmp)) / (max(tmp) - min(tmp))
+          }
+
+          st_list[[i]]$value[st_list[[i]]$feature == j] <- (tmp - min(tmp)) / (max(tmp) - min(tmp))
+
       }
 
-    }
+  }
 
 
   for(i in 1:length(st_list)){
     st_list[[i]]$condition <- names[i]
   }
 
+  print_msg("Merging data.", msg_type = "DEBUG")
+
   st_list <- do.call(rbind, st_list)
 
+  print_msg("Converting columns 'condition' to ordered factor.", msg_type = "DEBUG")
 
   st_list$condition <- factor(st_list$condition,
                               levels=names,
                               ordered = TRUE)
 
-  st_list$gene <- factor(st_list$gene,
+  print_msg("Converting columns 'gene' to ordered factor.", msg_type = "DEBUG")
+
+  st_list$gene <- factor(st_list$feature,
                               levels=feat_list,
                               ordered = TRUE)
+
+  print_msg("Building diagram", msg_type = "DEBUG")
 
   p <- ggplot2::ggplot(data=st_list,
                        mapping = ggplot2::aes(x=bin_x,
@@ -729,10 +803,10 @@ cmp_images <- function(...,
                    strip.text = ggplot2::element_text(color="white")) +
     ggplot2::scale_fill_gradientn(colours=colors)
 
-    if(condition_vs_gene){
-      p <- p + ggh4x::facet_grid2(condition~gene, scale="free", independent = "x")
+    if(condition_vs_feat){
+      p <- p + ggh4x::facet_grid2(condition~feature, scale="free", independent = "x")
     }else{
-      p <- p + ggh4x::facet_grid2(gene~condition, scale="free", independent = "y")
+      p <- p + ggh4x::facet_grid2(feature~condition, scale="free", independent = "y")
     }
 
   p

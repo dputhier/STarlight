@@ -35,7 +35,8 @@ setClass("STCompR",
            scaling_factor = "numeric",
            stat_test = "data.frame",
            pseudo_count= "numeric",
-           neighborhood="list"
+           neighborhood="list",
+           neighborhood_changes="data.frame"
          ),
          prototype = list(
            conditions = "",
@@ -44,7 +45,8 @@ setClass("STCompR",
            scaling_factor = numeric(),
            stat_test = data.frame(),
            pseudo_count= 1,
-           neighborhood=list()
+           neighborhood=list(),
+           neighborhood_changes=data.frame()
          )
 )
 
@@ -225,14 +227,20 @@ stcompr <- function(object_1,
                      STATS = colSums(bin_mat_2, na.rm = TRUE), FUN = "/")
 
 
-  spatial_matrix_ratio_1 <- as.matrix(dist(t(bin_mat_1), method = "manhattan"))
-  spatial_matrix_ratio_2 <- as.matrix(dist(t(bin_mat_2), method = "manhattan"))
+  spatial_matrix_ratio_1 <- as.matrix(dist(t(bin_mat_1),
+                                           method = "manhattan"))
+
+  spatial_matrix_ratio_2 <- as.matrix(dist(t(bin_mat_2),
+                                           method = "manhattan"))
 
   print_msg("Preparing an STCompR object... ")
 
   STCompR <- new("STCompR")
   STCompR@neighborhood <- list(spatial_matrix_ratio_1,
                                spatial_matrix_ratio_2)
+
+  STCompR@neighborhood_changes <- as.data.frame(spatial_matrix_ratio_2 - spatial_matrix_ratio_1)
+
   names(STCompR@neighborhood) <- c(name_1, name_2)
   STCompR@conditions <- c(name_1, name_2)
   STCompR@method <- c(object_1@method, object_2@method)
@@ -345,22 +353,31 @@ setMethod(
     what <- match.arg(what)
     dist_method <- match.arg(dist_method)
     hclust_method <- match.arg(hclust_method)
+
   if(what=="changes"){
+
     print_msg("Parameter 'what' is set to 'changes'...")
-    obj <- object@neighborhood[[2]] - object@neighborhood[[1]]
+    obj <- as.matrix(object@neighborhood_changes)
     legend_name <- "Changes"
+
   } else if(what == "changes_2"){
+
     print_msg("Parameter 'what' is set to 'changes_2'...")
     obj <- object@neighborhood[[1]] - object@neighborhood[[2]]
     legend_name <- "Changes"
+
   }else if(what=="c1"){
+
     print_msg("Parameter 'what' is set to 'c1'...")
     obj <- object@neighborhood[[1]]
     legend_name <- "Dist"
+
   }else {
+
     print_msg("Parameter 'what' is set to 'c2'...")
     obj <- object@neighborhood[[2]]
     legend_name <- "Dist"
+
   }
 
   if(!is.null(del_feat)){
@@ -533,7 +550,8 @@ setGeneric("stat_test",
 #' @param normalized Counts are normalized.
 #' @param features The features that should be returned. Default to all (NULL).
 #' @export stat_test
-setMethod("stat_test", "STCompR",
+setMethod("stat_test",
+          "STCompR",
            function(object,
                     transform=c("None", "log2", "log10", "log"),
                     count_only=FALSE,

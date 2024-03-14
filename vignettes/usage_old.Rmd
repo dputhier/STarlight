@@ -9,23 +9,7 @@ vignette: >
   %\usepackage[UTF-8]{inputenc}
 ---
 
-# Guided tutorial
-
-
-
-## The dataset
-
-Some blabla
-
-
-# Visualization
-
-
-# Verbosity level
-
-How it works...
-
-stcompr
+# Jessica's dataset (Merscope)
 
 ```{r verbosity_level, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
 library(stcompr)
@@ -34,29 +18,26 @@ library(patchwork)
 stcompr::set_verbosity(3)
 ```
 
-# Loading dataset
+## Loading the dataset
 
 Some text about the `load_spatial()` function.
 
 ```{r load_dataset, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
-st_obj_1 <- load_spatial("~/vizgen_input_region_1.txt")
+sto_1 <- load_spatial("~/vizgen_input_region_1.txt")
+sto_2 <- load_spatial("~/vizgen_input_region_0.txt")
 ```
 
-# The STGrid object
-
-## slot names, methods...
-
-Objective, what it is...
+## The STGrid object
 
 ```{r show, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
-st_obj_1
+sto_1
 ```
 ```{r}
-summary(st_obj_1)
+summary(sto_1)
 ```
 
 ```{r slots, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
-slotNames(st_obj_1)
+slotNames(sto_1)
 ```
 
 ```{r show_methods, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
@@ -68,27 +49,28 @@ stcompr::show_methods()
 ### Using bin_x / bin_y
 
 ```{r binx_1, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
-head(bin_x(st_obj_1))
+head(bin_x(sto_1))
 ```
 
 ```{r binx_2, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
-head(bin_y(st_obj_1))
+head(bin_y(sto_1))
 ```
 
 ```{r binx_3, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
-st_obj_1[bin_x(st_obj_1)[50:100], ]
+sto_1[bin_x(sto_1)[50:100], ]
 ```
 
 ### Using features
 
 ```{r genes, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
-st_obj_1[c("Rag1", "Cd3e"), ]
+sto_1[c("Rag1", "Cd3e"), ]
 ```
 
 Delete all Blanks...
 
 ```{r delete, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
-st_obj_1 <- rm_controls(st_obj_1)
+sto_1 <- rm_controls(sto_1)
+sto_2 <- rm_controls(sto_2)
 ```
 
 ### Using numeric
@@ -96,14 +78,14 @@ st_obj_1 <- rm_controls(st_obj_1)
 According to the position in feat_names()
 
 ```{r blanks, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
-st_obj_1[feat_names(st_obj_1)[1:10], ]
+sto_1[feat_names(sto_1)[1:10], ]
 ```
 
 The n-th feature...
 
 ```{r index, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
-nb_feat(st_obj_1)
-st_obj_1[10:12, ]
+nb_feat(sto_1)
+sto_1[10:12, ]
 ```
 
 # Image Visualization
@@ -113,37 +95,35 @@ Something about the `spatial_image()` function.
 * Single feature
 
 ```{r single_feature, warning=FALSE, results='hide', echo = FALSE, eval=TRUE}
-spatial_image(st_obj_1, feature="Rag1")
+spatial_image(sto_1, feature="Rag1")
 ```
+At higher res...
 
 ```{r}
-spatial_image(re_bin(st_obj_1["Rag1"], bin_size = 10), feature="Rag1")
+spatial_image(re_bin(sto_1["Rag1"], bin_size = 10), feature="Rag1")
 ```
 
 * sum of counts...
 
 ```{r sumcts, warning=FALSE, results='hide', echo = FALSE, eval=TRUE}
-spatial_image(st_obj_1, feature="sum_of_cts", scale=FALSE)
+spatial_image(sto_1, feature="sum_of_cts", scale=FALSE)
 ```
 
 ## Zooming...
 
 ```{r}
-st_obj_1_b5 <- re_bin(st_obj_1[c("Rag1", "Ccl19", "Cd19", "Dntt"),], bin_size=5)
-
+sto_1_b5 <- re_bin(sto_1, bin_size=5)
 ```
+Into endothelial cells
 
 ```{r}
-st_obj_1_b5 <- re_bin(st_obj_1, bin_size=5)
 
-spatial_image(st_obj_1_b5, 
+spatial_image(sto_1_b5, 
              feature="sum_of_cts", 
-             overlay_feat = "Cd19", 
-             grid=TRUE,
              grid_by = 50)
 
-sub <- st_obj_1_b5[bin_x(st_obj_1_b5)[350:550],
-                          bin_y(st_obj_1_b5)[625:875]]
+sub <- sto_1_b5[bin_x(sto_1_b5)[350:550],
+                          bin_y(sto_1_b5)[625:875]]
 
 # Could also add Lifr, Ltbr
 p1 <-  spatial_image(sub, 
@@ -301,16 +281,15 @@ p6 <-  spatial_image(sub,
 ```
 
 ```{r}
-st_obj_2_b5 <- re_bin(st_obj_2, bin_size=5)
+sto_2_b5 <- re_bin(sto_2, bin_size=5)
 
-spatial_image(st_obj_2_b5, 
+spatial_image(sto_2_b5, 
              feature="sum_of_cts", 
              overlay_feat = "Cd19", 
-             grid=TRUE,
              grid_by = 50)
 
-sub <- st_obj_2_b5[bin_x(st_obj_2_b5)[101:501],
-                          bin_y(st_obj_2_b5)[101:851]]
+sub <- sto_2_b5[bin_x(sto_2_b5)[101:501],
+                        bin_y(sto_2_b5)[101:851]]
 
 # Could also add Lifr, Ltbr
 p1 <-  spatial_image(sub, 
@@ -385,7 +364,6 @@ p10 <-  spatial_image(sub,
   theme(legend.position = "none")
 
 (p1 | p2 | p3 | p4 | p9) / (p5 | p6 | p7 | p8 | p10)
-
 
 p1 <-  spatial_image(sub, 
              feature="sum_of_cts", 
@@ -467,27 +445,12 @@ p6 <-  spatial_image(sub,
 
 ```
 
-```{r loadlib1, warning=FALSE, results='hide', echo = FALSE, eval=TRUE}
 
-spatial_image(st_obj_1_b10[bin_x(st_obj_1_b10)[100:400], 
-                           bin_y(st_obj_1_b10)[100:400]], 
-              feature="Cd3e")
-```
+## Comparing counts
 
-# Comparing counts
-
-## Creating an STCompR object
 
 ```{r}
-st_obj_2 <- load_spatial("~/vizgen_input_region_0.txt")
-st_obj_2 <- rm_controls(st_obj_2)
-```
-```{r}
-st_obj_2
-```
-
-```{r}
-cmp <- stcompr(rm_controls(st_obj_1), rm_controls(st_obj_2), 
+cmp <- stcompr(sto_1, sto_2, 
                name_1 = "young", name_2 = "old")
 ```
 
@@ -503,7 +466,10 @@ cmp_volcano(cmp)
 ### Barplot
 
 ```{r}
-cmp_bar_plot(cmp, transform = "log10", normalized = FALSE)
+cmp_bar_plot(cmp, transform = "None", normalized = TRUE, features = c("Cd19", 
+                                                                       "Mafb",
+                                                                       "Ccl22",
+                                                                       "Ccr7"))
 ```
 
 ### Boxplot
@@ -519,74 +485,44 @@ cmp_boxplot(cmp, transform = "log10", normalized = TRUE)
 ### Computing Ripley's K function
 
 ```{r}
-st_obj_1 <- compute_k_ripley(st_obj_1)
-st_obj_2 <- compute_k_ripley(st_obj_2)
+sto_1 <- compute_k_ripley(sto_1)
+sto_2 <- compute_k_ripley(sto_2)
 ```
 
 ```{r}
-head(ripley_k_function(st_obj_1))
+head(ripley_k_function(sto_1))
 ```
 
 ```{r}
-plot_rip_k(st_obj_1) +  plot_rip_k(st_obj_2) 
+plot_rip_k(sto_1) +  plot_rip_k(sto_2) 
 ```
 
 ### Comparing density across samples
 
 ```{r}
-spatial_image(st_obj_1, feature="Cd36")
+spatial_image(sto_1, feature="Cd36")
 ```
 ```{r}
-spatial_image(st_obj_1, feature="Ighd") + ggtitle("Young") + spatial_image(st_obj_2, feature="Ighd") + ggtitle("Old") 
-```
-```{r}
-spatial_image(st_obj_1, feature="Cd19") + ggtitle("Young") + spatial_image(st_obj_2, feature="Cd19") + ggtitle("Old") 
+cmp_images(sto_1, sto_2, feat_list=c("Ighd", "Cd19", "Spib", "Tbx21"), names = c("Young", "Aged"))
 ```
 
-# The strange case of Blanks...
-
-
-```{r}
-goi <- unique(grep("^Blank-[0-9]", 
-                   st_obj_1@coord$feature, val=TRUE))
-ggplot(st_obj_1@coord[st_obj_1@coord$feature %in% goi,],
-       mapping=aes(x=x, y=y, col=feature)) +
-  geom_point(size=0.5, shape=15) + theme_bw() +
-ggplot(st_obj_2@coord[st_obj_2@coord$feature %in% goi,],
-       mapping=aes(x=x, y=y, col=feature)) +
-  geom_point(size=0.5, shape=15) + theme_bw() 
-```
-
-```{r}
-ggplot(st_obj_1@coord[st_obj_1@coord$feature %in% goi,],
-       mapping=aes(x=x, y=y, col=feature)) +
-  geom_point(size=0.5, shape=15) + theme_bw()
-```
-
-
-```{r}
-spatial_image(st_obj_1, 
-              gene = "sum_of_cts", 
-              overlay_feat = "Cd19", 
-              colors = c("#000000", "#0f9b0f"), 
-              colors_overlay = c("#DEEBF7", 
-                                 "#9ECAE1", 
-                                 "#3182BD", 
-                                 "#0000FF"))
-```
-
-# Subset 
-
-```{r}
-spatial_image(st_obj_2[bin_x(st_obj_2)[50:70], bin_y(st_obj_2)[120:150]], feature="Ighd")
-bin_x(st_obj_2)[50:70]
-bin_y(st_obj_2)[120:150]
-```
 
 ## Neighborhing changes
 
 ```{r}
-heatmap_nbh_changes(cmp, what ="changes", only_feat = c("Ccl19", "Ccl25", "Rag1", "Dntt", "Pcna", "Mki67", "Ccl22", "Spib", "Cd19", "Ighd", "Cd3e", "Cd3d", "Ccr6", "Dcn", "Ccr9", "Cxcl12", "Aire", "fezf2", "Krt14", "H2-Aa", "S1pr1"), hclust_method = "single")
+heatmap_cmp(cmp, what ="changes", hclust_method = "single", filter=0.3)
+```
+```{r}
+heatmap_cmp(cmp, what ="changes", only_feat = c("Ccl19", "Ccl25", "Rag1", "Dntt", "Pcna", "Mki67", "Ccl22", "Spib", "Cd19", "Ighd", "Cd3e", "Cd3d", "Ccr6", "Dcn", "Ccr9", "Cxcl12", "Aire", "fezf2", "Krt14", "H2-Aa", "S1pr1"), hclust_method = "single")
+```
+
+## UMAP
+
+```{r}
+um <- umap(as.matrix(cmp@neighborhood_changes))
+um <- um$layout
+colnames(um) <- c("x", "y")
+ggplot(as.data.frame(um), aes(x=x, y=y, label=rownames(um))) + geom_point() + ggrepel::geom_text_repel(size=1)
 ```
 
 ## Session info

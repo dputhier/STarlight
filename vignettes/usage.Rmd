@@ -15,6 +15,8 @@ Spatial transcriptomics enables the spatially resolved measurement of gene expre
 
 
 ```{r loadlib}
+remotes::install_version("matrixStats", version="1.1.0")
+library(matrixStats)
 library(stcompr)
 library(patchwork)
 library(ggplot2)
@@ -111,7 +113,8 @@ This command retrieves spatial transcriptomic data for genes positioned 10 throu
 The `spatial_image()` function allows for the visualization of the density of spatial molecules across the tisse section. The following examples demonstrate the visualization of a single gene. The grid=TRUE argument allow to show bin numbering in x and y dimension. This eases the selection of particular regions.
 
 ```{r single_gene, warning=FALSE, results='hide', echo = FALSE, eval=TRUE}
-spatial_image(st_obj_1, feat="Ano1", grid = 20)
+spatial_image(st_obj_1, feat="Ano1", grid = 20, 
+              logb = 10, scale = TRUE, saturation = 0.9)
 ```
 
 One can **zoom** for instance in the region with high "Ano1" molecule density in the upper right corner of the previous image. Here we use `rebin()` to increase the resolution specifically on "Ano1".
@@ -120,7 +123,8 @@ One can **zoom** for instance in the region with high "Ano1" molecule density in
 x_bins <-  bin_x(st_obj_1)[181:length(bin_x(st_obj_1))]
 y_bins <-  bin_y(st_obj_1)[101:length(bin_y(st_obj_1))]
 st_obj_2 <- st_obj_1[x_bins, y_bins]
-spatial_image(re_bin(st_obj_2["Ano1",], bin_size = 5, verbose = FALSE), feat="Ano1")
+spatial_image(re_bin(st_obj_2["Ano1",], bin_size = 5, verbose = FALSE), 
+              feat="Ano1", logb = 10, scale = TRUE, saturation = 0.9)
 ```
 
 ### The spatial_plot() function
@@ -205,6 +209,13 @@ spatial_image(st_obj_2, feat = c("Strip2", "Pdyn", "Igf2", "Slc13a4", "Chat", "R
 spatial_image(st_obj_3, feat = c("Trp73", "Nts", "Spag16", "Slc13a4", "Penk", "Igf2"))
 ```
 
+```{r}
+cmp_images(st_obj_2, feat_list=head(order_feat_by_ripley(st_obj_2)))
+cmp_images(st_obj_2, feat_list=tail(order_feat_by_ripley(st_obj_2)))
+cmp_images(st_obj_3, feat_list=head(order_feat_by_ripley(st_obj_3)))
+cmp_images(st_obj_3, feat_list=tail(order_feat_by_ripley(st_obj_3)))
+```
+
 ## Neighborhood dynamics
 
 The `stcompr()`function also asseses whether the molecule neighborhood tends to change. This method aims to determine whether RNA molecules from genes A and B tend to aggregate within the same cells of the grid, indicating potential functional relationships or regulatory interactions between the two genes. Furthermore, the approach allows for the comparison of colocalization patterns between different conditions or tissues, enabling the investigation of spatial dynamics in gene expression across diverse biological contexts. 
@@ -217,6 +228,109 @@ heatmap_cmp(cmp, filter = 1, size = 4)
 As an example we can clearly see below the increased co-localization of Kctd8 and Nwd2:
 
 ```{r heatmap_cmp_img}
-spatial_image(st_obj_3, feat = c("Kctd8", "Nwd2")) +  
-  spatial_image(st_obj_2, feat = c("Kctd8", "Nwd2"))
+cmp_images(st_obj_2, st_obj_3, feat_list = c("Nwd2",
+                                             "Kctd8",
+                                             "Necab2",
+                                             "Chat", "Ano1"), names=c("Region_1", "Region_2"))
 ```
+
+### Calling UMAP
+
+```{r}
+p <- umap(as.matrix(cmp@neighborhood_changes))
+u <- p$layout
+colnames(u) <- c("x", "y")
+ggplot(as.data.frame(u), aes(x=x, y=y, label=rownames(u))) + geom_point() + ggrepel::geom_text_repel()
+```
+
+
+
+## Using cell as input:
+
+```{r}
+library(Seurat)
+# https://nanostring.com/products/cosmx-spatial-molecular-imager/ffpe-dataset/nsclc-ffpe-dataset/
+
+data.dir <- "~/Downloads/Lung5/Lung5_Rep1/Lung5_Rep1-Flat_files_and_images/"
+data <- ReadNanostring(data.dir = data.dir, type = "centroids")
+cents <- CreateCentroids(data$centroids)
+coords <- CreateFOV(coords = list("centroids" = cents), type = "centroids")
+nano.obj <- CreateSeuratObject(counts = data$matrix, assay = "Nanostring")
+nano.obj[["fov"]]<-subset(coords, cell=Cells(obj))
+```
+
+```{r}
+azimuth.data <- readRDS("~/Downloads/Lung5/nanostring_data.Rds")
+nano.obj <- AddMetaData(nano.obj, metadata = azimuth.data$annotations)
+nano.obj[["proj.umap"]] <- azimuth.data$umap
+Idents(nano.obj) <- nano.obj$predicted.annotation.l1
+options(future.globals.maxSize = 8000 * 1024^2)
+nano.obj <- SCTransform(nano.obj, assay = "Nanostring", clip.range = c(-10, 10), verbose = FALSE)
+head(slot(object = nano.obj, name = "meta.data")[2:5])
+```
+```{r}
+DimPlot(nano.obj)
+ImageDimPlot(nano.obj, fov = "lung5.rep1", axes = TRUE, cols = "glasbey")
+```
+
+```{r}
+cell_coord <- data.frame(GetTissueCoordinates(nano.obj)[,1:2],
+                         setNames(nano.obj$predicted.annotation.l1, NULL))
+colnames(cell_coord) <- c("x", "y", "cell")
+cell_coord$x <- round(cell_coord$x, 2)
+cell_coord$y <- round(cell_coord$y, 2)
+write.table(cell_coord, file = "../Lung5_Rep1_nanostring.txt", sep="\t", quote = F, 
+            row.names = F)
+```
+
+```{r}
+cell_1 <- load_spatial("/Users/puthier/Documents/git/project_dev/stcompr/Lung5_Rep1_nanostring.txt", 
+                         method = "coordinates",
+                         verbose = FALSE, 
+                         control = NULL, 
+                       bin_size = 100)
+cell_1 <- compute_k_ripley(cell_1, rmax = 200, verbose = FALSE)
+plot_rip_k(cell_1, max_feat_label = 3)
+```
+
+```{r}
+spatial_image(cell_1, features = "Club")
+spatial_image(cell_1, features = "Plasmacytoid Dendritic")
+spatial_image(cell_1, features = "B")
+spatial_image(cell_1, features = "CD4 T")
+```
+
+```{r}
+foi_1 <- cell_1[bin_x(cell_1)[30:90], bin_y(cell_1)[30:90]]
+foi_2 <- cell_1[bin_x(cell_1)[60:120], bin_y(cell_1)[150:210]]
+```
+
+```{r}
+feat <- c(unique(foi_2@coord$feature), unique(foi_1@coord$feature))
+feat <- feat[duplicated(feat)]
+cmp <- stcompr(foi_1[feat, ], foi_2[feat, ], name_1 = "foi_1",  name_2 = "foi_2")
+cmp_volcano(cmp, text_y_lim = 15)
+heatmap_cmp(cmp, filter = 0)
+spatial_image(re_bin(foi_1, bin_size=10), feat=c("CD4 T", "B"))
+spatial_image(re_bin(foi_2, bin_size=10), feat=c("CD4 T", "B"))
+
+```
+```{r}
+feat <- c(unique(foi_2@coord$feature), unique(foi_1@coord$feature))
+feat <- feat[duplicated(feat)]
+feat <- setdiff(feat, c("B", "CD4 T"))
+cmp <- stcompr(foi_1[feat, ], 
+               foi_2[feat, ], 
+               name_1 = "foi_1",  
+               name_2 = "foi_2")
+cmp_volcano(cmp, text_y_lim = 15)
+heatmap_cmp(cmp, filter = 0)
+# Error
+#spatial_image(re_bin(foi_1, bin_size=20), feat=c("Myofibroblast", "Fibroblast", "CD8 T"))
+#spatial_image(re_bin(foi_2, bin_size=20), feat=c("Myofibroblast", "Fibroblast", "CD8 T"))
+
+spatial_image(foi_1, feat=c("Myofibroblast", "Fibroblast", "CD8 T"))
+spatial_image(foi_2, feat=c("Myofibroblast", "Fibroblast", "CD8 T"))
+```
+
+

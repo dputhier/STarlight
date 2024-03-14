@@ -9,7 +9,7 @@
   features = NULL,
   saturation = 1,
   scale = TRUE,
-  colors = c("#000003", "#410967", "#932567", "#DC5039", "#FBA40A", "#FCFEA4"),
+  colors = viridis::inferno(10),
   coord_fixed = TRUE,
   overlay_feature = NULL,
   colors_overlay = c("#DEEBF7", "#9ECAE1", "#3182BD"),
