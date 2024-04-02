@@ -26,3 +26,7 @@
 \description{
 The binned matrix stored in a STGrid object.
 }
+\examples{
+example_dataset()
+head(bin_mat(Xenium_Mouse_Brain_Coronal_7g))
+}

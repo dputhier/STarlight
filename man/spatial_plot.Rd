@@ -26,4 +26,11 @@ spatial_plot(
 \description{
 Plot x/y coordinates of molecules of a spatial transcriptomics experiment.
 }
+\examples{
+example_dataset()
+xen <- Xenium_Mouse_Brain_Coronal_7g
+spatial_plot(xen,
+             feat_list=c("Chat", "Nwd2", "Ano1"),
+             size=0.05)
+}
 \keyword{internal}

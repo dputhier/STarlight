@@ -16,4 +16,8 @@ get_coord(object, feat_list = character(), as.factor = TRUE)
 \description{
 Return the x/y coordinates of features from a STGrid object
 }
+\examples{
+example_dataset()
+head(get_coord(Xenium_Mouse_Brain_Coronal_7g))
+}
 \keyword{internal}

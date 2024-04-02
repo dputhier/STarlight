@@ -10,28 +10,26 @@
 #'
 #' @slot conditions A character vector specifying the conditions being compared.
 #' @slot method A character vector specifying the technology used for each condition.
-#' @slot raw_counts A list storing raw count data for each condition.
+#' @slot raw_counts A data.frame storing raw count data for each condition.
 #' @slot scaling_factor A numeric vector representing the scaling factors used during normalization (to be divided).
 #' @slot stat_test A data frame containing statistical test results, including log2 ratios,
 #'                odds ratios, and p-values for each feature.
 #' @slot pseudo_count The value for the pseudo_count.
+#' @slot neighborhood a list of feature-feature neighborhood for the two conditions to be compared.
+#' @slot neighborhood_changes A feature-feature matrix indicative of neighborhood changes.
 #'
 #' @export
 #'
 #' @examples
 #' # Example usage:
-#' st_grid_1 <- create_STGrid(...)
-#' st_grid_2 <- create_STGrid(...)
-#' st_compr_result <- stcompr(st_grid_1, st_grid_2, name_1 = "Condition1", name_2 = "Condition2")
-#' st_compr_object <- new("STCompR", conditions = c("Condition1", "Condition2"),
-#'                        method = c("Method1", "Method2"), raw_counts = list(...),
-#'                        scaling_factor = c(1.2, 0.8), stat_test = data.frame(...))
+#' example_dataset("10819270/files/cmp_xen")
+#' cmp_xen
 #'
 setClass("STCompR",
          slots = c(
            conditions = "character",
            method="character",
-           raw_counts = "list",
+           raw_counts = "data.frame",
            scaling_factor = "numeric",
            stat_test = "data.frame",
            pseudo_count= "numeric",
@@ -41,7 +39,7 @@ setClass("STCompR",
          prototype = list(
            conditions = "",
            method="",
-           raw_counts = list(),
+           raw_counts = data.frame(),
            scaling_factor = numeric(),
            stat_test = data.frame(),
            pseudo_count= 1,
@@ -73,7 +71,7 @@ setClass("STCompR",
 #' Each count is then divided by its corresponding geometric mean, and the median
 #' of these ratios across all samples is computed to obtain the size factor for each sample.
 #'
-#' @keywords internal
+#' @export
 estimSf <- function(cts) {
 
   geomMean <- function(x) prod(x)^(1/length(x))
@@ -88,7 +86,7 @@ estimSf <- function(cts) {
   cts <- sweep(cts, 1, gm.mean, FUN="/")
 
   # Compute the median over the columns
-  med <- apply(cts, 2, median, na.rm=TRUE)
+  med <- apply(cts, 2, stats::median, na.rm=TRUE)
 
   # Force sf to have geometric mean of 1
   med <- med/exp(mean(log(med)))
@@ -119,9 +117,16 @@ estimSf <- function(cts) {
 #'
 #' @examples
 #' # Example usage:
-#' st_grid_1 <- load_spatial(...)
-#' st_grid_2 <- load_spatial(...)
-#' st_compr_result <- stcompr(st_grid_1, st_grid_2, name_1 = "Condition1", name_2 = "Condition2")
+#' example_dataset()
+#' xen <- Xenium_Mouse_Brain_Coronal_7g
+#' x_bins <-  bin_x(xen)[181:nbin_x(xen)]
+#' y_bins <-  bin_y(xen)[101:nbin_y(xen)]
+#' xen_r1 <- xen[x_bins, y_bins]
+#' x_bins <-  bin_x(xen)[61:101]
+#' y_bins <-  bin_y(xen)[101:nbin_y(xen)]
+#' xen_r2 <- xen[x_bins, y_bins]
+#' cmp <- stcompr(xen_r1, xen_r2)
+#'
 #' @export stcompr
 stcompr <- function(object_1,
                     object_2,
@@ -134,19 +139,27 @@ stcompr <- function(object_1,
   stat_test <- match.arg(stat_test)
   norm_method <- match.arg(norm_method)
 
-  check_var(name_1)
-  check_var(name_2)
+  check_this_var(name_1)
+  check_this_var(name_2)
+
+  print_this_msg("Checking objects.")
 
   if(class(object_1)[1] != "STGrid" | class(object_2)[1] != "STGrid"){
-    print_msg("Please provide STGrid objects.")
+    print_this_msg("Please provide STGrid objects.")
   }
 
   gn_1 <- feat_names(object_1)
-  gn_2 <- feat_names(object_1)
+  gn_2 <- feat_names(object_2)
 
-  if(!all(gn_1 %in% gn_2) | !all(gn_2 %in% gn_1)){
-    print_msg("Objects do not contain the same features")
+  print_this_msg("Checking feature names.")
+
+  inter_gn <- intersect(gn_1, gn_2)
+
+  if(length(inter_gn) == 0){
+    print_this_msg("No shared features between objects")
   }
+
+  print_this_msg("Retrieving counts.")
 
   tb_1 <- data.frame(row.names = names(table(coord(object_1)$feature)),
                      counts=as.numeric(table(coord(object_1)$feature)))
@@ -154,24 +167,27 @@ stcompr <- function(object_1,
   tb_2 <- data.frame(row.names = names(table(coord(object_2)$feature)),
                      counts=as.numeric(table(coord(object_2)$feature)))
 
-  raw_counts <- cbind(tb_1, tb_2)
+  print_this_msg("Merging counts.")
+
+  raw_counts <- cbind(tb_1[inter_gn, ], tb_2[inter_gn, ])
+  rownames(raw_counts) <- inter_gn
   colnames(raw_counts) <- c(name_1, name_2)
 
-  print_msg("Normalizing...")
+  print_this_msg("Normalizing...")
   scaling_factor <- estimSf(raw_counts)
 
   norm_counts <- sweep(raw_counts, MARGIN = 2, STATS =  scaling_factor, FUN="/")
 
   norm_counts <- norm_counts + pseudo_count
 
-  print_msg("Computing log2 ratio...")
+  print_this_msg("Computing log2 ratio...")
   ratio <- norm_counts[, name_2]/norm_counts[, name_1]
   log2_ratio <- log2(ratio)
 
   p_values <- c()
   odd_ratio <- c()
 
-  print_msg("Computing Fisher tests...")
+  print_this_msg("Computing Fisher tests...")
 
   for(g in 1:nrow(norm_counts)){
 
@@ -180,8 +196,13 @@ stcompr <- function(object_1,
     c <- sum(norm_counts[-g,name_2])
     d <- sum(norm_counts[-g, name_1])
 
-    m <- matrix(c(round(a, 0), round(b, 0), round(c, 0) , round(d, 0)), byrow = TRUE, nc=2)
-    ft <- fisher.test(m)
+    m <- matrix(c(round(a, 0),
+                  round(b, 0),
+                  round(c, 0) ,
+                  round(d, 0)),
+                byrow = TRUE, ncol=2)
+
+    ft <- stats::fisher.test(m)
     p_values[g] <- ft$p.value
     odd_ratio[g] <- ft$estimate["odds ratio"]
   }
@@ -193,27 +214,18 @@ stcompr <- function(object_1,
 
   stats$p_values[stats$p_values < 1e-320] <- 1e-320
 
-  print_msg("Adjusting p-values...")
+  print_this_msg("Adjusting p-values...")
 
   for(corr in c("holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr")){
-    stats[, paste0("padj_", corr)] <- p.adjust(stats$p_values, method=corr)
+    stats[, paste0("padj_", corr)] <- stats::p.adjust(stats$p_values, method=corr)
   }
 
-  print_msg("Preparing neighborhood analysis...")
+  print_this_msg("Preparing neighborhood analysis...")
 
   bin_mat_1 <- bin_mat(object_1, del_bin = TRUE)
   bin_mat_2 <- bin_mat(object_2, del_bin = TRUE)
-
-  bin_mat_2 <- bin_mat_2[, colnames(bin_mat_1)]
-
-  spatial_matrix_ratio_1 <- matrix(NA,
-                                     nrow= ncol(bin_mat_1),
-                                     ncol= ncol(bin_mat_1))
-
-  colnames(spatial_matrix_ratio_1) <- colnames(bin_mat_1)
-  rownames(spatial_matrix_ratio_1) <- colnames(bin_mat_1)
-
-  spatial_matrix_ratio_2 <- spatial_matrix_ratio_1
+  bin_mat_1 <- bin_mat_1[, inter_gn]
+  bin_mat_2 <- bin_mat_2[, inter_gn]
 
   bin_mat_1 <- bin_mat_1[rowSums(bin_mat_1) > 0, ]
   bin_mat_2 <- bin_mat_2[rowSums(bin_mat_2) > 0, ]
@@ -227,15 +239,15 @@ stcompr <- function(object_1,
                      STATS = colSums(bin_mat_2, na.rm = TRUE), FUN = "/")
 
 
-  spatial_matrix_ratio_1 <- as.matrix(dist(t(bin_mat_1),
+  spatial_matrix_ratio_1 <- as.matrix(stats::dist(t(bin_mat_1),
                                            method = "manhattan"))
 
-  spatial_matrix_ratio_2 <- as.matrix(dist(t(bin_mat_2),
+  spatial_matrix_ratio_2 <- as.matrix(stats::dist(t(bin_mat_2),
                                            method = "manhattan"))
 
-  print_msg("Preparing an STCompR object... ")
+  print_this_msg("Preparing an STCompR object... ")
 
-  STCompR <- new("STCompR")
+  STCompR <- methods::new("STCompR")
   STCompR@neighborhood <- list(spatial_matrix_ratio_1,
                                spatial_matrix_ratio_2)
 
@@ -247,12 +259,13 @@ stcompr <- function(object_1,
   names(STCompR@method) <- STCompR@conditions
   STCompR@scaling_factor <- scaling_factor
   STCompR@stat_test <- stats
-  STCompR@raw_counts <- raw_counts
+  STCompR@raw_counts <- as.data.frame(raw_counts)
   STCompR@pseudo_count <- pseudo_count
 
   return(STCompR)
 
 }
+
 
 # -------------------------------------------------------------------------
 ##    Generate a heatmap comparison for an 'STCompR' object
@@ -281,7 +294,8 @@ stcompr <- function(object_1,
 #'
 #' @examples
 #' # Example usage:
-#' heatmap_cmp(object = my_STCompR_object, hclust_method = "ward.D", dist_method = "euclidean")
+#' example_dataset("10819270/files/cmp_xen")
+#' heatmap_cmp(object = cmp_xen, hclust_method = "ward.D", dist_method = "euclidean")
 #' @keywords internal
 #' @export
 setGeneric("heatmap_cmp",
@@ -328,9 +342,11 @@ setGeneric("heatmap_cmp",
 #'
 #' @examples
 #' # Example usage:
-#' heatmap_cmp(object = my_STCompR_object, hclust_method = "ward.D", dist_method = "euclidean")
+#' example_dataset("10819270/files/cmp_xen")
+#' heatmap_cmp(object = cmp_xen, hclust_method = "ward.D", dist_method = "euclidean")
 #' @importFrom ggheatmap ggheatmap ggheatmap_theme
 #' @importFrom RColorBrewer brewer.pal
+#' @import magrittr
 #' @export
 setMethod(
   "heatmap_cmp", signature("STCompR"),
@@ -356,25 +372,25 @@ setMethod(
 
   if(what=="changes"){
 
-    print_msg("Parameter 'what' is set to 'changes'...")
+    print_this_msg("Parameter 'what' is set to 'changes'...")
     obj <- as.matrix(object@neighborhood_changes)
     legend_name <- "Changes"
 
   } else if(what == "changes_2"){
 
-    print_msg("Parameter 'what' is set to 'changes_2'...")
+    print_this_msg("Parameter 'what' is set to 'changes_2'...")
     obj <- object@neighborhood[[1]] - object@neighborhood[[2]]
     legend_name <- "Changes"
 
   }else if(what=="c1"){
 
-    print_msg("Parameter 'what' is set to 'c1'...")
+    print_this_msg("Parameter 'what' is set to 'c1'...")
     obj <- object@neighborhood[[1]]
     legend_name <- "Dist"
 
   }else {
 
-    print_msg("Parameter 'what' is set to 'c2'...")
+    print_this_msg("Parameter 'what' is set to 'c2'...")
     obj <- object@neighborhood[[2]]
     legend_name <- "Dist"
 
@@ -386,7 +402,7 @@ setMethod(
       obj <- obj[!rownames(obj) %in% del_feat,
                  !colnames(obj) %in% del_feat]
     }else{
-      print_msg("Some feature to delete were not found in the object", msg_type = "STOP")
+      print_this_msg("Some feature to delete were not found in the object", msg_type = "STOP")
     }
   }
 
@@ -396,12 +412,12 @@ setMethod(
         obj <- obj[rownames(obj) %in% only_feat,
                    colnames(obj) %in% only_feat]
       }else{
-        print_msg("Some feature to delete were not found in the object", msg_type = "STOP")
+        print_this_msg("Some feature to delete were not found in the object", msg_type = "STOP")
       }
     }
 
-  if(ncol(obj) == 0){
-    print_msg("No more feature left", msg_type = "STOP")
+  if(length(feat_names(obj)) == 0){
+    print_this_msg("No more feature left", msg_type = "STOP")
   }
 
   if(!is.null(filter)){
@@ -409,7 +425,8 @@ setMethod(
     obj <- obj[rowSums(TF) > 0 , colSums(TF) > 0]
   }
 
-  print_msg("Calling ggheatmap...")
+  return(list(p=obj, dist_method=dist_method, hclust_method=hclust_method, legendName=legend_name))
+  print_this_msg("Calling ggheatmap...")
   p <- ggheatmap::ggheatmap(obj,
                  dist_method=dist_method,
                  hclust_method = hclust_method,
@@ -424,10 +441,11 @@ setMethod(
                  annotation_rows = NULL,
                  annotation_cols = NULL,
                  annotation_color = NULL
-  ) %>% ggheatmap::ggheatmap_theme(1,
-                        theme=list(theme(axis.text.x = element_text(angle = 90,
-                                                                   size = size, hjust=1),
-                                        axis.text.y = element_text(size=size))))
+  )
+  #%>% ggheatmap::ggheatmap_theme(1,
+  #                     theme=list(ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90,
+  #                                                                 size = size, hjust=1),
+  #                                      axis.text.y = ggplot2::element_text(size=size))))
   print(p)
 
 }
@@ -444,21 +462,20 @@ setMethod(
 #'
 #' @param object A STCompR object.
 #' @keywords internal
-#'
 #' @examples
-#' # Example usage:
-#' show(st_compr_result)
+#' example_dataset("10819270/files/cmp_xen")
+#' show(cmp_xen)
+#' @import methods
 #' @export
-setMethod(
-  "show", signature("STCompR"),
+setMethod("show", signature("STCompR"),
   function(object) {
-    print_msg("An object of class STCompR")
+    print_this_msg("An object of class STCompR")
     for(i in 1:length(object@conditions)){
-      print_msg("Condition", i, object@conditions[i])
+      print_this_msg("Condition", i, object@conditions[i])
     }
-    print_msg("Memory used: ", object.size(object))
-    print_msg("Number of features: ", nrow(object@raw_counts))
-    print_msg(">>> Please, use show_methods(class = 'STCompR') to show availables methods <<<")
+    print_this_msg("Memory used: ", utils::object.size(object))
+    print_this_msg("Number of features: ", nrow(object@raw_counts))
+    print_this_msg(">>> Please, use show_st_methods(class = 'STCompR') to show availables methods <<<")
   }
 )
 
@@ -466,27 +483,15 @@ setMethod(
 # -------------------------------------------------------------------------
 ##    Some basic functions
 # -------------------------------------------------------------------------
-#' @title The number of features stored in a STCompR object
-#' @description
-#' The number of features stored in a STCompR object
-#' @param object The STCompR object
-#' @keywords internal
-#' @export nb_feat
-#' @name nb_feat
-if(!isGeneric("nb_feat")){
-  setGeneric("nb_feat",
-            function(object)
-              standardGeneric("nb_feat")
-  )
-}
 
 #' @title The number of features stored in a STCompR object
 #' @description
 #' The number of features stored in a STCompR object
 #' @param object The STCompR object
-#' @keywords internal
-#' @export nb_feat
-#' @name nb_feat
+#' @examples
+#' example_dataset("10819270/files/cmp_xen")
+#' nb_feat(cmp_xen)
+#' @export
 setMethod("nb_feat", signature(object = "STCompR"),
            function(object)
              nrow(object@stat_test)
@@ -497,6 +502,9 @@ setMethod("nb_feat", signature(object = "STCompR"),
 #' The features stored in a STCompR object
 #' @param object The STCompR object
 #' @keywords internal
+#' @examples
+#' example_dataset("10819270/files/cmp_xen")
+#' feat_names(cmp_xen)
 #' @export
 #' @name feat_names
 if(!isGeneric("feat_names")){
@@ -510,6 +518,9 @@ if(!isGeneric("feat_names")){
 #' @description
 #' The features stored in a STCompR object
 #' @param object The STCompR object
+#' @examples
+#' example_dataset("10819270/files/cmp_xen")
+#' feat_names(cmp_xen)
 #' @export
 setMethod("feat_names", signature(object="STCompR"),
            function(object)
@@ -529,6 +540,9 @@ setMethod("feat_names", signature(object="STCompR"),
 #' @param melted_count Returns a melted table with counts.
 #' @param normalized Counts are normalized.
 #' @param features The features that should be returned. Default to all (NULL).
+#' @examples
+#' example_dataset("10819270/files/cmp_xen")
+#' stat_test(cmp_xen)
 #' @keywords internal
 setGeneric("stat_test",
            function(object,
@@ -549,6 +563,9 @@ setGeneric("stat_test",
 #' @param melted_count Returns a melted table with counts.
 #' @param normalized Counts are normalized.
 #' @param features The features that should be returned. Default to all (NULL).
+#' @examples
+#' example_dataset("10819270/files/cmp_xen")
+#' stat_test(cmp_xen)
 #' @export stat_test
 setMethod("stat_test",
           "STCompR",
@@ -565,7 +582,7 @@ setMethod("stat_test",
 
              if(!is.null(features)){
                if(!all(features %in% feat_names(object))){
-                 print_msg("Some features where not found.", msg_type = "STOP")
+                 print_this_msg("Some features where not found.", msg_type = "STOP")
                }
              }else{
                features <- feat_names(object)

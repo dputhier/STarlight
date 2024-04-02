@@ -39,7 +39,14 @@ Create a STCompR compare class to compare two STGrid objects.
 }
 \examples{
 # Example usage:
-st_grid_1 <- load_spatial(...)
-st_grid_2 <- load_spatial(...)
-st_compr_result <- stcompr(st_grid_1, st_grid_2, name_1 = "Condition1", name_2 = "Condition2")
+example_dataset()
+xen <- Xenium_Mouse_Brain_Coronal_7g
+x_bins <-  bin_x(xen)[181:nbin_x(xen)]
+y_bins <-  bin_y(xen)[101:nbin_y(xen)]
+xen_r1 <- xen[x_bins, y_bins]
+x_bins <-  bin_x(xen)[61:101]
+y_bins <-  bin_y(xen)[101:nbin_y(xen)]
+xen_r2 <- xen[x_bins, y_bins]
+cmp <- stcompr(xen_r1, xen_r2)
+
 }

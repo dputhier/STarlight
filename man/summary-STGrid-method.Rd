@@ -12,3 +12,7 @@
 \description{
 The summary method of a STGrid object
 }
+\examples{
+example_dataset()
+summary(Xenium_Mouse_Brain_Coronal_7g)
+}

@@ -33,8 +33,7 @@ An updated object of class "STGrid" with the Ripley's K function estimates store
 This method calculates Ripley's reduced second moment function, K(r), for each feature in a spatial grid.
 }
 \examples{
-# Example usage:
-# grid_object <- load_spatial(...)
-# grid_object <- compute_k_ripley(grid_object)
+example_dataset()
+Xenium_Mouse_Brain_Coronal_7g <- compute_k_ripley(Xenium_Mouse_Brain_Coronal_7g)
 
 }

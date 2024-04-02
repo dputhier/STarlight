@@ -7,7 +7,9 @@
 \S4method{row_names}{STGrid}(x)
 }
 \arguments{
-\item{x}{The STGrid object}
+\item{x}{The STGrid object
+example_dataset()
+row_names(Xenium_Mouse_Brain_Coronal_7g)}
 }
 \description{
 The row names of a STGrid object.

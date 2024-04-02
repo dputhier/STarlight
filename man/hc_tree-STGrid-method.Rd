@@ -6,8 +6,10 @@
 \usage{
 \S4method{hc_tree}{STGrid}(
   object,
-  method = "complete",
-  layout = "circular",
+  method = c("complete", "ward.D", "ward.D2", "single", "average", "mcquitty", "median",
+    "centroid"),
+  layout = c("circular", "rectangular", "slanted", "fan", "unrooted", "time-scale",
+    "two-dimensional"),
   dist_method = "pearson",
   branch_length = "none",
   class_nb = 1,
@@ -32,5 +34,10 @@
 }
 \description{
 Create a tree from an STGrid object
+}
+\examples{
+example_dataset()
+p <- hc_tree(Xenium_Mouse_Brain_Coronal_7g, class_nb = 7, class_name = letters[1:7])
+print(p)
 }
 \keyword{internal}

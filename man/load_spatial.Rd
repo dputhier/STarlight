@@ -33,3 +33,8 @@ An object of class STGrid.
 The load_spatial() function is the entry point of the stcompr package.
 It will load the molecule coordinates and create a 2D binned grid with default size 25µm.
 }
+\examples{
+  fp <- file.path(system.file("extdata", package = "stcompr"), "tyni_xenium.txt")
+  st <- load_spatial(fp, method = "coordinates")
+
+}

@@ -13,4 +13,9 @@ dim}
 \description{
 The dimension of a STGrid object.
 }
+\examples{
+example_dataset()
+dim(Xenium_Mouse_Brain_Coronal_7g)
+
+}
 \keyword{internal}

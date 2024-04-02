@@ -15,10 +15,26 @@
 #' @param colors_overlay The colors to use for gradient fill in the overlay feature. Defaults to a set of colors.
 #' @param grid_by Whether to overlay a grid with horizontal and vertical lines at particular interval.
 #' No overlay if NULL otherwise the size of the interval (e.g. 20).
+#' @param color_grid A color for the grid.
 #' @param size The size of the overlayed points.
 #' @param logb The basis for the log transformation. Default to 10. If NULL no log transformation.
 #' @param pseudo_count a value for the pseudo count used for log transformation (default to 1).
 #' @keywords internal
+#' @examples
+#' example_dataset()
+#' xen <- Xenium_Mouse_Brain_Coronal_7g
+#' spatial_image(xen,
+#'              features="Chat",
+#'              grid_by=50)
+#' bx <- bin_x(xen)[175:nbin_x(xen)]
+#' by <- bin_y(xen)[100:nbin_y(xen)]
+#' sub <- xen[bx, by]
+#' spatial_image(sub,
+#'              features=c("Chat", "Ano1"))
+#' spatial_image(sub,
+#'              features=c("Chat", "Ano1"),
+#'              overlay_feature="Nwd2",
+#'              size=0.05)
 #' @export
 setGeneric("spatial_image",
            function(object=NULL,
@@ -51,12 +67,28 @@ setGeneric("spatial_image",
 #' @param colors_overlay The colors to use for gradient fill in the overlay feature. Defaults to a set of colors.
 #' @param grid_by Whether to overlay a grid with horizontal and vertical lines at particular interval.
 #' No overlay if NULL otherwise the size of the interval (e.g. 20).
+#' @param color_grid A color for the grid.
 #' @param size The size of the overlayed points.
 #' @param logb The basis for the log transformation. Default to 10. If NULL no log transformation.
 #' @param pseudo_count a value for the pseudo count used for log transformation (default to 1).
-#' @importFrom ggplot2 aes coord_fixed facet_wrap geom_tile scale_fill_gradientn theme xlab ylab element_blank element_rect element_text
+#' @importFrom ggplot2 aes coord_fixed facet_wrap geom_point geom_tile scale_fill_gradientn theme xlab ylab element_blank element_rect element_text scale_x_discrete scale_y_discrete
 #' @importFrom reshape2 melt
 #' @importFrom viridis inferno
+#' @examples
+#' example_dataset()
+#' xen <- Xenium_Mouse_Brain_Coronal_7g
+#' spatial_image(xen,
+#'              features="Chat",
+#'              grid_by=50)
+#' bx <- bin_x(xen)[175:nbin_x(xen)]
+#' by <- bin_y(xen)[100:nbin_y(xen)]
+#' sub <- xen[bx, by]
+#' spatial_image(sub,
+#'              features=c("Chat", "Ano1"))
+#' spatial_image(sub,
+#'              features=c("Chat", "Ano1"),
+#'              overlay_feature="Nwd2",
+#'              size=0.05)
 #' @export
 setMethod("spatial_image",
           signature(object = "STGrid"),
@@ -74,32 +106,38 @@ setMethod("spatial_image",
                    logb=10,
                    pseudo_count=1) {
 
-            print_msg("Checking arguments", msg_type = "DEBUG")
+            check_this_var(grid_by, null_accepted =TRUE, type = "int")
+
+            if(saturation > 1 | saturation < 0)
+              print_this_msg("Saturation should be between 0 and 1.",
+                             msg_type = "STOP")
+
+            print_this_msg("Checking arguments", msg_type = "DEBUG")
 
             if(is.null(object))
-                print_msg("Please provide an STGrid object.",
+                print_this_msg("Please provide an STGrid object.",
                         msg_type = "STOP")
 
             if(!is.null(overlay_feature)){
               if(!overlay_feature %in% feat_names(object))
-                print_msg("The feature to overlay was not found in the object.",
+                print_this_msg("The feature to overlay was not found in the object.",
                           msg_type = "STOP")
 
             }
 
-            print_msg("Checking features", msg_type = "DEBUG")
+            print_this_msg("Checking features", msg_type = "DEBUG")
 
             if(is.null(features))
-              print_msg("Please provide a feature name (see feature arguments).", msg_type = "STOP")
+              print_this_msg("Please provide a feature name (see feature arguments).", msg_type = "STOP")
 
 
             if(!all(features %in% c(feat_names(object), "sum_of_cts"))){
-              print_msg("The feature was not found in the object.", msg_type = "STOP")
+              print_this_msg("The feature was not found in the object.", msg_type = "STOP")
             }
 
             if("sum_of_cts" %in% features){
 
-              print_msg("Using sum_of_cts", msg_type = "DEBUG")
+              print_this_msg("Using sum_of_cts", msg_type = "DEBUG")
 
               spatial_matrix <- object@bin_mat
 
@@ -126,7 +164,7 @@ setMethod("spatial_image",
 
             for(i in 1:ncol(tmp)){
               if(saturation < 1){
-                q_sat <- quantile(tmp[,i][tmp[,i] != 0], saturation)
+                q_sat <- stats::quantile(tmp[,i][tmp[,i] != 0], saturation)
                 tmp[tmp[,i] > q_sat, i] <- q_sat
               }
 
@@ -155,8 +193,11 @@ setMethod("spatial_image",
                                                      levels = features,
                                                      ordered=TRUE)
 
+            bin_x <- bin_y <- value <- .data <- NULL
             p <- ggplot2::ggplot(data=spatial_matrix_melted,
-                                 mapping = ggplot2::aes(x=bin_x, y=bin_y, fill= value)) +
+                                 mapping = ggplot2::aes(x=bin_x,
+                                                        y=bin_y,
+                                                        fill= value)) +
               ggplot2::geom_tile() +
               ggplot2::xlab("")  +
               ggplot2::ylab("") +
@@ -176,12 +217,12 @@ setMethod("spatial_image",
                               as_factor = TRUE)[ ,c("bin_x", "bin_y", overlay_feature)]
               over <- over[over[[overlay_feature]] != 0,]
 
-              p <- p + geom_point(data=over, mapping=aes(x=bin_x,
+              p <- p + ggplot2::geom_point(data=over, mapping=aes(x=bin_x,
                                                          y=bin_y,
                                                          color=log10(.data[[overlay_feature]])),
                                   size=size,
                                   inherit.aes = FALSE) +
-                scale_color_gradientn(colors=colors_overlay)
+                ggplot2::scale_color_gradientn(colors=colors_overlay)
             }
 
             if(!is.null(grid_by)){
@@ -192,18 +233,18 @@ setMethod("spatial_image",
               x_seq <- seq(from=1, to=length(lev_bin_x), by=grid_by)
               y_seq <- seq(from=1, to=length(lev_bin_y), by=grid_by)
 
-              label_x <- setNames(lev_bin_x, 1:length(lev_bin_x))
+              label_x <- stats::setNames(lev_bin_x, 1:length(lev_bin_x))
               names(label_x)[-x_seq] <- ""
-              label_y <- setNames(lev_bin_y, 1:length(lev_bin_y))
+              label_y <- stats::setNames(lev_bin_y, 1:length(lev_bin_y))
               names(label_y)[-y_seq] <- ""
 
               p <- p + geom_vline(data=data.frame(bin_x=levels(spatial_matrix$bin_x)[x_seq]),
                                   mapping=aes(xintercept=bin_x), color = color_grid) +
                        geom_hline(data=data.frame(bin_y=levels(spatial_matrix$bin_y)[y_seq]),
                                   mapping=aes(yintercept=bin_y), color = color_grid) +
-                  theme(axis.text = element_text(size=6, angle = 45)) +
-                  scale_x_discrete("bla", labels=names(label_x)) +
-                  scale_y_discrete("bla", labels=names(label_y))
+                  ggplot2::theme(axis.text = element_text(size=6, angle = 45)) +
+                  ggplot2::scale_x_discrete("x", labels=names(label_x)) +
+                  ggplot2::scale_y_discrete("y", labels=names(label_y))
             }
 
             return(p)
@@ -223,6 +264,12 @@ setMethod("spatial_image",
 #' @param size The size of the points
 #' @param coord_fixed Logical value indicating whether to keep the aspect ratio fixed. Defaults to TRUE.
 #' @export
+#' @examples
+#' example_dataset()
+#' xen <- Xenium_Mouse_Brain_Coronal_7g
+#' spatial_plot(xen,
+#'              feat_list=c("Chat", "Nwd2", "Ano1"),
+#'              size=0.05)
 #' @keywords internal
 setGeneric("spatial_plot",
            function(object=NULL,
@@ -242,6 +289,13 @@ setGeneric("spatial_plot",
 #' @param colors The colors to use for features in the spatial image.
 #' @param size The size of the points
 #' @param coord_fixed Logical value indicating whether to keep the aspect ratio fixed. Defaults to TRUE.
+#' @examples
+#' example_dataset()
+#' xen <- Xenium_Mouse_Brain_Coronal_7g
+#' spatial_plot(xen,
+#'              feat_list=c("Chat", "Nwd2", "Ano1"),
+#'              size=0.05)
+#' @importFrom ggplot2 aes geom_point scale_color_manual xlab ylab theme_minimal theme coord_fixed geom_point scale_color_manual aes
 #' @export
 setMethod("spatial_plot", "STGrid",
            function(object=NULL,
@@ -251,18 +305,23 @@ setMethod("spatial_plot", "STGrid",
                     coord_fixed=TRUE){
 
              if(is.null(object))
-               print_msg("Please provide an STGrid object.",
+               print_this_msg("Please provide an STGrid object.",
                          msg_type = "STOP")
+              if(!is.null(colors)){
+                if(length(colors) < length(feat_list))
+                  print_this_msg("More colors are needed...", msg_type = "STOP")
+              }
 
              if(is.null(feat_list))
-               print_msg("Please provide feature names (see feat_list arguments).",
+               print_this_msg("Please provide feature names (see feat_list arguments).",
                          msg_type = "STOP")
 
              if(!all(feat_list %in% feat_names(object)))
-               print_msg("One or several features were not found in the object.", msg_type = "STOP")
+               print_this_msg("One or several features were not found in the object.", msg_type = "STOP")
 
              coord <- get_coord(object, feat_list = feat_list, as.factor=TRUE)
 
+             x <- y <- feature <- NULL
              p <- ggplot2::ggplot(data=coord,
                                   mapping = ggplot2::aes(x=x,
                                                          y=y,
@@ -271,7 +330,7 @@ setMethod("spatial_plot", "STGrid",
                ggplot2::xlab("x")  +
                ggplot2::ylab("y") +
                ggplot2::theme_minimal() +
-               theme(axis.text = element_text(size=6))
+               ggplot2::theme(axis.text = element_text(size=6))
 
               if(!is.null(colors))
                 p <- p +ggplot2::scale_color_manual(values=colors)
@@ -285,7 +344,7 @@ setMethod("spatial_plot", "STGrid",
 )
 
 # -------------------------------------------------------------------------
-##    Molecule counts
+##     cmp_bar_plot()
 # -------------------------------------------------------------------------
 #' @title Create a barplot to show counts for selected features.
 #' @description
@@ -295,10 +354,22 @@ setMethod("spatial_plot", "STGrid",
 #' @param normalized  Whether counts should be normalized.
 #' @param transform Whether the count should be transformed (the pseudo count defined for the object is added).
 #' @param colors A set of colors.
+#' @examples
+#' example_dataset()
+#' xen <- Xenium_Mouse_Brain_Coronal_7g
+#' x_bins <-  bin_x(xen)[181:nbin_x(xen)]
+#' y_bins <-  bin_y(xen)[101:nbin_y(xen)]
+#' xen_r1 <- xen[x_bins, y_bins]
+#' x_bins <-  bin_x(xen)[61:101]
+#' y_bins <-  bin_y(xen)[101:nbin_y(xen)]
+#' xen_r2 <- xen[x_bins, y_bins]
+#' cmp <- stcompr(xen_r1, xen_r2)
+#' cmp_bar_plot(cmp,
+#'              features=c("Chat", "Nwd2", "Ano1"))
 #' @keywords internal
 setGeneric("cmp_bar_plot",
            function(object,
-                    features=head(feat_names(object)),
+                    features=utils::head(feat_names(object)),
                     normalized=FALSE,
                     transform=c("None", "log2", "log10", "log"),
                     colors=c("#3074BB", "#BE5B52"))
@@ -313,18 +384,30 @@ setGeneric("cmp_bar_plot",
 #' @param normalized  Whether counts should be normalized.
 #' @param transform Whether the count should be transformed (the pseudo count defined for the object is added).
 #' @param colors A set of colors.
+#' @examples
+#' example_dataset()
+#' xen <- Xenium_Mouse_Brain_Coronal_7g
+#' x_bins <-  bin_x(xen)[181:nbin_x(xen)]
+#' y_bins <-  bin_y(xen)[101:nbin_y(xen)]
+#' xen_r1 <- xen[x_bins, y_bins]
+#' x_bins <-  bin_x(xen)[61:101]
+#' y_bins <-  bin_y(xen)[101:nbin_y(xen)]
+#' xen_r2 <- xen[x_bins, y_bins]
+#' cmp <- stcompr(xen_r1, xen_r2)
+#' cmp_bar_plot(cmp,
+#'              features=c("Chat", "Nwd2", "Ano1"))
 #' @export
 setMethod(
   "cmp_bar_plot", signature("STCompR"),
     function(object,
-             features=head(feat_names(object)),
+             features=utils::head(feat_names(object)),
              normalized=FALSE,
              transform=c("None", "log2", "log10", "log"),
              colors=c("#3074BB", "#BE5B52")) {
 
 
     if(is.null(features)){
-      print_msg("Please provide some features...", msg_type = "STOP")
+      print_this_msg("Please provide some features...", msg_type = "STOP")
     }
 
     transform <- match.arg(transform)
@@ -342,6 +425,8 @@ setMethod(
     counts$Features <- factor(counts$Features,
                               levels=features,
                               ordered = TRUE)
+
+    Features <- Counts <- Conditions <- NULL
 
     ggplot2::ggplot(data=counts,
                     mapping = ggplot2::aes(x=Features, y=Counts,
@@ -376,11 +461,9 @@ setMethod(
 #'
 #' @return A ggplot object displaying the molecule counts distribution.
 #' @examples
-#' # Example usage:
-#' st_grid_1 <- create_STGrid(...)
-#' st_grid_2 <- create_STGrid(...)
-#' st_compr_result <- stcompr(st_grid_1, st_grid_2, name_1 = "Condition1", name_2 = "Condition2")
-#' cmp_boxplot(st_compr_result, normalized = TRUE, transform = "log2", colors = c("blue", "red"))
+#' example_dataset("10819270/files/cmp_xen")
+#' cmp_xen
+#' cmp_boxplot(cmp_xen, normalized = TRUE, transform = "log2", colors = c("blue", "red"))
 #'
 #' @keywords internal
 setGeneric("cmp_boxplot",
@@ -405,14 +488,10 @@ setGeneric("cmp_boxplot",
 #'
 #' @return A ggplot object displaying the molecule counts distribution.
 #' @export cmp_boxplot
-#'
 #' @examples
-#' # Example usage:
-#' st_grid_1 <- create_STGrid(...)
-#' st_grid_2 <- create_STGrid(...)
-#' st_compr_result <- stcompr(st_grid_1, st_grid_2, name_1 = "Condition1", name_2 = "Condition2")
-#' cmp_boxplot(st_compr_result, normalized = TRUE, transform = "log2", colors = c("blue", "red"))
-#'
+#' example_dataset("10819270/files/cmp_xen")
+#' cmp_xen
+#' cmp_boxplot(cmp_xen, normalized = TRUE, transform = "log2", colors = c("blue", "red"))
 #' @importFrom ggplot2 ggplot aes theme_bw ylab scale_fill_manual
 #' @importFrom ggsci pal_npg
 #' @importFrom ggpol geom_boxjitter
@@ -435,6 +514,8 @@ setMethod(
     ylabel <- ifelse(transform %in% c("log2", "log10", "log"),
                      paste0(transform, "(Molecule counts)"),
                      "Molecule counts")
+
+    Conditions <- Counts <- Conditions <- NULL
 
     ggplot2::ggplot(data=counts,
            mapping = ggplot2::aes(x=Conditions, y=Counts, fill=Conditions)) +
@@ -472,6 +553,11 @@ setMethod(
 #' @keywords internal
 #' @importFrom ggplot2 aes geom_vline geom_hline geom_point theme_bw xlab ylab expand_limits scale_fill_gradientn
 #' @importFrom  ggrepel geom_text_repel
+#' @examples
+#' example_dataset("10819270/files/cmp_xen")
+#' cmp_xen
+#' cmp_volcano(cmp_xen)
+#'
 #' @keywords internal
 setGeneric("cmp_volcano",
            function(object,
@@ -499,8 +585,13 @@ setGeneric("cmp_volcano",
 #' @param text_x_lim Numeric value specifying the threshold for feature labels on the x-axis. Genes with absolute x-values less than this threshold will not be labeled. Default is 2.
 #' @param text_size Numeric value specifying the size of text labels in the plot. Default is 5.
 #' @keywords internal
+#' @examples
+#' example_dataset("10819270/files/cmp_xen")
+#' cmp_xen
+#' cmp_volcano(cmp_xen)
 #' @importFrom ggplot2 aes geom_vline geom_hline geom_point theme_bw xlab ylab expand_limits scale_fill_gradientn
 #' @importFrom  ggrepel geom_text_repel
+#' @importFrom stringr str_to_title
 #' @export cmp_volcano
 setMethod(
   "cmp_volcano", signature("STCompR"),
@@ -508,7 +599,7 @@ setMethod(
              x_axis=c("log2_ratio", "log2_odds", "odd_ratio"),
            y_axis=c("p_values", "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr"),
            x_lim=c(-2.5, 2.5),
-           colors=RColorBrewer::brewer.pal(7, "Spectral"),
+           colors=rev(RColorBrewer::brewer.pal(7, "Spectral")),
            text_y_lim=100,
            text_x_lim=1,
            text_size=4) {
@@ -537,6 +628,8 @@ setMethod(
     volc_data$feature[-log10(volc_data$y) < text_y_lim] <- NA
     volc_data$feature[abs(volc_data$x) < text_x_lim] <- NA
 
+    x <- y <- mean_counts <- feature <- NULL
+
     ggplot2::ggplot(data=volc_data,
            mapping = ggplot2::aes(x=x, y=-log10(y),
                          fill=x,
@@ -547,7 +640,8 @@ setMethod(
                           color="black",
                           stroke=0.2) +
       ggplot2::theme_bw() +
-      ggrepel::geom_text_repel(data=na.omit(volc_data), mapping=ggplot2::aes(label=feature),
+      ggrepel::geom_text_repel(data=stats::na.omit(volc_data),
+                               mapping=ggplot2::aes(label=feature),
                                size=text_size,
                                color="black") +
       ggplot2::theme(axis.text.x = ggplot2::element_text(size=10,  vjust = 0.5),
@@ -601,6 +695,12 @@ setGeneric("plot_rip_k",
 #' are displayed.
 #' @param color The colors for the features to be displayed.
 #' @param size The size of the labels.
+#' @import magrittr
+#' @importFrom dplyr group_by filter arrange
+#' @examples
+#' example_dataset()
+#' plot_rip_k(compute_k_ripley(Xenium_Mouse_Brain_Coronal_7g[c("Ano1", "Chat", "Ebf3")]))
+#'
 #' @export plot_rip_k
 setMethod(
   "plot_rip_k", signature("STGrid"),
@@ -626,21 +726,21 @@ setMethod(
 
 
     if(nrow(ripley_k_function(object)) == 0){
-      print_msg("Please run ripley_k_function() first.", msg_type = "STOP")
+      print_this_msg("Please run ripley_k_function() first.", msg_type = "STOP")
     }
 
     correction <- match.arg(correction)
     ripk <- ripley_k_function(object)
 
     if(max_feat_label > nrow(ripk))
-      print_msg("Too much selected gehes...", msg_type = "STOP")
+      print_this_msg("Too much selected gehes...", msg_type = "STOP")
 
     voi <- ripk %>%
       dplyr::group_by(feature) %>%
       dplyr::filter(border == max(border)) %>%
       dplyr::filter(r == max(r)) %>%
-      dplyr::arrange(desc(border)) %>%
-          head(n=max_feat_label)
+      dplyr::arrange(dplyr::desc(border)) %>%
+          utils::head(n=max_feat_label)
 
     voi <- voi[!duplicated(voi$feature),]
 
@@ -648,8 +748,11 @@ setMethod(
 
     ripk_sub <- ripk[ripk$feature %in% goi, ]
 
+    r <- border <- feature <- NULL
     p <- ggplot2::ggplot(data= ripk) +
-      ggplot2::geom_line(mapping = ggplot2::aes(x=r, y=border, group=feature), color="black") +
+      ggplot2::geom_line(mapping = ggplot2::aes(x=r,
+                                                y=border,
+                                                group=feature), color="black") +
       ggplot2::theme_bw() +
       ggplot2::theme(legend.text = ggplot2::element_text(size=4),
                       legend.position = "none",
@@ -666,7 +769,7 @@ setMethod(
                                 size = size,
                                 force=20) +
       ggplot2::ylab(paste0("Ripley's K function (correction=", correction, ")")) +
-      scale_color_manual(values=color)
+      ggplot2::scale_color_manual(values=color)
 
     return(p)
 })
@@ -692,6 +795,16 @@ setMethod(
 #'
 #' @importFrom ggplot2 aes geom_tile scale_fill_gradientn theme xlab ylab element_blank element_rect element_text
 #' @importFrom ggh4x facet_grid2
+#' @examples
+#' example_dataset()
+#' xen <- Xenium_Mouse_Brain_Coronal_7g
+#' x_bins <-  bin_x(xen)[181:nbin_x(xen)]
+#' y_bins <-  bin_y(xen)[101:nbin_y(xen)]
+#' xen_1 <- xen[x_bins, y_bins]
+#' x_bins <-  bin_x(xen)[61:101]
+#' y_bins <-  bin_y(xen)[101:nbin_y(xen)]
+#' xen_2 <- xen[x_bins, y_bins]
+#' cmp_images(xen_1, xen_2, feat_list = c("Nwd2", "Kctd8", "Necab2", "Nrp2"))
 #' @export
 cmp_images <- function(...,
                        feat_list=NULL,
@@ -704,29 +817,33 @@ cmp_images <- function(...,
                        pseudo_count=1,
                        condition_vs_feat=TRUE){
 
-  if(is.null(feat_list))
-    print_msg("Please provide a feature list.", msg_type = "STOP")
+  if(saturation > 1 | saturation < 0)
+    print_this_msg("Saturation should be between 0 and 1.",
+                   msg_type = "STOP")
 
-  print_msg("Checking STGrid objects", msg_type = "DEBUG")
+  if(is.null(feat_list))
+    print_this_msg("Please provide a feature list.", msg_type = "STOP")
+
+  print_this_msg("Checking STGrid objects", msg_type = "DEBUG")
 
   st_list <- list(...)
   if(any(unlist(lapply(lapply(st_list, class), "[", 1)) != "STGrid")){
-    print_msg("Object should be of type STGrid", msg_type = "STOP")
+    print_this_msg("Object should be of type STGrid", msg_type = "STOP")
   }
 
   if(length(st_list) < 1){
-    print_msg("Need at least one experiment !!", msg_type = "STOP")
+    print_this_msg("Need at least one experiment !!", msg_type = "STOP")
   }
 
   if(is.null(names)){
     names <- paste("Condition_", 1:length(st_list), sep="")
   }else{
     if(length(names) != length(st_list))
-      print_msg("The number of names should be same as the number of objects.",
+      print_this_msg("The number of names should be same as the number of objects.",
                 msg_type = "STOP")
   }
 
-  print_msg("Subsetting STGrid objects.", msg_type = "DEBUG")
+  print_this_msg("Subsetting STGrid objects.", msg_type = "DEBUG")
 
   for(i in 1:length(st_list)){
     st_list[[i]] <- st_list[[i]][feat_list, ]
@@ -738,7 +855,7 @@ cmp_images <- function(...,
                     as_factor = TRUE,
                     feat_list =feat_list)
 
-  print_msg("Preparing data.", msg_type = "DEBUG")
+  print_this_msg("Preparing data.", msg_type = "DEBUG")
 
   for(i in 1:length(st_list)){
       for(j in feat_list){
@@ -746,49 +863,50 @@ cmp_images <- function(...,
           tmp <- st_list[[i]]$value[st_list[[i]]$feature == j]
 
           if(saturation < 1){
-            print_msg("Ceiling.", msg_type = "DEBUG")
-            q_sat <- quantile(tmp[tmp != 0], saturation)
+            print_this_msg("Ceiling.", msg_type = "DEBUG")
+            q_sat <- stats::quantile(tmp[tmp != 0], saturation)
             tmp[tmp > q_sat] <- q_sat
           }
 
           if(!is.null(logb)){
-            print_msg("Transforming in log base ", logb, ".", msg_type = "DEBUG")
+            print_this_msg("Transforming in log base ", logb, ".", msg_type = "DEBUG")
             tmp <- log(tmp + pseudo_count, base = logb)
           }
 
           if(scale){
-            print_msg("Rescaling", msg_type = "DEBUG")
+            print_this_msg("Rescaling", msg_type = "DEBUG")
             tmp <- (tmp - min(tmp)) / (max(tmp) - min(tmp))
           }
 
-          st_list[[i]]$value[st_list[[i]]$feature == j] <- (tmp - min(tmp)) / (max(tmp) - min(tmp))
+          st_list[[i]]$value[st_list[[i]]$feature == j] <- tmp
 
       }
 
   }
 
-
   for(i in 1:length(st_list)){
     st_list[[i]]$condition <- names[i]
   }
 
-  print_msg("Merging data.", msg_type = "DEBUG")
+  print_this_msg("Merging data.", msg_type = "DEBUG")
 
   st_list <- do.call(rbind, st_list)
 
-  print_msg("Converting columns 'condition' to ordered factor.", msg_type = "DEBUG")
+  print_this_msg("Converting columns 'condition' to ordered factor.", msg_type = "DEBUG")
 
   st_list$condition <- factor(st_list$condition,
                               levels=names,
                               ordered = TRUE)
 
-  print_msg("Converting columns 'gene' to ordered factor.", msg_type = "DEBUG")
+  print_this_msg("Converting columns 'gene' to ordered factor.", msg_type = "DEBUG")
 
   st_list$gene <- factor(st_list$feature,
                               levels=feat_list,
                               ordered = TRUE)
 
-  print_msg("Building diagram", msg_type = "DEBUG")
+  print_this_msg("Building diagram", msg_type = "DEBUG")
+
+  value <- bin_x <- bin_y <- NULL
 
   p <- ggplot2::ggplot(data=st_list,
                        mapping = ggplot2::aes(x=bin_x,
@@ -811,8 +929,6 @@ cmp_images <- function(...,
 
   p
 }
-
-
 
 
 

@@ -12,4 +12,9 @@ ripley_k_function(object)
 \description{
 Get Ripley's K function slot from a STGrid object.
 }
+\examples{
+example_dataset()
+Xenium_Mouse_Brain_Coronal_7g <- compute_k_ripley(Xenium_Mouse_Brain_Coronal_7g)
+head(ripley_k_function(Xenium_Mouse_Brain_Coronal_7g))
+}
 \keyword{internal}

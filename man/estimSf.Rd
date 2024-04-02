@@ -27,4 +27,3 @@ across all samples is computed. Zero counts are set to NA to avoid division by z
 Each count is then divided by its corresponding geometric mean, and the median
 of these ratios across all samples is computed to obtain the size factor for each sample.
 }
-\keyword{internal}

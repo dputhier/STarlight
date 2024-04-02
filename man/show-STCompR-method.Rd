@@ -14,7 +14,7 @@ The show method of a STCompR object displays information about the object,
 including conditions, memory usage, and the number of features
 }
 \examples{
-# Example usage:
-show(st_compr_result)
+example_dataset("10819270/files/cmp_xen")
+show(cmp_xen)
 }
 \keyword{internal}

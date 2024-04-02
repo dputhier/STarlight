@@ -12,4 +12,8 @@ row_names(x)
 \description{
 The row names of a STGrid object.
 }
+\examples{
+example_dataset()
+row_names(Xenium_Mouse_Brain_Coronal_7g)
+}
 \keyword{internal}

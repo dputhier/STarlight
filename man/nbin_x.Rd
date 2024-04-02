@@ -12,4 +12,8 @@ nbin_x(x)
 \description{
 Number of bins (x axis) of a STGrid object.
 }
+\examples{
+example_dataset()
+nbin_x(Xenium_Mouse_Brain_Coronal_7g)
+}
 \keyword{internal}

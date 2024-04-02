@@ -34,5 +34,13 @@ This class stores transcript molecules or cell coordinates as a grid.
 \item{\code{bin_x}}{Character vector containing the names of bins/windows along the x-axis.}
 
 \item{\code{bin_y}}{Character vector containing the names of bins/windows along the y-axis.}
+
+\item{\code{ripley_k_function}}{The result of Ripley's K function computation.}
+
+\item{\code{control}}{A regular expression indicating the string motif related to controls.}
 }}
 
+\examples{
+example_dataset()
+Xenium_Mouse_Brain_Coronal_7g
+}

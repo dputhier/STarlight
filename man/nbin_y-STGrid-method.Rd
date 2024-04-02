@@ -12,4 +12,8 @@
 \description{
 Number of bins (y axis) of a STGrid object.
 }
+\examples{
+example_dataset()
+nbin_y(Xenium_Mouse_Brain_Coronal_7g)
+}
 \keyword{internal}

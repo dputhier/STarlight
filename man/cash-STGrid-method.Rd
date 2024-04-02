@@ -14,4 +14,9 @@
 \description{
 Subsetting operator "$" of a STGrid object. Extract metadata.
 }
+\examples{
+example_dataset()
+head(Xenium_Mouse_Brain_Coronal_7g$count_sums)
+head(Xenium_Mouse_Brain_Coronal_7g[[1]])
+}
 \keyword{internal}

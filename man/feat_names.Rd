@@ -16,4 +16,10 @@ The features stored in a STGrid object
 
 The features stored in a STCompR object
 }
+\examples{
+example_dataset()
+feat_names(Xenium_Mouse_Brain_Coronal_7g)
+example_dataset("10819270/files/cmp_xen")
+feat_names(cmp_xen)
+}
 \keyword{internal}

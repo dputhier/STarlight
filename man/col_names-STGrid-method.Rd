@@ -12,3 +12,8 @@
 \description{
 The column names of a STGrid object.
 }
+\examples{
+example_dataset()
+col_names(Xenium_Mouse_Brain_Coronal_7g)
+}
+\keyword{internal}

@@ -41,3 +41,14 @@ cmp_images(
 \description{
 This function compares and visualizes multiple spatial images obtained from STGrid objects. It displays a color-coded representation of the feature (e.g., molecules) density observed in spatial transcriptomics experiments for different conditions.
 }
+\examples{
+example_dataset()
+xen <- Xenium_Mouse_Brain_Coronal_7g
+x_bins <-  bin_x(xen)[181:nbin_x(xen)]
+y_bins <-  bin_y(xen)[101:nbin_y(xen)]
+xen_1 <- xen[x_bins, y_bins]
+x_bins <-  bin_x(xen)[61:101]
+y_bins <-  bin_y(xen)[101:nbin_y(xen)]
+xen_2 <- xen[x_bins, y_bins]
+cmp_images(xen_1, xen_2, feat_list = c("Nwd2", "Kctd8", "Necab2", "Nrp2"))
+}

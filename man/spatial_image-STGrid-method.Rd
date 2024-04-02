@@ -40,6 +40,8 @@
 \item{grid_by}{Whether to overlay a grid with horizontal and vertical lines at particular interval.
 No overlay if NULL otherwise the size of the interval (e.g. 20).}
 
+\item{color_grid}{A color for the grid.}
+
 \item{size}{The size of the overlayed points.}
 
 \item{logb}{The basis for the log transformation. Default to 10. If NULL no log transformation.}
@@ -48,4 +50,20 @@ No overlay if NULL otherwise the size of the interval (e.g. 20).}
 }
 \description{
 This function displays a color-coded representation of the object (e.g. molecules) density observed in a spatial transcriptomics experiment.
+}
+\examples{
+example_dataset()
+xen <- Xenium_Mouse_Brain_Coronal_7g
+spatial_image(xen,
+             features="Chat",
+             grid_by=50)
+bx <- bin_x(xen)[175:nbin_x(xen)]
+by <- bin_y(xen)[100:nbin_y(xen)]
+sub <- xen[bx, by]
+spatial_image(sub,
+             features=c("Chat", "Ano1"))
+spatial_image(sub,
+             features=c("Chat", "Ano1"),
+             overlay_feature="Nwd2",
+             size=0.05)
 }

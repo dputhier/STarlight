@@ -18,4 +18,10 @@ Extract}
 The subsetting operator of a STGrid object.
 The i axis correspond to features (i.e. genes) or bins (x axis). The j axis corresponds to bins
 }
+\examples{
+example_dataset()
+xen <- Xenium_Mouse_Brain_Coronal_7g
+xen["Ano1",]
+xen[bin_x(xen)[1:20], bin_y(xen)[1:20]]
+}
 \keyword{internal}

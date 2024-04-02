@@ -14,3 +14,9 @@
 \description{
 Remove control (Blank-*) features.
 }
+\examples{
+# Here the example_dataset does not contain any
+# control...
+example_dataset()
+rm_controls(Xenium_Mouse_Brain_Coronal_7g)
+}

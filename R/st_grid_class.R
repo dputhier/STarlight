@@ -19,6 +19,11 @@
 #' @slot bin_size Numeric value representing the bin size.
 #' @slot bin_x Character vector containing the names of bins/windows along the x-axis.
 #' @slot bin_y Character vector containing the names of bins/windows along the y-axis.
+#' @slot ripley_k_function The result of Ripley's K function computation.
+#' @slot control A regular expression indicating the string motif related to controls.
+#' @examples
+#' example_dataset()
+#' Xenium_Mouse_Brain_Coronal_7g
 #' @export
 setClass(
   "STGrid",
@@ -61,41 +66,54 @@ setClass(
 #      NCOL/NROW/DIM METHOD FOR CLASS OBJECT : STGrid
 # -------------------------------------------------------------------------
 #' @title
-#' ncol.STGrid
+#' ncol
 #' @description
 #' The number of columns of a STGrid object.
 #' @param x The STGrid object
 #' @keywords internal
-ncol.STGrid <- function (x) {
-  length(x@bin_x)
-}
+setMethod(
+  f = "ncol",
+  signature = "STGrid",
+  definition = function(x)
+    length(bin_y(x))
+)
 
 #' @title
-#' nrow.STGrid
+#' nrow
 #' @description
 #' The number of rows of a STGrid object.
 #' @param x The STGrid object
 #' @keywords internal
-nrow.STGrid <- function (x) {
-  length((x@bin_y))
-}
+setMethod(
+  f = "nrow",
+  signature = "STGrid",
+  definition = function(x)
+    length(bin_x(x))
+)
 
 #' @title Dimension of a STGrid object.
 #' dim
 #' @description
 #' The dimension of a STGrid object.
 #' @param x The STGrid object
+#' @examples
+#' example_dataset()
+#' dim(Xenium_Mouse_Brain_Coronal_7g)
+#'
 #' @keywords internal
 setMethod("dim", signature(x = "STGrid"),
           function(x)
-            dim(x@bin_mat))
+            dim(bin_mat(x, del_bin = TRUE)))
 
 #' @title Column names of a STGrid object.
 #' @description
 #' The column names of a STGrid object.
 #' @param x The STGrid object
-#' @export col_names
+#' @examples
+#' example_dataset()
+#' col_names(Xenium_Mouse_Brain_Coronal_7g)
 #' @keywords internal
+#' @export
 setGeneric(
   name = "col_names",
   def = function(x)
@@ -106,7 +124,11 @@ setGeneric(
 #' @description
 #' The column names of a STGrid object.
 #' @param x The STGrid object
-#' @export col_names
+#' @examples
+#' example_dataset()
+#' col_names(Xenium_Mouse_Brain_Coronal_7g)
+#' @keywords internal
+#' @export
 setMethod(
   f = "col_names",
   signature = "STGrid",
@@ -118,8 +140,11 @@ setMethod(
 #' @description
 #' The row names of a STGrid object.
 #' @param x The STGrid object
-#' @export row_names
+#' @examples
+#' example_dataset()
+#' row_names(Xenium_Mouse_Brain_Coronal_7g)
 #' @keywords internal
+#' @export
 setGeneric("row_names",
            function(x)
              standardGeneric("row_names"))
@@ -128,16 +153,22 @@ setGeneric("row_names",
 #' @description
 #' The row names of a STGrid object.
 #' @param x The STGrid object
-#' @export row_names
+#' example_dataset()
+#' row_names(Xenium_Mouse_Brain_Coronal_7g)
+#' @export
 setMethod("row_names", "STGrid",
           function(x)
-            x@bin_y)
+            x@bin_y
+)
 
 #' @title X bins of a STGrid object.
 #' @description
 #' X bins of a STGrid object.
 #' @param x The STGrid object
 #' @keywords internal
+#' @examples
+#' example_dataset()
+#' bin_x(Xenium_Mouse_Brain_Coronal_7g)
 #' @export bin_x
 setGeneric("bin_x",
            function(x)
@@ -147,7 +178,10 @@ setGeneric("bin_x",
 #' @description
 #' X bins of a STGrid object.
 #' @param x The STGrid object
-#' @export bin_x
+#' @examples
+#' example_dataset()
+#' bin_x(Xenium_Mouse_Brain_Coronal_7g)
+#' @export
 setMethod("bin_x", "STGrid",
           function(x)
             x@bin_x)
@@ -156,8 +190,11 @@ setMethod("bin_x", "STGrid",
 #' @description
 #' Y bins of a STGrid object.
 #' @param x The STGrid object
+#' @examples
+#' example_dataset()
+#' bin_y(Xenium_Mouse_Brain_Coronal_7g)
 #' @keywords internal
-#' @export bin_y
+#' @export
 setGeneric("bin_y",
            function(x)
              standardGeneric("bin_y"))
@@ -166,7 +203,10 @@ setGeneric("bin_y",
 #' @description
 #' Y bins of a STGrid object.
 #' @param x The STGrid object
-#' @export bin_y
+#' @examples
+#' example_dataset()
+#' bin_y(Xenium_Mouse_Brain_Coronal_7g)
+#' @export
 setMethod("bin_y", "STGrid",
           function(x)
             x@bin_y)
@@ -176,6 +216,9 @@ setMethod("bin_y", "STGrid",
 #' Number of bins (x axis) of a STGrid object.
 #' @param x The STGrid object
 #' @keywords internal
+#' @examples
+#' example_dataset()
+#' nbin_x(Xenium_Mouse_Brain_Coronal_7g)
 #' @export
 setGeneric("nbin_x",
            function(x)
@@ -185,6 +228,9 @@ setGeneric("nbin_x",
 #' @description
 #' Number of bins (x axis) of a STGrid object.
 #' @param x The STGrid object
+#' @examples
+#' example_dataset()
+#' nbin_x(Xenium_Mouse_Brain_Coronal_7g)
 #' @keywords internal
 #' @export
 setMethod("nbin_x", "STGrid",
@@ -195,6 +241,9 @@ setMethod("nbin_x", "STGrid",
 #' @description
 #' Number of bins (y axis) of a STGrid object.
 #' @param x The STGrid object
+#' @examples
+#' example_dataset()
+#' nbin_y(Xenium_Mouse_Brain_Coronal_7g)
 #' @keywords internal
 #' @export
 setGeneric("nbin_y",
@@ -206,6 +255,9 @@ setGeneric("nbin_y",
 #'  Number of bins (y axis) of a STGrid object.
 #' @param x The STGrid object
 #' @keywords internal
+#' @examples
+#' example_dataset()
+#' nbin_y(Xenium_Mouse_Brain_Coronal_7g)
 #' @export
 setMethod("nbin_y", "STGrid",
           function(x)
@@ -214,9 +266,12 @@ setMethod("nbin_y", "STGrid",
 #' @description
 #' The coordinates stored in a STGrid object
 #' @param object The STGrid object
-#' @export coord
 #' @param as_factor Should bin_x and bin_y columns be returned as ordered factor ?
+#' @examples
+#' example_dataset()
+#' head(coord(Xenium_Mouse_Brain_Coronal_7g))
 #' @keywords internal
+#' @export
 setGeneric("coord",
            function(object,
                     as_factor = FALSE)
@@ -227,7 +282,10 @@ setGeneric("coord",
 #' The coordinates stored in a STGrid object
 #' @param object The STGrid object
 #' @param as_factor Should bin_x and bin_y columns be returned as ordered factor ?
-#' @export coord
+#' @examples
+#' example_dataset()
+#' head(coord(Xenium_Mouse_Brain_Coronal_7g))
+#' @export
 setMethod("coord", "STGrid",
           function(object,
                    as_factor = FALSE) {
@@ -254,6 +312,9 @@ setMethod("coord", "STGrid",
 #' @param melt_tab Whether to melt.
 #' @param del_bin Whether to delete the bin_x, bin_y columns.
 #' @keywords internal
+#' @examples
+#' example_dataset()
+#' head(bin_mat(Xenium_Mouse_Brain_Coronal_7g))
 #' @export
 setGeneric("bin_mat",
            function(object,
@@ -271,6 +332,9 @@ setGeneric("bin_mat",
 #' @param feat_list Whether to subset to some features.
 #' @param melt_tab Whether to melt.
 #' @param del_bin Whether to delete the bin_x, bin_y columns.
+#' @examples
+#' example_dataset()
+#' head(bin_mat(Xenium_Mouse_Brain_Coronal_7g))
 #' @export
 setMethod("bin_mat", "STGrid",
           function(object,
@@ -302,7 +366,7 @@ setMethod("bin_mat", "STGrid",
 
 
             if (melt_tab) {
-              print_msg("Melting data.frame...", msg_type = "DEBUG")
+              print_this_msg("Melting data.frame...", msg_type = "DEBUG")
               if (del_bin) {
                 this_bin_mat <- reshape2::melt(this_bin_mat)
                 colnames(this_bin_mat) <- c("feature",
@@ -323,24 +387,55 @@ setMethod("bin_mat", "STGrid",
             return(this_bin_mat)
           })
 
-#' @title The number of molecules stored in a STGrid object
+#' @title The number of x/y items (e.g. molecules or cells) stored in a STGrid object
 #' @description
-#' The number of molecules stored in a STGrid object
+#' Returns the number of x/y items (e.g. molecules or cells) stored in a STGrid object.
 #' @param x The STGrid object
-#' @export nb_molec
 #' @keywords internal
-setGeneric("nb_molec",
+#' @examples
+#' example_dataset()
+#' nb_items(Xenium_Mouse_Brain_Coronal_7g)
+#' @export
+setGeneric("nb_items",
            function(x)
-             standardGeneric("nb_molec"))
+             standardGeneric("nb_items"))
 
-#' @title The number of molecules stored in a STGrid object
+#' @title The number of x/y items (e.g. molecules or cells) stored in a STGrid object
 #' @description
-#' The number of molecules stored in a STGrid object
+#' Returns the number of x/y items (e.g. molecules or cells) stored in a STGrid object.
 #' @param x The STGrid object
-#' @export nb_molec
-setMethod("nb_molec", "STGrid",
+#' @examples
+#' example_dataset()
+#' nb_items(Xenium_Mouse_Brain_Coronal_7g)
+#' @export
+setMethod("nb_items", "STGrid",
           function(x)
             nrow(x@coord))
+
+#' @title The number of items (molecules/cells) per features (gene/cell-type).
+#' @description
+#' Returns The number of items (molecules/cells) per features (gene/cell-type).
+#' @param x The STGrid object
+#' @keywords internal
+#' @examples
+#' example_dataset()
+#' tab(Xenium_Mouse_Brain_Coronal_7g)
+#' @export
+setGeneric("tab",
+           function(x)
+             standardGeneric("tab"))
+
+#' @title The number of items (molecules/cells) per features (gene/cell-type).
+#' @description
+#' Returns The number of items (molecules/cells) per features (gene/cell-type).
+#' @param x The STGrid object
+#' @examples
+#' example_dataset()
+#' tab(Xenium_Mouse_Brain_Coronal_7g)
+#' @export
+setMethod("tab", "STGrid",
+          function(x)
+            sort(table(x@coord$feature)))
 
 
 #' @title The number of features stored in a STGrid object
@@ -348,7 +443,10 @@ setMethod("nb_molec", "STGrid",
 #' The number of features stored in a STGrid object
 #' @param object The STGrid object
 #' @keywords internal
-#' @export nb_feat
+#' @examples
+#' example_dataset()
+#' nb_feat(Xenium_Mouse_Brain_Coronal_7g)
+#' @export
 setGeneric("nb_feat",
            function(object) {
              standardGeneric("nb_feat")
@@ -359,12 +457,58 @@ setGeneric("nb_feat",
 #' @description
 #' The number of features stored in a STGrid object
 #' @param object The STGrid object
-#' @export nb_feat
+#' @examples
+#' example_dataset()
+#' nb_feat(Xenium_Mouse_Brain_Coronal_7g)
+#' @export
 setMethod("nb_feat", signature(object = "STGrid"),
           function(object) {
             length(feat_names(object))
           })
 
+#' @title Write object coordinates.
+#' @description
+#' Write object coordinates.
+#' @param object The STGrid object
+#' @param file_path The path where to store the file.
+#' @keywords internal
+#' @examples
+#' example_dataset()
+#' tmp_f <- tempfile()
+#' write_coord(Xenium_Mouse_Brain_Coronal_7g, file_path=tmp_f)
+#' @export
+setGeneric("write_coord",
+           function(object=NULL, file_path=NULL) {
+             standardGeneric("write_coord")
+           })
+
+
+#' @title Write object coordinates.
+#' @description
+#' Write object coordinates.
+#' @param object The STGrid object
+#' @param file_path The path where to store the file.
+#' @examples
+#' example_dataset()
+#' tmp_f <- tempfile()
+#' write_coord(Xenium_Mouse_Brain_Coronal_7g, file_path=tmp_f)
+#' @export
+setMethod("write_coord", signature(object = "STGrid"),
+          function(object=NULL,
+                   file_path=NULL) {
+            if(is.null(object))
+              print_this_msg("Please provide an STGrid object.")
+
+            if(is.null(file_path)){
+              print_this_msg("Please provide a file path.")
+            }else{
+              check_this_file(file_path, mode = "write", force = TRUE)
+            }
+            print_this_msg("Writing to ", file_path)
+            data.table::fwrite(object@coord,
+                               file = file_path,
+                               quote = FALSE, sep = "\t")
+})
 
 #' @title The features stored in a STGrid object
 #' @description
@@ -372,6 +516,9 @@ setMethod("nb_feat", signature(object = "STGrid"),
 #' @param object The STGrid object
 #' @param del_control Whether to delete controls.
 #' @keywords internal
+#' @examples
+#' example_dataset()
+#' feat_names(Xenium_Mouse_Brain_Coronal_7g)
 #' @export
 setGeneric("feat_names",
            function(object,
@@ -383,6 +530,9 @@ setGeneric("feat_names",
 #' The features stored in a STGrid object
 #' @param object The STGrid object.
 #' @param del_control Whether to delete controls.
+#' @examples
+#' example_dataset()
+#' feat_names(Xenium_Mouse_Brain_Coronal_7g)
 #' @export
 setMethod("feat_names", signature(object = "STGrid"),
           function(object,
@@ -393,14 +543,13 @@ setMethod("feat_names", signature(object = "STGrid"),
                 colnames(object@bin_mat),
                 invert = TRUE,
                 perl = TRUE,
-                val = TRUE
+                value = TRUE
             )
 
 
             if (del_control) {
-              print(object@control)
               fn <-
-                fn[!fn %in% grep(object@control, fn, val = TRUE)]
+                fn[!fn %in% grep(object@control, fn, value = TRUE)]
             }
 
             fn
@@ -411,8 +560,11 @@ setMethod("feat_names", signature(object = "STGrid"),
 #' @description
 #' The size of the bins stored in an STGrid object
 #' @param x The STGrid object
-#' @export bin_size
+#' @examples
+#' example_dataset()
+#' bin_size(Xenium_Mouse_Brain_Coronal_7g)
 #' @keywords internal
+#' @export bin_size
 setGeneric("bin_size",
            function(x)
              standardGeneric("bin_size"))
@@ -421,6 +573,9 @@ setGeneric("bin_size",
 #' @description
 #' The size of the bins stored in an STGrid object
 #' @param x The STGrid object
+#' @examples
+#' example_dataset()
+#' bin_size(Xenium_Mouse_Brain_Coronal_7g)
 #' @export bin_size
 setMethod("bin_size", "STGrid",
           function(x)
@@ -431,6 +586,11 @@ setMethod("bin_size", "STGrid",
 #'  Remove control (Blank-*) features.
 #' @param object The STGrid object
 #' @param regexp A regexp to search for internal controls.
+#' @examples
+#' # Here the example_dataset does not contain any
+#' # control...
+#' example_dataset()
+#' rm_controls(Xenium_Mouse_Brain_Coronal_7g)
 #' @keywords internal
 #' @export
 setGeneric("rm_controls",
@@ -443,6 +603,11 @@ setGeneric("rm_controls",
 #'  Remove control (Blank-*) features.
 #' @param object The STGrid object
 #' @param regexp A regexp to search for internal controls.
+#' @examples
+#' # Here the example_dataset does not contain any
+#' # control...
+#' example_dataset()
+#' rm_controls(Xenium_Mouse_Brain_Coronal_7g)
 #' @export
 setMethod("rm_controls", "STGrid",
           function(object,
@@ -463,8 +628,12 @@ setMethod("rm_controls", "STGrid",
 #' @description
 #'   Get Ripley's K function slot from a STGrid object.
 #' @param x The STGrid object
-#' @export rm_controls
 #' @keywords internal
+#' @examples
+#' example_dataset()
+#' Xenium_Mouse_Brain_Coronal_7g <- compute_k_ripley(Xenium_Mouse_Brain_Coronal_7g)
+#' head(ripley_k_function(Xenium_Mouse_Brain_Coronal_7g))
+#' @export
 setGeneric("ripley_k_function",
            function(object)
              standardGeneric("ripley_k_function"))
@@ -475,7 +644,11 @@ setGeneric("ripley_k_function",
 #' @param x The STGrid object
 #' @export bin_size
 #' @keywords internal
-#' @export ripley_k_function
+#' @examples
+#' example_dataset()
+#' Xenium_Mouse_Brain_Coronal_7g <- compute_k_ripley(Xenium_Mouse_Brain_Coronal_7g)
+#' head(ripley_k_function(Xenium_Mouse_Brain_Coronal_7g))
+#' @export
 setMethod("ripley_k_function", "STGrid",
           function(object)
             object@ripley_k_function)
@@ -491,21 +664,25 @@ setMethod("ripley_k_function", "STGrid",
 #' The show method of a STGrid object
 #' @param object A STGrid object.
 #' @keywords internal
+#' @examples
+#' example_dataset()
+#' show(Xenium_Mouse_Brain_Coronal_7g)
+#' @import methods
 #' @export
 setMethod("show", signature("STGrid"),
           function(object) {
-            print_msg("An object of class STGrid")
-            print_msg("Memory used: ", object.size(object))
-            print_msg("Number of counts: ", nb_molec(object))
-            print_msg("Number of features: ", nb_feat(object))
-            print_msg("Bin size: ", bin_size(object))
-            print_msg("Number of bins (x axis): ", length(bin_x(object)))
-            print_msg("Number of bins (y axis): ", length(bin_y(object)))
-            print_msg("x_min: ", object@x_min)
-            print_msg("x_max: ", object@x_max)
-            print_msg("y_min: ", object@y_min)
-            print_msg("y_max: ", object@y_max)
-            print_msg(">>> Please, use show_methods() to show availables methods <<<")
+            print_this_msg("An object of class STGrid")
+            print_this_msg("Memory used: ", utils::object.size(object))
+            print_this_msg("Number of counts: ", nb_items(object))
+            print_this_msg("Number of features: ", nb_feat(object))
+            print_this_msg("Bin size: ", bin_size(object))
+            print_this_msg("Number of bins (x axis): ", length(bin_x(object)))
+            print_this_msg("Number of bins (y axis): ", length(bin_y(object)))
+            print_this_msg("x_min: ", object@x_min)
+            print_this_msg("x_max: ", object@x_max)
+            print_this_msg("y_min: ", object@y_min)
+            print_this_msg("y_max: ", object@y_max)
+            print_this_msg(">>> Please, use show_st_methods() to show availables methods <<<")
           })
 
 # -------------------------------------------------------------------------
@@ -517,22 +694,24 @@ setMethod("show", signature("STGrid"),
 #' @description
 #' The summary method of a STGrid object
 #' @param object A STGrid object.
+#' @examples
+#' example_dataset()
+#' summary(Xenium_Mouse_Brain_Coronal_7g)
 #' @export summary
 setMethod("summary", signature("STGrid"),
           function(object) {
-            mx_col <- min(ncol(object), 4)
-            print_msg("An object of class STGrid")
-            print_msg("Method:", object@method)
-            print_msg("Bin size:", object@bin_size)
-            print_msg("Features:", c(head(feat_names(object), 4), "..."))
-            print_msg("x_min:", object@x_min)
-            print_msg("x_max:", object@x_max)
-            print_msg("y_min:", object@y_min)
-            print_msg("y_max:", object@y_max)
-            print_msg("path:", object@path)
-            print_msg("bin_x:", head(bin_x(object), 4), "...")
-            print_msg("bin_y:", head(bin_y(object), 4), "...")
-            print_msg("Meta data:", paste0(colnames(object@meta), collapse=" , "))
+            print_this_msg("An object of class STGrid")
+            print_this_msg("Method:", object@method)
+            print_this_msg("Bin size:", object@bin_size)
+            print_this_msg("Features:", c(utils::head(feat_names(object), 4), "..."))
+            print_this_msg("x_min:", object@x_min)
+            print_this_msg("x_max:", object@x_max)
+            print_this_msg("y_min:", object@y_min)
+            print_this_msg("y_max:", object@y_max)
+            print_this_msg("path:", object@path)
+            print_this_msg("bin_x:", utils::head(bin_x(object), 4), "...")
+            print_this_msg("bin_y:", utils::head(bin_y(object), 4), "...")
+            print_this_msg("Meta data:", paste0(colnames(object@meta), collapse=" , "))
           })
 
 # -------------------------------------------------------------------------
@@ -546,6 +725,11 @@ setMethod("summary", signature("STGrid"),
 #' @param features (i.e. genes) or bins (x axis) to extract or substract.
 #' @param ... See ?'['. Not functionnal here.
 #' @param drop For matrices and arrays. If TRUE the result is coerced to the lowest possible dimension. Not functionnal here.
+#' @examples
+#' example_dataset()
+#' xen <- Xenium_Mouse_Brain_Coronal_7g
+#' xen["Ano1",]
+#' xen[bin_x(xen)[1:20], bin_y(xen)[1:20]]
 #' @keywords internal
 setMethod("[", signature(x = "STGrid"),
           function (x, i, j, ..., drop = FALSE) {
@@ -565,13 +749,13 @@ setMethod("[", signature(x = "STGrid"),
                   if (is.numeric(i)) {
                     i <- round(i, 0)
                     if (any(i > nb_feat(x))) {
-                      print_msg("Numering value i is out of range (should be < nb_feat(x)).",
+                      print_this_msg("Numering value i is out of range (should be < nb_feat(x)).",
                                 msg_type = "STOP")
                     }
                     i <- feat_names(x)[i]
                     x_is_feat <- TRUE
                   } else{
-                    print_msg("Check i... Should be a set of features or bins.",
+                    print_this_msg("Check i... Should be a set of features or bins.",
                               msg_type = "STOP")
                   }
 
@@ -580,13 +764,13 @@ setMethod("[", signature(x = "STGrid"),
               }
 
               if (!x_is_bin && !x_is_feat)
-                print_msg("Some features or bin_x or indexes where not found in the object.",
+                print_this_msg("Some features or bin_x or indexes where not found in the object.",
                           msg_type = "STOP")
             }
 
             if (!missing(j)) {
               if (!all(j %in% bin_y(x)))
-                print_msg("Some bin_y where not found in the object.", msg_type = "STOP")
+                print_this_msg("Some bin_y where not found in the object.", msg_type = "STOP")
             }
 
             n_coord <- x@coord
@@ -629,24 +813,23 @@ setMethod("[", signature(x = "STGrid"),
                   n_bin_mat <-
                       n_bin_mat[, colnames(n_bin_mat) %in% c("bin_x", "bin_y", i)]
 
-
-
                 } else {
-                  n_coord <- n_coord[n_coord$bin_x %in% i, ]
-                  n_bin_mat <- n_bin_mat[n_bin_mat$bin_x %in% i, ]
+
+                  n_coord <- n_coord[n_coord$bin_x %in% i & n_coord$bin_y %in% j, ]
+
+                  n_bin_mat <- n_bin_mat[n_bin_mat$bin_x %in% i & n_bin_mat$bin_y %in% j, ]
                   feat_left <- unique(n_coord$feature)
+
 
                   n_bin_mat <-
                       n_bin_mat[, colnames(n_bin_mat) %in% c("bin_x", "bin_y", feat_left)]
 
                 }
 
-                n_coord <- n_coord[n_coord$bin_y %in% j, ]
-                n_bin_mat <- n_bin_mat[n_bin_mat$bin_y %in% j, ]
               }
             }
 
-            STGrid_obj <- new("STGrid",
+            STGrid_obj <- methods::new("STGrid",
                               path = x@path)
 
             STGrid_obj@coord <- n_coord
@@ -667,7 +850,7 @@ setMethod("[", signature(x = "STGrid"),
 
             return(STGrid_obj)
 
-          })
+})
 
 # -------------------------------------------------------------------------
 ##    Method for function "[[". Set/Extract/Replace metadata.
@@ -677,6 +860,9 @@ setMethod("[", signature(x = "STGrid"),
 #' Subsetting operator "[[" of a STGrid object. Extract metadata.
 #' @param i indices specifying metadata to extract.
 #' @param exact See ?"[[".
+#' @examples
+#' example_dataset()
+#' utils::head(Xenium_Mouse_Brain_Coronal_7g[[1]])
 #' @keywords internal
 #' @export
 setMethod("[[", signature(x = "STGrid"),
@@ -689,6 +875,10 @@ setMethod("[[", signature(x = "STGrid"),
 #' Subsetting operator "$" of a STGrid object. Extract metadata.
 #' @param i indices specifying metadata to extract.
 #' @param name The metadata to extract.
+#' @examples
+#' example_dataset()
+#' head(Xenium_Mouse_Brain_Coronal_7g$count_sums)
+#' head(Xenium_Mouse_Brain_Coronal_7g[[1]])
 #' @keywords internal
 #' @export
 setMethod ("$", "STGrid",
@@ -712,11 +902,14 @@ setMethod ("$", "STGrid",
 #' @param exact See ?"$".
 #' @param value The replacement value.
 #' @keywords internal
+#' @examples
+#' example_dataset()
+#' Xenium_Mouse_Brain_Coronal_7g$count_sums <- Xenium_Mouse_Brain_Coronal_7g$count_sums
 #' @export
 setMethod ("$<-", "STGrid",
            function (x, name, value) {
              if (length(value) != nbin_x(x) * nbin_y(x) && length(value) != 1)
-               print_msg("The size of the vector needs to be nbin_x(x) * nbin_y(x) or 1.",
+               print_this_msg("The size of the vector needs to be nbin_x(x) * nbin_y(x) or 1.",
                          msg_type = "STOP")
              x@meta[[name]] <- value
              x
@@ -728,13 +921,39 @@ setMethod ("$<-", "STGrid",
 #' @param name The name of the metadata.
 #' @param value The replacement value.
 #' @keywords internal
+#' @examples
+#' example_dataset()
+#' Xenium_Mouse_Brain_Coronal_7g[[1]] <- Xenium_Mouse_Brain_Coronal_7g[[1]]
 #' @export
-setMethod ("[[<-", "STGrid",
-           function (x, name, value) {
-             x@meta[[name]] <- value
-             x
+setMethod (f = '[[<-',
+           signature = c('x' = 'STGrid', i = 'numeric', value = 'ANY'),
+           definition = function(x, i, ..., value) {
+             if (length(value) != nbin_x(x) * nbin_y(x) && length(value) != 1)
+               print_this_msg("The size of the vector needs to be nbin_x(x) * nbin_y(x) or 1.",
+                              msg_type = "STOP")
+             x@meta[[i]] <- value
+             return(x)
            })
 
+#' @title Replacing operator "[[" of a STGrid object. Extract metadata.
+#' @description
+#' Subsetting operator "[[" of a STGrid object. Extract metadata.
+#' @param name The name of the metadata.
+#' @param value The replacement value.
+#' @keywords internal
+#' @examples
+#' example_dataset()
+#' Xenium_Mouse_Brain_Coronal_7g[[1]] <- Xenium_Mouse_Brain_Coronal_7g[[1]]
+#' @export
+setMethod (f = '[[<-',
+           signature = c('x' = 'STGrid', i = 'character', value = 'ANY'),
+           definition = function(x, i, ..., value) {
+             if (length(value) != nbin_x(x) * nbin_y(x) && length(value) != 1)
+               print_this_msg("The size of the vector needs to be nbin_x(x) * nbin_y(x) or 1.",
+                              msg_type = "STOP")
+             x@meta[[i]] <- value
+             return(x)
+           })
 # -------------------------------------------------------------------------
 ##    Compute Ripley's K function
 # -------------------------------------------------------------------------
@@ -751,10 +970,10 @@ setMethod ("[[<-", "STGrid",
 #' @return An updated object of class "STGrid" with the Ripley's K function estimates stored in the slot 'ripley_k_function'.
 #'
 #' @examples
-#' # Example usage:
-#' # grid_object <- load_spatial(...)
-#' # grid_object <- compute_k_ripley(grid_object)
+#' example_dataset()
+#' Xenium_Mouse_Brain_Coronal_7g <- compute_k_ripley(Xenium_Mouse_Brain_Coronal_7g)
 #' @keywords internal
+#' @export compute_k_ripley
 setGeneric("compute_k_ripley",
            function(object,
                     rmax = 200,
@@ -777,9 +996,8 @@ setGeneric("compute_k_ripley",
 #' @return An updated object of class "STGrid" with the Ripley's K function estimates stored in the slot 'ripley_k_function'.
 #'
 #' @examples
-#' # Example usage:
-#' # grid_object <- load_spatial(...)
-#' # grid_object <- compute_k_ripley(grid_object)
+#' example_dataset()
+#' Xenium_Mouse_Brain_Coronal_7g <- compute_k_ripley(Xenium_Mouse_Brain_Coronal_7g)
 #'
 #' @importFrom spatstat.geom ppp owin
 #' @importFrom spatstat.explore Kest
@@ -813,12 +1031,12 @@ setMethod("compute_k_ripley", signature("STGrid"),
                                           molecules$feature)
 
 
-            print_msg(">>> Estimating Ripley's reduced second moment function for all features.")
+            print_this_msg(">>> Estimating Ripley's reduced second moment function for all features.")
 
             n_iter <- length(unique(molecules$feature))
 
             if (verbose) {
-              pb <- txtProgressBar(
+              pb <- utils::txtProgressBar(
                 min = 0,
                 max = n_iter,
                 style = 3,
@@ -832,7 +1050,7 @@ setMethod("compute_k_ripley", signature("STGrid"),
             for (g in unique(molecules$feature)) {
               if (verbose) {
                 n <- n + 1
-                setTxtProgressBar(pb, n)
+                utils::setTxtProgressBar(pb, n)
               }
 
 
@@ -866,7 +1084,7 @@ setMethod("compute_k_ripley", signature("STGrid"),
             if (verbose)
               close(pb)
 
-            data_out <- na.omit(data_out)
+            data_out <- stats::na.omit(data_out)
 
             object@ripley_k_function <- data_out
 
@@ -892,6 +1110,11 @@ setMethod("compute_k_ripley", signature("STGrid"),
 #' counts, this will allow to delete these blanks/controls for computation.
 #' @param verbose Whether to display the progress bar.
 #' @return An object of class STGrid.
+#' @importFrom Seurat ReadVizgen
+#' @importFrom Seurat ReadXenium
+#' @examples
+#'   fp <- file.path(system.file("extdata", package = "stcompr"), "tyni_xenium.txt")
+#'   st <- load_spatial(fp, method = "coordinates")
 #'
 #' @export load_spatial
 load_spatial <- function(path = "",
@@ -903,8 +1126,8 @@ load_spatial <- function(path = "",
                          verbose = TRUE) {
   method <- match.arg(method)
 
-  print_msg("Technology is '", method, "'.")
-  print_msg("Loading data from file:", path)
+  print_this_msg("Technology is '", method, "'.")
+  print_this_msg("Loading data from file:", path)
 
   if (method == "merscope") {
     spat_input <-
@@ -923,7 +1146,7 @@ load_spatial <- function(path = "",
       control <-  "(NegControl)|(^BLANK)"
 
   }  else if (method == "coordinates") {
-    check_file(path, mode = "read")
+    check_this_file(path, mode = "read")
     spat_input <- as.data.frame(data.table::fread(path,
                                                   sep = "\t",
                                                   head = TRUE))
@@ -936,11 +1159,11 @@ load_spatial <- function(path = "",
     }else if("gene" %in% colnames(spat_input)){
       col_needed <- c(col_needed, "gene")
     }else{
-      print_msg("Could not find a cell/feature/gene columns.", msg_type = "STOP")
+      print_this_msg("Could not find a cell/feature/gene columns.", msg_type = "STOP")
     }
 
     if (any(!col_needed %in% colnames(spat_input))) {
-      print_msg("Please check the column name of the input file.", msg_type = "STOP")
+      print_this_msg("Please check the column name of the input file.", msg_type = "STOP")
     }
 
     spat_input <- spat_input[, col_needed]
@@ -961,7 +1184,7 @@ load_spatial <- function(path = "",
 
   # create a STGrid object                             ---------
 
-  STGrid_obj <- new("STGrid",
+  STGrid_obj <- methods::new("STGrid",
                     path = path)
 
   STGrid_obj@coord <- bin_matrix$coord
@@ -999,12 +1222,12 @@ sum_of_counts <- function(spatial_matrix = NULL,
                           control = NULL) {
 
   if (is.null(spatial_matrix)) {
-    print_msg("Please provide a spatial matrix.", msg_type = "STOP")
+    print_this_msg("Please provide a spatial matrix.", msg_type = "STOP")
   }
 
-  print_msg("Regexp for controls:", control, msg_type = "DEBUG")
+  print_this_msg("Regexp for controls:", control, msg_type = "DEBUG")
 
-  print_msg("Computing sum of counts.")
+  print_this_msg("Computing sum of counts.")
 
   pos_bin_xy <- grep("^bin_[xy]$",
                      colnames(spatial_matrix))
@@ -1018,8 +1241,8 @@ sum_of_counts <- function(spatial_matrix = NULL,
   }
 
   if (length(pos_ctrl) > 0) {
-    print_msg("Found the following controls:",
-              paste0(head(colnames(tmp)[pos_ctrl], 3),
+    print_this_msg("Found the following controls:",
+              paste0(utils::head(colnames(tmp)[pos_ctrl], 3),
                      collapse = ", "),
               "...")
     sum_of_cts <- rowSums(tmp[, -pos_ctrl, drop=FALSE])
@@ -1047,14 +1270,16 @@ sum_of_counts <- function(spatial_matrix = NULL,
 #' @param verbose Whether to display the progress bar.
 #' @return A list containing the binned spatial matrix, updated molecule coordinates, and information about the binning process.
 #' @examples
-#' # Create a binned grid from molecule coordinates
-#' bin_mat(coord = my_coord, bin_size = 25)
+#' example_dataset()
+#' res <- bin_this_matrix(Xenium_Mouse_Brain_Coronal_7g@coord)
+#'
 #' @keywords internal
+
 #' @export bin_this_matrix
 bin_this_matrix <- function(coord = NULL,
                             bin_size = 25,
                             verbose = TRUE) {
-  print_msg("Binning a matrix...")
+  print_this_msg("Binning a matrix...")
 
   x_min <- min(coord$x)
   x_max <- max(coord$x)
@@ -1062,7 +1287,7 @@ bin_this_matrix <- function(coord = NULL,
   y_max <- max(coord$y)
 
   if (x_max - x_min < bin_size) {
-    print_msg(
+    print_this_msg(
       "Can't create bin with x_max =",
       x_max,
       ", x_min =",
@@ -1074,7 +1299,7 @@ bin_this_matrix <- function(coord = NULL,
   }
 
   if (y_max - y_min < bin_size) {
-    print_msg(
+    print_this_msg(
       "Can't create bin with x_max =",
       y_max,
       ", x_min =",
@@ -1132,7 +1357,7 @@ bin_this_matrix <- function(coord = NULL,
   coord$bin_y <- NA
 
   if (verbose) {
-    pb <- txtProgressBar(
+    pb <- utils::txtProgressBar(
       min = 0,
       max = length(unique(coord$feature)),
       style = 3,
@@ -1161,13 +1386,13 @@ bin_this_matrix <- function(coord = NULL,
     )
     coord$bin_y[coord$feature == goi] <- as.character(y_molec)
 
-    nb_molec <- table(paste(x_molec, y_molec, sep = "~"))
+    nb_items <- table(paste(x_molec, y_molec, sep = "~"))
     spatial_matrix[, goi] <- 0
-    spatial_matrix[names(nb_molec), goi] <- nb_molec
+    spatial_matrix[names(nb_items), goi] <- nb_items
 
     if (verbose) {
       n_loop <- n_loop + 1
-      setTxtProgressBar(pb, n_loop)
+      utils::setTxtProgressBar(pb, n_loop)
     }
   }
 
@@ -1201,8 +1426,12 @@ bin_this_matrix <- function(coord = NULL,
 #' @param object The STGrid object
 #' @param bin_size The size of the bin.
 #' @param verbose Whether to be display progress bar.
-#' @export re_bin
+#' @examples
+#' example_dataset()
+#' res <- re_bin(Xenium_Mouse_Brain_Coronal_7g, bin_size=10)
+#'
 #' @keywords internal
+#' @export re_bin
 setGeneric("re_bin",
            function(object,
                     bin_size,
@@ -1215,13 +1444,16 @@ setGeneric("re_bin",
 #' @param object The STGrid object.
 #' @param bin_size The size of the bin.
 #' @param verbose Whether to be display progress bar.
+#' @examples
+#' example_dataset()
+#' res <- re_bin(Xenium_Mouse_Brain_Coronal_7g, bin_size=10)
 #' @export re_bin
 setMethod("re_bin", signature(object = "STGrid"),
           function(object,
                    bin_size,
                    verbose = TRUE) {
             if (object@bin_size == bin_size) {
-              print_msg("The bin_size is unchanged.")
+              print_this_msg("The bin_size is unchanged.")
               return(object)
             }
 
@@ -1229,15 +1461,15 @@ setMethod("re_bin", signature(object = "STGrid"),
                                           bin_size = bin_size,
                                           verbose = verbose)
 
-            print_msg("Re-computing sum of counts .")
+            print_this_msg("Re-computing sum of counts .")
             sum_of_cts <- sum_of_counts(bin_matrix$spatial_matrix,
                                         control=object@control)
 
             # create a STGrid object                             ---------
-            print_msg("Creating an STGrid object")
-            print_msg("Note that meta data will be lost (except 'sum_of_cts').")
+            print_this_msg("Creating an STGrid object")
+            print_this_msg("Note that meta data will be lost (except 'sum_of_cts').")
 
-            STGrid_obj <- new("STGrid",
+            STGrid_obj <- methods::new("STGrid",
                               path = object@path)
 
             STGrid_obj@coord <- bin_matrix$coord
@@ -1272,6 +1504,9 @@ setMethod("re_bin", signature(object = "STGrid"),
 #' @param object The STGrid object
 #' @param feat_list The list of features.
 #' @param as.factor Whether the 'feature' column should be returned as an ordered factor.
+#' @examples
+#' example_dataset()
+#' head(get_coord(Xenium_Mouse_Brain_Coronal_7g))
 #' @export
 #' @keywords internal
 setGeneric("get_coord",
@@ -1285,13 +1520,16 @@ setGeneric("get_coord",
 #' @param object The STGrid object
 #' @param feat_list The list of features.
 #' @param as.factor Whether the 'feature' column should be returned as an ordered factor
+#' @examples
+#' example_dataset()
+#' head(get_coord(Xenium_Mouse_Brain_Coronal_7g))
 #' @export
 setMethod("get_coord", "STGrid",
           function(object,
                    feat_list = character(),
                    as.factor = TRUE) {
             if (!all(feat_list %in% feat_names(object))) {
-              print_msg("Some features were not found...",
+              print_this_msg("Some features were not found...",
                         msg_type = "STOP")
             }
 
@@ -1323,12 +1561,18 @@ setMethod("get_coord", "STGrid",
 #' @param branch_length A variable for scaling branch, if 'none' draw cladogram. See ggtree::ggtree().
 #' @param class_nb An integer indicating the desired number of groups.
 #' @param size The size of the labels.
-#' @export
+#' @examples
+#' example_dataset()
+#' p <- hc_tree(Xenium_Mouse_Brain_Coronal_7g)
+#' print(p)
 #' @keywords internal
 setGeneric("hc_tree",
            function(object,
-                    method = "complete",
-                    layout = "circular",
+                    method = c("complete", "ward.D", "ward.D2", "single",
+                               "average", "mcquitty", "median", "centroid"),
+                    layout = c("circular", "rectangular",
+                               "slanted", "fan", "unrooted",
+                               "time-scale", "two-dimensional"),
                     dist_method = "pearson",
                     branch_length = "none",
                     class_nb = 1,
@@ -1349,44 +1593,72 @@ setGeneric("hc_tree",
 #' @importFrom ggnewscale new_scale_fill
 #' @importFrom ggplot2 aes scale_color_viridis_d
 #' @importFrom ggsci scale_fill_jco
+#' @importFrom tidytree MRCA
+#' @examples
+#' example_dataset()
+#' p <- hc_tree(Xenium_Mouse_Brain_Coronal_7g, class_nb = 7, class_name = letters[1:7])
+#' print(p)
 #' @export
 #' @keywords internal
 setMethod("hc_tree", "STGrid",
 
           function(object,
-                   method = "complete",
-                   layout = "circular",
+                   method = c("complete", "ward.D", "ward.D2", "single",
+                              "average", "mcquitty", "median", "centroid"),
+                   layout = c("circular", "rectangular",
+                              "slanted", "fan", "unrooted",
+                              "time-scale", "two-dimensional"),
                    dist_method = "pearson",
                    branch_length = "none",
                    class_nb = 1,
                    class_name = "All",
                    size = 2.25) {
+
+            method <- match.arg(method)
+            layout <- match.arg(layout)
+
+            print_this_msg("Using method", method, msg_type="INFO")
+            print_this_msg("Using layout", layout, msg_type="INFO")
+
             if (class_nb > 0) {
               if (length(class_name) != class_nb) {
-                print_msg("Please set the right number of class names.",
+                print_this_msg("Please set the right number of class names",
+                               "see 'class_name' and 'class_nb'. ",
                           msg_type = "STOP")
               }
             } else{
-              print_msg("The class_nb argument should be an integer > than 0...",
+              print_this_msg("The class_nb argument should be an integer > than 0...",
                         msg_type = "STOP")
             }
+
+            print_this_msg("Retrieving binned matrix.", msg_type="DEBUG")
 
             bin_mat <-
               bin_mat(object, del_bin = TRUE)
 
-            hc_clust <- hclust(as.dist((1 - cor(bin_mat,
+            print_this_msg("Computing hierarchical clustering.", msg_type="DEBUG")
+            hc_clust <- stats::hclust(stats::as.dist((1 - stats::cor(bin_mat,
                                                 method = dist_method)) / 2),
                                method = method)
+
+            print_this_msg("Building ggplot diagram.", msg_type="DEBUG")
 
             p <- ggtree::ggtree(hc_clust,
                                 layout = layout,
                                 branch.length = branch_length)
 
-            tree_classes <- cutree(hc_clust, k = class_nb)
+            print_this_msg("Cutting tree.", msg_type="DEBUG")
+
+            tree_classes <- stats::cutree(hc_clust, k = class_nb)
             groups <- split(names(tree_classes), tree_classes)
+
+            print_this_msg("Retrieving classes.", msg_type="DEBUG")
+
             clades <-
               sapply(groups, function(n)
                 tidytree::MRCA(p, n))
+
+            print_this_msg("Retrieving annotations", msg_type="DEBUG")
             annotation <- data.frame(id = clades[1:class_nb],
                                      Class = class_name)
 
@@ -1395,10 +1667,12 @@ setMethod("hc_tree", "STGrid",
             #pmath <- match(p$data$label, names(ginfo))
             #p$data$cell_type[!is.na(pmath)] <- names(ginfo)[pmath[!is.na(pmath)]]
 
+            id <- Class <- label <- NULL
             p <- p + ggtree::geom_hilight(
               data = annotation,
               extend = 0.2,
-              mapping = aes(node = id, fill = Class),
+              mapping = ggplot2::aes(node = id,
+                            fill = Class),
               alpha = 0.3
             ) +
               ggsci::scale_fill_jco() +
@@ -1424,19 +1698,39 @@ setMethod("hc_tree", "STGrid",
 # -------------------------------------------------------------------------
 #      Get the min / max value from ripley's k function
 # -------------------------------------------------------------------------
-
+#' Returns features ordered by Ripley's K-function
+#'
+#' This method returns features ordered by Ripley's K-function results stored in
+#' an \code{STGrid}.
+#'
+#' @param object An \code{STGrid} object.
+#'
+#' @importFrom dplyr group_by filter arrange
+#' @keywords internal
+#' @export
 setGeneric("order_feat_by_ripley",
            function(object)
              standardGeneric("order_feat_by_ripley"))
 
+#' Returns features ordered by Ripley's K-function
+#'
+#' This method returns features ordered by Ripley's K-function results stored in
+#' an \code{STGrid}.
+#'
+#' @param object An \code{STGrid} object.
+#'
+#' @importFrom dplyr group_by filter arrange
+#' @import magrittr
+#' @export
 setMethod("order_feat_by_ripley", "STGrid",
           function(object){
+            feature <- border <- r <- NULL
             ripk <- ripley_k_function(object)
             voi <- ripk %>%
               dplyr::group_by(feature) %>%
               dplyr::filter(border == max(border)) %>%
               dplyr::filter(r == max(r)) %>%
-              dplyr::arrange(desc(border))
+              dplyr::arrange(dplyr::desc(border))
             return(voi$feature)
 })
 

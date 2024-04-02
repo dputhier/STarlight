@@ -6,7 +6,7 @@
 \usage{
 \S4method{cmp_bar_plot}{STCompR}(
   object,
-  features = head(feat_names(object)),
+  features = utils::head(feat_names(object)),
   normalized = FALSE,
   transform = c("None", "log2", "log10", "log"),
   colors = c("#3074BB", "#BE5B52")
@@ -25,4 +25,17 @@
 }
 \description{
 Create a barplot to show counts for selected features.
+}
+\examples{
+example_dataset()
+xen <- Xenium_Mouse_Brain_Coronal_7g
+x_bins <-  bin_x(xen)[181:nbin_x(xen)]
+y_bins <-  bin_y(xen)[101:nbin_y(xen)]
+xen_r1 <- xen[x_bins, y_bins]
+x_bins <-  bin_x(xen)[61:101]
+y_bins <-  bin_y(xen)[101:nbin_y(xen)]
+xen_r2 <- xen[x_bins, y_bins]
+cmp <- stcompr(xen_r1, xen_r2)
+cmp_bar_plot(cmp,
+             features=c("Chat", "Nwd2", "Ano1"))
 }

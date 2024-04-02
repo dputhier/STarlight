@@ -12,4 +12,8 @@
 \description{
 The show method of a STGrid object
 }
+\examples{
+example_dataset()
+show(Xenium_Mouse_Brain_Coronal_7g)
+}
 \keyword{internal}

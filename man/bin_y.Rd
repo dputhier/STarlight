@@ -12,4 +12,8 @@ bin_y(x)
 \description{
 Y bins of a STGrid object.
 }
+\examples{
+example_dataset()
+bin_y(Xenium_Mouse_Brain_Coronal_7g)
+}
 \keyword{internal}

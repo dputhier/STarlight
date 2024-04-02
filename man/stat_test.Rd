@@ -29,4 +29,8 @@ stat_test(
 \description{
 The normalized counts and test results of a STCompR object.
 }
+\examples{
+example_dataset("10819270/files/cmp_xen")
+stat_test(cmp_xen)
+}
 \keyword{internal}

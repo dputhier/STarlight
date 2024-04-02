@@ -31,10 +31,7 @@ A ggplot object displaying the molecule counts distribution.
 Create a boxplot/jitter plot to show molecule counts distribution.
 }
 \examples{
-# Example usage:
-st_grid_1 <- create_STGrid(...)
-st_grid_2 <- create_STGrid(...)
-st_compr_result <- stcompr(st_grid_1, st_grid_2, name_1 = "Condition1", name_2 = "Condition2")
-cmp_boxplot(st_compr_result, normalized = TRUE, transform = "log2", colors = c("blue", "red"))
-
+example_dataset("10819270/files/cmp_xen")
+cmp_xen
+cmp_boxplot(cmp_xen, normalized = TRUE, transform = "log2", colors = c("blue", "red"))
 }

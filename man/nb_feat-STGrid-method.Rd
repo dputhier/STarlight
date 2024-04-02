@@ -12,3 +12,7 @@
 \description{
 The number of features stored in a STGrid object
 }
+\examples{
+example_dataset()
+nb_feat(Xenium_Mouse_Brain_Coronal_7g)
+}

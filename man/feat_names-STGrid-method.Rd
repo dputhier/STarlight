@@ -14,3 +14,7 @@
 \description{
 The features stored in a STGrid object
 }
+\examples{
+example_dataset()
+feat_names(Xenium_Mouse_Brain_Coronal_7g)
+}

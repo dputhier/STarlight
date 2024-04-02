@@ -12,3 +12,7 @@
 \description{
 The size of the bins stored in an STGrid object
 }
+\examples{
+example_dataset()
+bin_size(Xenium_Mouse_Brain_Coronal_7g)
+}

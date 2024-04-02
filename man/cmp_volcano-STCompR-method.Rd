@@ -9,7 +9,7 @@
   x_axis = c("log2_ratio", "log2_odds", "odd_ratio"),
   y_axis = c("p_values", "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr"),
   x_lim = c(-2.5, 2.5),
-  colors = RColorBrewer::brewer.pal(7, "Spectral"),
+  colors = rev(RColorBrewer::brewer.pal(7, "Spectral")),
   text_y_lim = 100,
   text_x_lim = 1,
   text_size = 4
@@ -36,5 +36,10 @@ Options are "p_values", "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", 
 }
 \description{
 Create a boxplot/jitter plot to show molecule counts distribution.
+}
+\examples{
+example_dataset("10819270/files/cmp_xen")
+cmp_xen
+cmp_volcano(cmp_xen)
 }
 \keyword{internal}

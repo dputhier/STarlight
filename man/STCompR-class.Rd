@@ -16,7 +16,7 @@ scaling factors, and statistical test results.
 
 \item{\code{method}}{A character vector specifying the technology used for each condition.}
 
-\item{\code{raw_counts}}{A list storing raw count data for each condition.}
+\item{\code{raw_counts}}{A data.frame storing raw count data for each condition.}
 
 \item{\code{scaling_factor}}{A numeric vector representing the scaling factors used during normalization (to be divided).}
 
@@ -24,15 +24,15 @@ scaling factors, and statistical test results.
 odds ratios, and p-values for each feature.}
 
 \item{\code{pseudo_count}}{The value for the pseudo_count.}
+
+\item{\code{neighborhood}}{a list of feature-feature neighborhood for the two conditions to be compared.}
+
+\item{\code{neighborhood_changes}}{A feature-feature matrix indicative of neighborhood changes.}
 }}
 
 \examples{
 # Example usage:
-st_grid_1 <- create_STGrid(...)
-st_grid_2 <- create_STGrid(...)
-st_compr_result <- stcompr(st_grid_1, st_grid_2, name_1 = "Condition1", name_2 = "Condition2")
-st_compr_object <- new("STCompR", conditions = c("Condition1", "Condition2"),
-                       method = c("Method1", "Method2"), raw_counts = list(...),
-                       scaling_factor = c(1.2, 0.8), stat_test = data.frame(...))
+example_dataset("10819270/files/cmp_xen")
+cmp_xen
 
 }

@@ -28,3 +28,8 @@ are displayed.}
 \description{
 Call the Ripley's k function.
 }
+\examples{
+example_dataset()
+plot_rip_k(compute_k_ripley(Xenium_Mouse_Brain_Coronal_7g[c("Ano1", "Chat", "Ebf3")]))
+
+}

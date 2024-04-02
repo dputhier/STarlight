@@ -47,6 +47,7 @@ stored in the object.
 }
 \examples{
 # Example usage:
-heatmap_cmp(object = my_STCompR_object, hclust_method = "ward.D", dist_method = "euclidean")
+example_dataset("10819270/files/cmp_xen")
+heatmap_cmp(object = cmp_xen, hclust_method = "ward.D", dist_method = "euclidean")
 }
 \keyword{internal}

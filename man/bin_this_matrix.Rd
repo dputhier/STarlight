@@ -22,7 +22,8 @@ binned grid by dividing the x and y axes into bins. It returns the counts of the
 each bin along with additional information about the binning process.
 }
 \examples{
-# Create a binned grid from molecule coordinates
-bin_mat(coord = my_coord, bin_size = 25)
+example_dataset()
+res <- bin_this_matrix(Xenium_Mouse_Brain_Coronal_7g@coord)
+
 }
 \keyword{internal}

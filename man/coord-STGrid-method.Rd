@@ -14,3 +14,7 @@
 \description{
 The coordinates stored in a STGrid object
 }
+\examples{
+example_dataset()
+head(coord(Xenium_Mouse_Brain_Coronal_7g))
+}

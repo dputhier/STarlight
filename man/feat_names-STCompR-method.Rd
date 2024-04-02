@@ -12,3 +12,7 @@
 \description{
 The features stored in a STCompR object
 }
+\examples{
+example_dataset("10819270/files/cmp_xen")
+feat_names(cmp_xen)
+}

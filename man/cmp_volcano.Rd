@@ -37,4 +37,10 @@ Options are "p_values", "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", 
 \description{
 Create a boxplot/jitter plot to show molecule counts distribution.
 }
+\examples{
+example_dataset("10819270/files/cmp_xen")
+cmp_xen
+cmp_volcano(cmp_xen)
+
+}
 \keyword{internal}
