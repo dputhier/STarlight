@@ -1,12 +1,30 @@
 ---
-title: "Usage (xenium)"
+author: "D. Puthier"
+title: "Guided tutorial"
 author: "D. Puthier"
 date: "2024-03-06"
-output: html_document
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteEngine{knitr::knitr}
+  %\VignetteIndexEntry{Guided tutorial}
+  %\usepackage[UTF-8]{inputenc}
 ---
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r loadlib}
+library(matrixStats)
+library(magrittr)
+library(Seurat)
+library(stcompr)
+library(patchwork)
+library(ggplot2)
+library(dplyr)
+stcompr::set_verb_level(1)
+library(stcompr)
 ```
 
 ## Loading data
@@ -14,18 +32,13 @@ knitr::opts_chunk$set(echo = TRUE)
 Spatial transcriptomics enables the spatially resolved measurement of gene expression within tissue sections, providing valuable insights into the spatial organization of biological processes. Assigning RNA molecules to cells using a segmentation process is generally the first step in the analysis. This approach can be tricky for a number of reasons, including high cell density, the absence or poor quality of surface labelling, etc. The `stcompr` package is intended to perform analysis of RNA molecules using a grid-based approach (sometimes referred as 'rasterization'). The `load_spatial()`is the entry point of the `stcompr` package It will load the molecule coordinates and create a 2D binned grid with default size 25µm.
 
 
-```{r loadlib}
-remotes::install_version("matrixStats", version="1.1.0")
-library(matrixStats)
-library(stcompr)
-library(patchwork)
-library(ggplot2)
-library(dplyr)
-stcompr::set_verbosity(1)
+```{r loadfile}
 st_obj <- load_spatial("~/Downloads/Xenium_V1_FF_Mouse_Brain_Coronal_Subset_CTX_HP_outs/", 
                          method = "xenium",
-                         verbose = FALSE)
+                         verbose = FALSE, 
+                         bin_size = 25)
 ```
+
 
 # The STGrid object
 
@@ -42,7 +55,7 @@ summary(st_obj)
 slotNames(st_obj)
 ```
 
-```{r show_methods, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
+```{r show_st_methods, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
 stcompr::show_methods()
 ```
 
@@ -123,8 +136,8 @@ spatial_image(st_obj, feat="Ano1", grid = 20,
 One can **zoom** for instance in the region with high "Ano1" molecule density in the upper right corner of the previous image. Here we use `rebin()` to increase the resolution specifically on "Ano1".
 
 ```{r zoom}
-x_bins <-  bin_x(st_obj)[181:length(bin_x(st_obj))]
-y_bins <-  bin_y(st_obj)[101:length(bin_y(st_obj))]
+x_bins <-  bin_x(st_obj)[181:nbin_x(st_obj)]
+y_bins <-  bin_y(st_obj)[101:nbin_y(st_obj)]
 st_obj_r1 <- st_obj[x_bins, y_bins]
 spatial_image(re_bin(st_obj_r1[c("Ano1", "Chat"),], bin_size = 5, verbose = FALSE), 
               feat=c("Ano1", "Chat"), logb = 10,
@@ -153,7 +166,7 @@ First we prepare an stgrid object containing another region of the tissue. We wi
 
 ```{r stcompr}
 x_bins <-  bin_x(st_obj)[61:101]
-y_bins <-  bin_y(st_obj)[101:length(bin_y(st_obj))]
+y_bins <-  bin_y(st_obj)[101:nbin_y(st_obj)]
 st_obj_r2 <- st_obj[x_bins, y_bins]
 ```
 
@@ -166,7 +179,7 @@ spatial_image(st_obj_r1, feature="sum_of_cts") + Seurat::NoLegend() +
 Now we can create an STCompR object using the stcompr() function. 
 
 ```{r stcompr_create}
-cmp <- stcompr(st_obj_r1, st_obj_r2, name_1="region_1", name_2="region_2")
+cmp <- stcompr(st_obj_r2, st_obj_r1, name_1="region_1", name_2="region_2")
 ```
 
 ## Count distributions
@@ -239,10 +252,11 @@ heatmap_cmp(cmp, filter = 1, size = 4)
 As an example we can clearly see that  Kctd8, Necab2, Nrp2 or Chat molecules relocate toward Nwd2. indeed, a negative value indictae 
 
 ```{r heatmap_cmp_img}
-cmp_images(st_obj_r1, st_obj_r2, feat_list = c("Nwd2",
-                                             "Kctd8",
-                                             "Necab2",
-                                             "Nrp2", "Chat"), names=c("Region_1", "Region_2"))
+cmp_images(st_obj_r2, st_obj_r1, feat_list = c("Nwd2",
+                                               "Kctd8",
+                                               "Ccn2",
+                                               "Cplx3"), 
+           names=c("Region_1", "Region_2"))
 ```
 
 ### Calling UMAP
@@ -286,7 +300,7 @@ ImageDimPlot(nano.obj, fov = "lung5.rep1", axes = TRUE, cols = "glasbey")
 
 ```{r}
 cell_coord <- data.frame(GetTissueCoordinates(nano.obj)[,1:2],
-                         setNames(nano.obj$predicted.annotation.l1, NULL))
+                         stats::setNames(nano.obj$predicted.annotation.l1, NULL))
 colnames(cell_coord) <- c("x", "y", "cell")
 cell_coord$x <- round(cell_coord$x, 2)
 cell_coord$y <- round(cell_coord$y, 2)
