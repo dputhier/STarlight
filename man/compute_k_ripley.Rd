@@ -34,6 +34,6 @@ This method calculates Ripley's reduced second moment function, K(r), for each f
 }
 \examples{
 example_dataset()
-Xenium_Mouse_Brain_Coronal_7g <- compute_k_ripley(Xenium_Mouse_Brain_Coronal_7g)
+Xenium_Mouse_Brain_Coronal_7g <- compute_k_ripley(Xenium_Mouse_Brain_Coronal_7g, verbose=FALSE)
 }
 \keyword{internal}

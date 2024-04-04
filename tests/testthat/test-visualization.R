@@ -1,11 +1,12 @@
-library(stcompr)
-set_verb_level(0)
 library(testthat)
-
-example_dataset()
-test_data <- Xenium_Mouse_Brain_Coronal_7g
-
 test_that("spatial_image...", {
+
+
+  library(stcompr)
+  set_verb_level(0)
+  example_dataset()
+  test_data <- Xenium_Mouse_Brain_Coronal_7g
+
   # Test that spatial_image does not throw an error
   expect_no_error(spatial_image(test_data, feat=feat_names(test_data)[1]))
 
@@ -53,14 +54,18 @@ test_that("spatial_image...", {
 
 })
 
-context("spatial_plot function")
 
 
-example_dataset()
-test_data <- Xenium_Mouse_Brain_Coronal_7g
-test_colors <- c("red", "blue", "green")
+
+
 
 test_that("spatial_plot...", {
+
+  library(stcompr)
+  set_verb_level(0)
+  example_dataset()
+  test_data <- Xenium_Mouse_Brain_Coronal_7g
+  test_colors <- c("red", "blue", "green")
 
   # Test case 1: Check if object is provided
   expect_error(spatial_plot())
@@ -97,11 +102,15 @@ test_that("spatial_plot...", {
 
 })
 
-example_dataset("10819270/files/cmp_xen")
-test_data <- cmp_xen
-feat <- feat_names(cmp_xen)
+
 
 test_that("cmp_bar_plot...", {
+
+  library(stcompr)
+  set_verb_level(0)
+  example_dataset("10819270/files/cmp_xen")
+  test_data <- cmp_xen
+  feat <- feat_names(cmp_xen)
 
   expect_no_error(cmp_bar_plot(test_data, feat=feat))
 
@@ -118,11 +127,15 @@ test_that("cmp_bar_plot...", {
 })
 
 
-example_dataset("10819270/files/cmp_xen")
-test_data <- cmp_xen
-feat <- feat_names(cmp_xen)
+
 
 test_that("cmp_boxplot...", {
+
+  library(stcompr)
+  set_verb_level(0)
+  example_dataset("10819270/files/cmp_xen")
+  test_data <- cmp_xen
+  feat <- feat_names(cmp_xen)
 
   expect_no_error(cmp_boxplot(test_data))
 
@@ -144,11 +157,15 @@ test_that("cmp_boxplot...", {
 
 })
 
-example_dataset("10819270/files/cmp_xen")
-test_data <- cmp_xen
-feat <- feat_names(cmp_xen)
+
 
 test_that("cmp_volcano...", {
+
+  library(stcompr)
+  set_verb_level(0)
+  example_dataset("10819270/files/cmp_xen")
+  test_data <- cmp_xen
+  feat <- feat_names(cmp_xen)
 
   expect_equal(round(sum(cmp_volcano(cmp_xen)$data$x), 2), -1.56)
 
@@ -167,12 +184,16 @@ test_that("cmp_volcano...", {
   expect_no_error(cmp_volcano(cmp_xen, color=c("red", "blue")))
 })
 
-example_dataset()
-test_data <- Xenium_Mouse_Brain_Coronal_7g
+
 
 test_that("plot_rip_k", {
 
-  test_data <-  compute_k_ripley(test_data)
+  library(stcompr)
+  set_verb_level(0)
+  example_dataset()
+  test_data <- Xenium_Mouse_Brain_Coronal_7g
+
+  test_data <-  compute_k_ripley(test_data, verbose = FALSE)
 
   expect_no_error(plot_rip_k(test_data))
 
@@ -184,13 +205,17 @@ test_that("plot_rip_k", {
 })
 
 
-example_dataset()
-test_data <- Xenium_Mouse_Brain_Coronal_7g
-t_1 <- test_data[bin_x(test_data)[180:200], bin_x(test_data)[100:140],]
-t_2 <- test_data[bin_x(test_data)[101:141], bin_x(test_data)[61:101],]
-feat <- feat_names(test_data)
+
 
 test_that("cmp_images...", {
+
+  library(stcompr)
+  set_verb_level(0)
+  example_dataset()
+  test_data <- Xenium_Mouse_Brain_Coronal_7g
+  t_1 <- test_data[bin_x(test_data)[180:200], bin_x(test_data)[100:140],]
+  t_2 <- test_data[bin_x(test_data)[101:141], bin_x(test_data)[61:101],]
+  feat <- feat_names(test_data)
 
   expect_no_error(cmp_images(test_data, feat_list = feat[1:2]))
 

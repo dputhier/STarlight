@@ -103,7 +103,8 @@ setMethod(
 #' @keywords internal
 setMethod("dim", signature(x = "STGrid"),
           function(x)
-            dim(bin_mat(x, del_bin = TRUE)))
+            c(length(bin_x(x)), length(bin_y(x)))
+)
 
 #' @title Column names of a STGrid object.
 #' @description
@@ -631,7 +632,7 @@ setMethod("rm_controls", "STGrid",
 #' @keywords internal
 #' @examples
 #' example_dataset()
-#' Xenium_Mouse_Brain_Coronal_7g <- compute_k_ripley(Xenium_Mouse_Brain_Coronal_7g)
+#' Xenium_Mouse_Brain_Coronal_7g <- compute_k_ripley(Xenium_Mouse_Brain_Coronal_7g, verbose=FALSE)
 #' head(ripley_k_function(Xenium_Mouse_Brain_Coronal_7g))
 #' @export
 setGeneric("ripley_k_function",
@@ -646,7 +647,7 @@ setGeneric("ripley_k_function",
 #' @keywords internal
 #' @examples
 #' example_dataset()
-#' Xenium_Mouse_Brain_Coronal_7g <- compute_k_ripley(Xenium_Mouse_Brain_Coronal_7g)
+#' Xenium_Mouse_Brain_Coronal_7g <- compute_k_ripley(Xenium_Mouse_Brain_Coronal_7g, verbose=FALSE)
 #' head(ripley_k_function(Xenium_Mouse_Brain_Coronal_7g))
 #' @export
 setMethod("ripley_k_function", "STGrid",
@@ -971,7 +972,7 @@ setMethod (f = '[[<-',
 #'
 #' @examples
 #' example_dataset()
-#' Xenium_Mouse_Brain_Coronal_7g <- compute_k_ripley(Xenium_Mouse_Brain_Coronal_7g)
+#' Xenium_Mouse_Brain_Coronal_7g <- compute_k_ripley(Xenium_Mouse_Brain_Coronal_7g, verbose=FALSE)
 #' @keywords internal
 #' @export compute_k_ripley
 setGeneric("compute_k_ripley",
@@ -997,7 +998,7 @@ setGeneric("compute_k_ripley",
 #'
 #' @examples
 #' example_dataset()
-#' Xenium_Mouse_Brain_Coronal_7g <- compute_k_ripley(Xenium_Mouse_Brain_Coronal_7g)
+#' Xenium_Mouse_Brain_Coronal_7g <- compute_k_ripley(Xenium_Mouse_Brain_Coronal_7g, verbose=FALSE)
 #'
 #' @importFrom spatstat.geom ppp owin
 #' @importFrom spatstat.explore Kest

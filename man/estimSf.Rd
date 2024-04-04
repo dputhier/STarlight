@@ -7,7 +7,7 @@
 estimSf(cts)
 }
 \arguments{
-\item{cds}{A DESeqDataSet object containing count data.}
+\item{cts}{A matrix with count data.}
 }
 \value{
 A numeric vector of size factors for normalization.

@@ -1,13 +1,17 @@
-library(stcompr)
-set_verb_level(0)
 library(testthat)
-
-example_dataset()
-test_data <- Xenium_Mouse_Brain_Coronal_7g
-
 test_that("STGrid...", {
 
-  expect_equal(sum(dim(test_data)), 30963)
+  library(stcompr)
+  set_verb_level(0)
+
+
+  example_dataset()
+  test_data <- Xenium_Mouse_Brain_Coronal_7g
+  x_bins <-  bin_x(test_data)[181:nbin_x(test_data)]
+  y_bins <-  bin_y(test_data)[101:nbin_y(test_data)]
+  xen_1 <- test_data[x_bins, y_bins]
+
+  expect_equal(sum(dim(test_data)), 360)
   expect_equal(ncol(test_data), 142)
   expect_equal(nrow(test_data), 218)
   expect_equal(length(col_names(test_data)), 218)
@@ -43,13 +47,14 @@ test_that("STGrid...", {
   expect_equal(nrow(coord(test_data["Ano1",])) < 152958, TRUE)
   expect_equal(nrow(coord(test_data[feat_names(test_data),])) == 152958, TRUE)
   expect_equal(nrow(coord(test_data[,])) == 152958, TRUE)
+  expect_equal(nb_items(test_data[bin_x(test_data), bin_y(test_data)]), nb_items(test_data))
   expect_equal(unique(coord(xen_1[bin_x(xen_1)[1], bin_y(xen_1)[1]])$feature), "Necab2")
   expect_equal(feat_names(xen_1[bin_x(xen_1)[1], bin_y(xen_1)[1]]), "Necab2")
 
   ## compute_k_ripley
 
-  expect_equal(sum(round(compute_k_ripley(xen_1["Ano1",])@ripley_k_function$border, 0)), 57780387)
-  expect_equal(sum(round(compute_k_ripley(xen_1["Ano1",])@ripley_k_function$iso, 0)), 51996873)
+  expect_equal(sum(round(compute_k_ripley(xen_1["Ano1",], verbose = FALSE)@ripley_k_function$border, 0)), 57780387)
+  expect_equal(sum(round(compute_k_ripley(xen_1["Ano1",], verbose = FALSE)@ripley_k_function$iso, 0)), 51996873)
 
   ## load_spatial
   fp <- file.path(system.file("extdata", package = "stcompr"), "tyni_xenium.txt")

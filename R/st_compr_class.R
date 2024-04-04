@@ -61,7 +61,7 @@ setClass("STCompR",
 #' Size factors are calculated as the median of the ratios of counts to their
 #' geometric mean across all samples.
 #'
-#' @param cds A DESeqDataSet object containing count data.
+#' @param cts A matrix with count data.
 #'
 #' @return A numeric vector of size factors for normalization.
 #'
@@ -406,7 +406,7 @@ setMethod(
     }
   }
 
-    if(!is.null(only_feat)){
+  if(!is.null(only_feat)){
       only_feat <- unique(only_feat)
       if(all(del_feat %in% feat_names(object))){
         obj <- obj[rownames(obj) %in% only_feat,
@@ -414,9 +414,9 @@ setMethod(
       }else{
         print_this_msg("Some feature to delete were not found in the object", msg_type = "STOP")
       }
-    }
+  }
 
-  if(length(feat_names(obj)) == 0){
+  if(nrow(obj) == 0){
     print_this_msg("No more feature left", msg_type = "STOP")
   }
 
@@ -425,7 +425,7 @@ setMethod(
     obj <- obj[rowSums(TF) > 0 , colSums(TF) > 0]
   }
 
-  return(list(p=obj, dist_method=dist_method, hclust_method=hclust_method, legendName=legend_name))
+
   print_this_msg("Calling ggheatmap...")
   p <- ggheatmap::ggheatmap(obj,
                  dist_method=dist_method,
@@ -446,7 +446,7 @@ setMethod(
   #                     theme=list(ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90,
   #                                                                 size = size, hjust=1),
   #                                      axis.text.y = ggplot2::element_text(size=size))))
-  print(p)
+  p
 
 }
 )

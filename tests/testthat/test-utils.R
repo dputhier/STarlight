@@ -1,9 +1,9 @@
-library(stcompr)
 library(testthat)
-set_verb_level(0)
-context("utils function")
-
 test_that("check_this_var function works correctly", {
+
+  library(stcompr)
+  set_verb_level(0)
+
   # Test NULL input
   expect_error(check_this_var(NULL), " should not be NULL.")
 
@@ -59,6 +59,11 @@ test_that("check_this_var function works correctly", {
 # Test cases for check_this_file function
 
 test_that("check_this_file function works correctly", {
+
+  library(stcompr)
+  library(testthat)
+  set_verb_level(0)
+
   # Test invalid file_path (NULL)
   expect_error(check_this_file(NULL), "Error: |-- STOP : file_path  should not be NULL")
 
