@@ -126,7 +126,7 @@ This command retrieves spatial transcriptomic data for genes positioned 10 throu
 
 ### The spatial_image() function
 
-The `spatial_image()` function allows for the visualization of the density of spatial molecules across the tisse section. The following examples demonstrate the visualization of a single gene. The grid=TRUE argument allow to show bin numbering in x and y dimension. This eases the selection of particular regions.
+The `spatial_image()` function allows for the visualization of the density of spatial molecules across the tissue section. The following examples demonstrate the visualization of a single gene. The grid=TRUE argument allow to show bin numbering in x and y dimension. This eases the selection of particular regions.
 
 ```{r single_gene, warning=FALSE, results='hide', echo = FALSE, eval=TRUE}
 spatial_image(st_obj, feat="Ano1", grid = 20, 
