@@ -827,6 +827,12 @@ cmp_images <- function(...,
   print_this_msg("Checking STGrid objects", msg_type = "DEBUG")
 
   st_list <- list(...)
+
+  bin_x_order <- unlist(lapply(st_list, bin_x))
+  bin_x_order <- bin_x_order[!duplicated(bin_x_order)]
+  bin_y_order <- unlist(lapply(st_list, bin_y))
+  bin_y_order <- bin_y_order[!duplicated(bin_y_order)]
+
   if(any(unlist(lapply(lapply(st_list, class), "[", 1)) != "STGrid")){
     print_this_msg("Object should be of type STGrid", msg_type = "STOP")
   }
@@ -854,6 +860,7 @@ cmp_images <- function(...,
                     melt_tab = TRUE,
                     as_factor = TRUE,
                     feat_list =feat_list)
+
 
   print_this_msg("Preparing data.", msg_type = "DEBUG")
 
@@ -907,6 +914,13 @@ cmp_images <- function(...,
   print_this_msg("Building diagram", msg_type = "DEBUG")
 
   value <- bin_x <- bin_y <- NULL
+
+  st_list$bin_x <- factor(st_list$bin_x,
+                          levels=bin_x_order,
+                          ordered = TRUE)
+  st_list$bin_y <- factor(st_list$bin_y,
+                          levels=bin_y_order,
+                          ordered = TRUE)
 
   p <- ggplot2::ggplot(data=st_list,
                        mapping = ggplot2::aes(x=bin_x,
