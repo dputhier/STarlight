@@ -1124,6 +1124,7 @@ load_spatial <- function(path = "",
                                     "xenium"),
                          bin_size = 25,
                          control = NULL,
+                         sep="\t",
                          verbose = TRUE) {
   method <- match.arg(method)
 
