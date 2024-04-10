@@ -22,9 +22,9 @@
 #' fov_selection(data_set)
 #' }
 #' @importFrom shiny reactiveValues shinyApp selectInput actionButton renderUI
-#'              uiOutput selectizeInput renderPlot observeEvent downloadHandler
+#'              uiOutput selectizeInput renderPlot observeEvent downloadHandler fluidRow
 #' @importFrom shinydashboard dashboardPage dashboardHeader dashboardSidebar
-#'              dashboardBody sidebarMenu menuItem box fluidRow
+#'              dashboardBody sidebarMenu menuItem box
 #' @importFrom ggplot2 ggplot aes geom_point theme_bw scale_color_manual theme
 #'              element_text element_blank guide_legend geom_abline geom_segment
 #' @importFrom colourpicker colourInput

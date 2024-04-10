@@ -16,8 +16,9 @@ load_spatial(
 }
 \arguments{
 \item{path}{Either a file (if method is set to "coordinates") or a directory (if method
-is set to "merscope"). If method is set to "coordinates" the file should contain 3 columns
-("x", "y", "gene"), ("x", "y", "feature") or ("x", "y", "cell").}
+is set to "merscope"). If method is set to "coordinates" the file should contain at least 3 columns
+("x", "y", "gene"), ("x", "y", "feature") or ("x", "y", "cell"). However, when column contains "global_x",
+"global_y" and "gene", "global_x" and "global_y" will be prefered to "x" and "y" (to support Merscope csv format).}
 
 \item{method}{The type of technology.}
 

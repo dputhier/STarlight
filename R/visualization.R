@@ -136,32 +136,14 @@ setMethod("spatial_image",
 
             if ("sum_of_cts" %in% features) {
               print_this_msg("Using sum_of_cts", msg_type = "DEBUG")
-
-              spatial_matrix <- object@bin_mat
-
-              if (length(features) == 1) {
-                sub_feat <- feat_names(object)
-                spatial_matrix <-
-                  spatial_matrix[, c("bin_x", "bin_y", sub_feat)]
-                tmp <- spatial_matrix[, sub_feat]
-                tmp$sum_of_cts <- rowSums(tmp)
-                spatial_matrix$sum_of_cts <- tmp$sum_of_cts
-                spatial_matrix <-
-                  spatial_matrix[, c("bin_x", "bin_y", "sum_of_cts")]
-                tmp <- tmp[, "sum_of_cts", drop = FALSE]
-              } else{
-                sub_feat <- setdiff(features, "sum_of_cts")
-                spatial_matrix <-
-                  spatial_matrix[, c("bin_x", "bin_y", sub_feat)]
-                tmp <- spatial_matrix[, sub_feat, drop = FALSE]
-                tmp$sum_of_cts <- rowSums(tmp)
-                spatial_matrix$sum_of_cts <- tmp$sum_of_cts
-              }
+              spatial_matrix <- object@bin_mat[, c("bin_x", "bin_y", setdiff(features, "sum_of_cts"))]
+              spatial_matrix$sum_of_cts <- object@meta$count_sums
 
             } else{
               spatial_matrix <- object@bin_mat[, c("bin_x", "bin_y", features)]
-              tmp <- spatial_matrix[, features, drop = FALSE]
             }
+
+            tmp <- spatial_matrix[, features, drop = FALSE]
 
             for (i in 1:ncol(tmp)) {
               if (saturation < 1) {
@@ -866,6 +848,7 @@ setMethod("plot_rip_k", signature("STGrid"),
 #'
 #' @importFrom ggplot2 aes geom_tile scale_fill_gradientn theme xlab ylab element_blank element_rect element_text
 #' @importFrom ggh4x facet_grid2
+#' @importFrom grid unit
 #' @examples
 #' example_dataset()
 #' xen <- Xenium_Mouse_Brain_Coronal_7g
@@ -887,6 +870,7 @@ cmp_images <- function(...,
                        logb = 10,
                        pseudo_count = 1,
                        condition_vs_feat = TRUE) {
+
   if (saturation > 1 | saturation < 0)
     print_this_msg("Saturation should be between 0 and 1.",
                    msg_type = "STOP")
@@ -897,11 +881,6 @@ cmp_images <- function(...,
   print_this_msg("Checking STGrid objects", msg_type = "DEBUG")
 
   st_list <- list(...)
-
-  bin_x_order <- unlist(lapply(st_list, bin_x))
-  bin_x_order <- bin_x_order[!duplicated(bin_x_order)]
-  bin_y_order <- unlist(lapply(st_list, bin_y))
-  bin_y_order <- bin_y_order[!duplicated(bin_y_order)]
 
   if (any(unlist(lapply(lapply(st_list, class), "[", 1)) != "STGrid")) {
     print_this_msg("Object should be of type STGrid", msg_type = "STOP")
@@ -919,7 +898,19 @@ cmp_images <- function(...,
                      msg_type = "STOP")
   }
 
+  for (i in 1:length(st_list)) {
+    if (!all(feat_list %in% c(feat_names(st_list[[i]]), "sum_of_cts"))) {
+      print_this_msg("The feature was not found in the object.", msg_type = "STOP")
+    }
+  }
+
   print_this_msg("Subsetting STGrid objects.", msg_type = "DEBUG")
+
+  st_list_grid <- st_list
+  #bin_x_order <- unlist(lapply(st_list, bin_x))
+  #bin_x_order <- bin_x_order[!duplicated(bin_x_order)]
+  #bin_y_order <- unlist(lapply(st_list, bin_y))
+  #bin_y_order <- bin_y_order[!duplicated(bin_y_order)]
 
   for (i in 1:length(st_list)) {
     st_list[[i]] <- st_list[[i]][feat_list,]
@@ -933,6 +924,20 @@ cmp_images <- function(...,
     feat_list = feat_list
   )
 
+  # Lot of manipulation to try to fix a weird bug...
+  for (i in 1:length(st_list)) {
+    st_list[[i]]$bin_x <- factor(st_list[[i]]$bin_x,
+                                 level=bin_x(st_list_grid[[i]]),
+                                 ordered = TRUE)
+    st_list[[i]]$bin_x <- as.numeric(st_list[[i]]$bin_x)
+    st_list[[i]]$bin_x <- as.factor(st_list[[i]]$bin_x)
+
+    st_list[[i]]$bin_y <- factor(st_list[[i]]$bin_y,
+                                 level=bin_y(st_list_grid[[i]]),
+                                 ordered = TRUE)
+    st_list[[i]]$bin_y <- as.numeric(st_list[[i]]$bin_y)
+    st_list[[i]]$bin_y <- as.factor(st_list[[i]]$bin_y)
+  }
 
   print_this_msg("Preparing data.", msg_type = "DEBUG")
 
@@ -966,6 +971,7 @@ cmp_images <- function(...,
     st_list[[i]]$condition <- names[i]
   }
 
+
   print_this_msg("Merging data.", msg_type = "DEBUG")
 
   st_list <- do.call(rbind, st_list)
@@ -987,11 +993,20 @@ cmp_images <- function(...,
   value <- bin_x <- bin_y <- NULL
 
   st_list$bin_x <- factor(st_list$bin_x,
-                          levels = bin_x_order,
+                          levels = levels(st_list$bin_x),
                           ordered = TRUE)
+
   st_list$bin_y <- factor(st_list$bin_y,
-                          levels = bin_y_order,
+                          levels = levels(st_list$bin_y),
                           ordered = TRUE)
+
+  st_list$feature <- factor(st_list$feature,
+                            levels = feat_list,
+                            ordered = TRUE)
+
+  st_list$condition <- factor(st_list$condition,
+                            levels = names,
+                            ordered = TRUE)
 
   p <- ggplot2::ggplot(data = st_list,
                        mapping = ggplot2::aes(x = bin_x,
@@ -1012,12 +1027,14 @@ cmp_images <- function(...,
     p <-
       p + ggh4x::facet_grid2(condition ~ feature,
                              scale = "free",
-                             independent = "x")
+                             independent = "x") +
+      theme(panel.spacing = grid::unit(0.25, "lines"))
   } else{
     p <-
       p + ggh4x::facet_grid2(feature ~ condition,
                              scale = "free",
-                             independent = "y")
+                             independent = "y") +
+      theme(panel.spacing = grid::unit(0.25, "lines"))
   }
 
   p

@@ -343,17 +343,23 @@ setMethod("bin_mat", "STGrid",
                    feat_list = character(),
                    melt_tab = FALSE,
                    del_bin = FALSE) {
+
             if (length(feat_list) == 0) {
               feat_list <- feat_names(object)
             }
 
-            this_bin_mat <- object@bin_mat
+            if("sum_of_cts" %in% feat_list){
+              this_bin_mat <- object@bin_mat
+              this_bin_mat$sum_of_cts <- object@meta$count_sums
+            }else{
+              this_bin_mat <- object@bin_mat
+            }
+
             if (del_bin) {
               this_bin_mat <- this_bin_mat[, feat_list]
             } else{
               this_bin_mat <- this_bin_mat[, c("bin_x", "bin_y", feat_list)]
             }
-
 
             if (as_factor) {
               this_bin_mat$bin_x <- factor(this_bin_mat$bin_x,
@@ -1103,8 +1109,9 @@ setMethod("compute_k_ripley", signature("STGrid"),
 #' It will load the molecule coordinates and create a 2D binned grid with default size 25µm.
 #'
 #' @param path Either a file (if method is set to "coordinates") or a directory (if method
-#' is set to "merscope"). If method is set to "coordinates" the file should contain 3 columns
-#' ("x", "y", "gene"), ("x", "y", "feature") or ("x", "y", "cell").
+#' is set to "merscope"). If method is set to "coordinates" the file should contain at least 3 columns
+#' ("x", "y", "gene"), ("x", "y", "feature") or ("x", "y", "cell"). However, when column contains "global_x",
+#' "global_y" and "gene", "global_x" and "global_y" will be prefered to "x" and "y" (to support Merscope csv format).
 #' @param method The type of technology.
 #' @param bin_size Numeric value representing the bin size (default to 25).
 #' @param control A regular expression to identify controls. As the function computes the sum of
@@ -1155,7 +1162,11 @@ load_spatial <- function(path = "",
     spat_input <- as.data.frame(data.table::fread(path,
                                                   sep = sep,
                                                   head = TRUE, nThread = threads))
-    col_needed <- c("x", "y")
+    if(all(c("global_x", "global_y") %in% colnames(spat_input))){
+      col_needed <- c("global_x", "global_y")
+    }else{
+      col_needed <- c("x", "y")
+    }
 
     if("cell" %in% colnames(spat_input)){
       col_needed <- c(col_needed, "cell")
@@ -1178,7 +1189,7 @@ load_spatial <- function(path = "",
 
   }
 
-  colnames(spat_input)[3] <- "feature"
+  colnames(spat_input) <- c("x","y", "feature")
 
   bin_matrix <- bin_this_matrix(coord = spat_input,
                                 bin_size = bin_size,
