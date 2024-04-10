@@ -1765,3 +1765,43 @@ setMethod("order_feat_by_ripley", "STGrid",
             return(voi$feature)
 })
 
+# -------------------------------------------------------------------------
+#      Check consistency of a list of st_grid
+# -------------------------------------------------------------------------
+#' Check Validity of STGrid List and Feature List
+#'
+#' Validates a list of STGrid objects and an optional list of features.
+#' Ensures that the list contains at least one STGrid object, all objects in the
+#' list are of type STGrid, and all specified features exist in the STGrid objects.
+#'
+#' @param st_list A list of objects to be validated, where each object should be
+#'        of class 'STGrid'.
+#' @param feat_list An optional vector of feature names to be checked across
+#'        all STGrid objects in 'st_list'. If 'NULL', only the STGrid object
+#'        validation is performed.
+#'
+#' @return Invisible NULL. The function is called for its side effect of
+#'         stopping execution with an error message if any validation fails.
+#'
+#' @examples
+#' example_dataset()
+#' check_st_list(list(Xenium_Mouse_Brain_Coronal_7g, Xenium_Mouse_Brain_Coronal_7g))
+#' @keywords internal
+#' @export
+#'
+check_st_list <- function(st_list,
+                          feat_list=NULL){
+  if (length(st_list) < 1) {
+    print_this_msg("Need at least one experiment !!", msg_type = "STOP")
+  }
+
+  if (any(unlist(lapply(lapply(st_list, class), "[", 1)) != "STGrid")) {
+    print_this_msg("Object should be of type STGrid", msg_type = "STOP")
+  }
+
+  for (i in 1:length(st_list)) {
+    if (!all(feat_list %in% c(feat_names(st_list[[i]]), "sum_of_cts"))) {
+      print_this_msg("The feature was not found in the object.", msg_type = "STOP")
+    }
+  }
+}
