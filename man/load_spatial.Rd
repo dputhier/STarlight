@@ -10,6 +10,7 @@ load_spatial(
   bin_size = 25,
   control = NULL,
   sep = "\\t",
+  threads = 1,
   verbose = TRUE
 )
 }
@@ -26,6 +27,8 @@ is set to "merscope"). If method is set to "coordinates" the file should contain
 counts, this will allow to delete these blanks/controls for computation.}
 
 \item{sep}{The separator when method is set to "coordinates" (default "\\t").}
+
+\item{threads}{The number of threads (see data.table::fread).}
 
 \item{verbose}{Whether to display the progress bar.}
 }

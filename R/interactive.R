@@ -17,9 +17,9 @@
 #' #' \dontrun{
 #' example_dataset()
 #' xen <- Xenium_Mouse_Brain_Coronal_7g
-#' visual_feature_picker(coord(xen))
+#' fov_selection(coord(xen))
 #' data_set <- data.frame(x = runif(1000, 0, 1000), y = runif(1000, 0, 1000), feature = sample(c("Feature1", "Feature2"), 100, replace = TRUE))
-#' visual_feature_picker(data_set)
+#' fov_selection(data_set)
 #' }
 #' @importFrom shiny reactiveValues shinyApp selectInput actionButton renderUI
 #'              uiOutput selectizeInput renderPlot observeEvent downloadHandler
@@ -31,7 +31,8 @@
 #' @importFrom secr pointsInPolygon
 #' @export
 #'
-visual_feature_picker <- function(object=NULL) {
+
+fov_selection <- function(object=NULL) {
   if(is.null(object))
     print_this_msg("Need an input object.")
   initialize_data <- function() {

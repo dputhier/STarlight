@@ -1110,6 +1110,7 @@ setMethod("compute_k_ripley", signature("STGrid"),
 #' @param control A regular expression to identify controls. As the function computes the sum of
 #' counts, this will allow to delete these blanks/controls for computation.
 #' @param sep The separator when method is set to "coordinates" (default "\\t").
+#' @param threads The number of threads (see data.table::fread).
 #' @param verbose Whether to display the progress bar.
 #' @return An object of class STGrid.
 #' @importFrom Seurat ReadVizgen
@@ -1126,6 +1127,7 @@ load_spatial <- function(path = "",
                          bin_size = 25,
                          control = NULL,
                          sep="\t",
+                         threads=1,
                          verbose = TRUE) {
   method <- match.arg(method)
 
@@ -1152,7 +1154,7 @@ load_spatial <- function(path = "",
     check_this_file(path, mode = "read")
     spat_input <- as.data.frame(data.table::fread(path,
                                                   sep = sep,
-                                                  head = TRUE))
+                                                  head = TRUE, nThread = threads))
     col_needed <- c("x", "y")
 
     if("cell" %in% colnames(spat_input)){
