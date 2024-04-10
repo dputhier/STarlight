@@ -9,6 +9,7 @@ load_spatial(
   method = c("coordinates", "merscope", "xenium"),
   bin_size = 25,
   control = NULL,
+  sep = "\\t",
   verbose = TRUE
 )
 }
@@ -23,6 +24,8 @@ is set to "merscope"). If method is set to "coordinates" the file should contain
 
 \item{control}{A regular expression to identify controls. As the function computes the sum of
 counts, this will allow to delete these blanks/controls for computation.}
+
+\item{sep}{The separator when method is set to "coordinates" (default "\\t").}
 
 \item{verbose}{Whether to display the progress bar.}
 }

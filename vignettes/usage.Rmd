@@ -209,7 +209,6 @@ cmp_images(st_obj_r1,
 ```
 
 
-           
 # Molecule clustering
 
 ## K Ripley's function

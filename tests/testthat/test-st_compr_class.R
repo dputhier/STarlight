@@ -61,5 +61,4 @@ test_that("STCompR...", {
   expect_equal(round(sum(-log10(stat_test(cmp_xen)$p_values))), 971)
   expect_equal(round(sum(abs(stat_test(cmp_xen)$log2_ratio))), 7)
 
-
 })

@@ -37,21 +37,20 @@
 #'              size=0.05)
 #' @export
 setGeneric("spatial_image",
-           function(object=NULL,
-                    features=NULL,
-                    saturation=1,
-                    scale=TRUE,
-                    colors=viridis::inferno(10),
-                    coord_fixed=TRUE,
-                    overlay_feature=NULL,
-                    colors_overlay=c("#DEEBF7", "#9ECAE1", "#3182BD"),
-                    grid_by=NULL,
-                    color_grid="white",
-                    size=0.5,
-                    logb=10,
-                    pseudo_count=1)
-             standardGeneric("spatial_image")
-)
+           function(object = NULL,
+                    features = NULL,
+                    saturation = 1,
+                    scale = TRUE,
+                    colors = viridis::inferno(10),
+                    coord_fixed = TRUE,
+                    overlay_feature = NULL,
+                    colors_overlay = c("#DEEBF7", "#9ECAE1", "#3182BD"),
+                    grid_by = NULL,
+                    color_grid = "white",
+                    size = 0.5,
+                    logb = 10,
+                    pseudo_count = 1)
+           standardGeneric("spatial_image"))
 
 #' Color-coded representation of the object (e.g. molecules) density
 #'
@@ -92,88 +91,90 @@ setGeneric("spatial_image",
 #' @export
 setMethod("spatial_image",
           signature(object = "STGrid"),
-          function(object=NULL,
-                   features=NULL,
-                   saturation=1,
-                   scale=TRUE,
-                   colors=viridis::inferno(10),
-                   coord_fixed=TRUE,
-                   overlay_feature=NULL,
-                   colors_overlay=c("#DEEBF7", "#9ECAE1", "#3182BD"),
-                   grid_by=NULL,
-                   color_grid="white",
-                   size=0.5,
-                   logb=10,
-                   pseudo_count=1) {
+          function(object = NULL,
+                   features = NULL,
+                   saturation = 1,
+                   scale = TRUE,
+                   colors = viridis::inferno(10),
+                   coord_fixed = TRUE,
+                   overlay_feature = NULL,
+                   colors_overlay = c("#DEEBF7", "#9ECAE1", "#3182BD"),
+                   grid_by = NULL,
+                   color_grid = "white",
+                   size = 0.5,
+                   logb = 10,
+                   pseudo_count = 1) {
+            check_this_var(grid_by, null_accepted = TRUE, type = "int")
 
-            check_this_var(grid_by, null_accepted =TRUE, type = "int")
-
-            if(saturation > 1 | saturation < 0)
+            if (saturation > 1 | saturation < 0)
               print_this_msg("Saturation should be between 0 and 1.",
                              msg_type = "STOP")
 
             print_this_msg("Checking arguments", msg_type = "DEBUG")
 
-            if(is.null(object))
-                print_this_msg("Please provide an STGrid object.",
-                        msg_type = "STOP")
+            if (is.null(object))
+              print_this_msg("Please provide an STGrid object.",
+                             msg_type = "STOP")
 
-            if(!is.null(overlay_feature)){
-              if(!overlay_feature %in% feat_names(object))
+            if (!is.null(overlay_feature)) {
+              if (!overlay_feature %in% feat_names(object))
                 print_this_msg("The feature to overlay was not found in the object.",
-                          msg_type = "STOP")
+                               msg_type = "STOP")
 
             }
 
             print_this_msg("Checking features", msg_type = "DEBUG")
 
-            if(is.null(features))
-              print_this_msg("Please provide a feature name (see feature arguments).", msg_type = "STOP")
+            if (is.null(features))
+              print_this_msg("Please provide a feature name (see feature arguments).",
+                             msg_type = "STOP")
 
 
-            if(!all(features %in% c(feat_names(object), "sum_of_cts"))){
+            if (!all(features %in% c(feat_names(object), "sum_of_cts"))) {
               print_this_msg("The feature was not found in the object.", msg_type = "STOP")
             }
 
-            if("sum_of_cts" %in% features){
-
+            if ("sum_of_cts" %in% features) {
               print_this_msg("Using sum_of_cts", msg_type = "DEBUG")
 
               spatial_matrix <- object@bin_mat
 
-              if(length(features) == 1){
+              if (length(features) == 1) {
                 sub_feat <- feat_names(object)
-                spatial_matrix <- spatial_matrix[, c("bin_x", "bin_y", sub_feat)]
+                spatial_matrix <-
+                  spatial_matrix[, c("bin_x", "bin_y", sub_feat)]
                 tmp <- spatial_matrix[, sub_feat]
                 tmp$sum_of_cts <- rowSums(tmp)
                 spatial_matrix$sum_of_cts <- tmp$sum_of_cts
-                spatial_matrix <- spatial_matrix[, c("bin_x", "bin_y","sum_of_cts")]
-                tmp <- tmp[, "sum_of_cts", drop=FALSE]
-              }else{
+                spatial_matrix <-
+                  spatial_matrix[, c("bin_x", "bin_y", "sum_of_cts")]
+                tmp <- tmp[, "sum_of_cts", drop = FALSE]
+              } else{
                 sub_feat <- setdiff(features, "sum_of_cts")
-                spatial_matrix <- spatial_matrix[, c("bin_x", "bin_y", sub_feat)]
-                tmp <- spatial_matrix[, sub_feat, drop=FALSE]
+                spatial_matrix <-
+                  spatial_matrix[, c("bin_x", "bin_y", sub_feat)]
+                tmp <- spatial_matrix[, sub_feat, drop = FALSE]
                 tmp$sum_of_cts <- rowSums(tmp)
                 spatial_matrix$sum_of_cts <- tmp$sum_of_cts
               }
 
-            }else{
+            } else{
               spatial_matrix <- object@bin_mat[, c("bin_x", "bin_y", features)]
-              tmp <- spatial_matrix[, features, drop=FALSE]
+              tmp <- spatial_matrix[, features, drop = FALSE]
             }
 
-            for(i in 1:ncol(tmp)){
-              if(saturation < 1){
-                q_sat <- stats::quantile(tmp[,i][tmp[,i] != 0], saturation)
-                tmp[tmp[,i] > q_sat, i] <- q_sat
+            for (i in 1:ncol(tmp)) {
+              if (saturation < 1) {
+                q_sat <- stats::quantile(tmp[, i][tmp[, i] != 0], saturation)
+                tmp[tmp[, i] > q_sat, i] <- q_sat
               }
 
-              if(!is.null(logb)){
-                tmp[,i] <- log(tmp[,i] + pseudo_count, base = logb)
+              if (!is.null(logb)) {
+                tmp[, i] <- log(tmp[, i] + pseudo_count, base = logb)
               }
 
-              if(scale){
-                tmp[,i] <- (tmp[,i] - min(tmp[,i])) / (max(tmp[,i]) - min(tmp[,i]))
+              if (scale) {
+                tmp[, i] <- (tmp[, i] - min(tmp[, i])) / (max(tmp[, i]) - min(tmp[, i]))
               }
             }
 
@@ -182,74 +183,98 @@ setMethod("spatial_image",
 
             spatial_matrix$bin_x <- factor(spatial_matrix$bin_x,
                                            levels = bin_x(object),
-                                           ordered=TRUE)
+                                           ordered = TRUE)
 
             spatial_matrix$bin_y <- factor(spatial_matrix$bin_y,
                                            levels = bin_y(object),
-                                           ordered=TRUE)
+                                           ordered = TRUE)
 
-            spatial_matrix_melted <- reshape2::melt(spatial_matrix, id.vars=c("bin_x", "bin_y"))
-            spatial_matrix_melted$variable <- factor(spatial_matrix_melted$variable,
-                                                     levels = features,
-                                                     ordered=TRUE)
+            spatial_matrix_melted <-
+              reshape2::melt(spatial_matrix, id.vars = c("bin_x", "bin_y"))
+            spatial_matrix_melted$variable <-
+              factor(spatial_matrix_melted$variable,
+                     levels = features,
+                     ordered = TRUE)
 
             bin_x <- bin_y <- value <- .data <- NULL
-            p <- ggplot2::ggplot(data=spatial_matrix_melted,
-                                 mapping = ggplot2::aes(x=bin_x,
-                                                        y=bin_y,
-                                                        fill= value)) +
+            p <- ggplot2::ggplot(data = spatial_matrix_melted,
+                                 mapping = ggplot2::aes(x = bin_x,
+                                                        y = bin_y,
+                                                        fill = value)) +
               ggplot2::geom_tile() +
               ggplot2::xlab("")  +
               ggplot2::ylab("") +
-              ggplot2::theme(axis.ticks = ggplot2::element_blank(),
-                             axis.text = ggplot2::element_blank(),
-                             strip.background = ggplot2::element_rect(fill="gray30"),
-                             strip.text = ggplot2::element_text(color="white")) +
-              ggplot2::scale_fill_gradientn(colours=colors) +
-              ggplot2::facet_wrap(~variable, nrow = 3, ncol=3)
+              ggplot2::theme(
+                axis.ticks = ggplot2::element_blank(),
+                axis.text = ggplot2::element_blank(),
+                strip.background = ggplot2::element_rect(fill =
+                                                           "gray30"),
+                strip.text = ggplot2::element_text(color =
+                                                     "white")
+              ) +
+              ggplot2::scale_fill_gradientn(colours = colors) +
+              ggplot2::facet_wrap( ~ variable, nrow = 3, ncol = 3)
 
-            if(coord_fixed)
+            if (coord_fixed)
               p <- p + ggplot2::coord_fixed()
 
 
-            if(!is.null(overlay_feature)){
+            if (!is.null(overlay_feature)) {
               over <- bin_mat(object,
-                              as_factor = TRUE)[ ,c("bin_x", "bin_y", overlay_feature)]
-              over <- over[over[[overlay_feature]] != 0,]
+                              as_factor = TRUE)[, c("bin_x", "bin_y", overlay_feature)]
+              over <- over[over[[overlay_feature]] != 0, ]
 
-              p <- p + ggplot2::geom_point(data=over, mapping=aes(x=bin_x,
-                                                         y=bin_y,
-                                                         color=log10(.data[[overlay_feature]])),
-                                  size=size,
-                                  inherit.aes = FALSE) +
-                ggplot2::scale_color_gradientn(colors=colors_overlay)
+              p <-
+                p + ggplot2::geom_point(
+                  data = over,
+                  mapping = aes(
+                    x = bin_x,
+                    y = bin_y,
+                    color = log10(.data[[overlay_feature]])
+                  ),
+                  size = size,
+                  inherit.aes = FALSE
+                ) +
+                ggplot2::scale_color_gradientn(colors = colors_overlay)
             }
 
-            if(!is.null(grid_by)){
-
+            if (!is.null(grid_by)) {
               lev_bin_x <- levels(spatial_matrix$bin_x)
               lev_bin_y <- levels(spatial_matrix$bin_y)
 
-              x_seq <- seq(from=1, to=length(lev_bin_x), by=grid_by)
-              y_seq <- seq(from=1, to=length(lev_bin_y), by=grid_by)
+              x_seq <- seq(from = 1,
+                           to = length(lev_bin_x),
+                           by = grid_by)
+              y_seq <- seq(from = 1,
+                           to = length(lev_bin_y),
+                           by = grid_by)
 
-              label_x <- stats::setNames(lev_bin_x, 1:length(lev_bin_x))
+              label_x <-
+                stats::setNames(lev_bin_x, 1:length(lev_bin_x))
               names(label_x)[-x_seq] <- ""
-              label_y <- stats::setNames(lev_bin_y, 1:length(lev_bin_y))
+              label_y <-
+                stats::setNames(lev_bin_y, 1:length(lev_bin_y))
               names(label_y)[-y_seq] <- ""
 
-              p <- p + geom_vline(data=data.frame(bin_x=levels(spatial_matrix$bin_x)[x_seq]),
-                                  mapping=aes(xintercept=bin_x), color = color_grid) +
-                       geom_hline(data=data.frame(bin_y=levels(spatial_matrix$bin_y)[y_seq]),
-                                  mapping=aes(yintercept=bin_y), color = color_grid) +
-                  ggplot2::theme(axis.text = element_text(size=6, angle = 45)) +
-                  ggplot2::scale_x_discrete("x", labels=names(label_x)) +
-                  ggplot2::scale_y_discrete("y", labels=names(label_y))
+              p <-
+                p + geom_vline(
+                  data = data.frame(bin_x = levels(spatial_matrix$bin_x)[x_seq]),
+                  mapping = aes(xintercept = bin_x),
+                  color = color_grid
+                ) +
+                geom_hline(
+                  data = data.frame(bin_y = levels(spatial_matrix$bin_y)[y_seq]),
+                  mapping = aes(yintercept = bin_y),
+                  color = color_grid
+                ) +
+                ggplot2::theme(axis.text = element_text(size = 6, angle = 45)) +
+                ggplot2::scale_x_discrete("x", labels = names(label_x)) +
+                ggplot2::scale_y_discrete("y", labels = names(label_y))
             }
 
             return(p)
 
-})
+          })
 
 # -------------------------------------------------------------------------
 ##    The spatial_plot function
@@ -272,13 +297,12 @@ setMethod("spatial_image",
 #'              size=0.05)
 #' @keywords internal
 setGeneric("spatial_plot",
-           function(object=NULL,
-                    feat_list=NULL,
-                    colors=NULL,
-                    size=0.1,
-                    coord_fixed=TRUE)
-             standardGeneric("spatial_plot")
-)
+           function(object = NULL,
+                    feat_list = NULL,
+                    colors = NULL,
+                    size = 0.1,
+                    coord_fixed = TRUE)
+             standardGeneric("spatial_plot"))
 
 #' Plot x/y coordinates of molecules
 #'
@@ -298,50 +322,49 @@ setGeneric("spatial_plot",
 #' @importFrom ggplot2 aes geom_point scale_color_manual xlab ylab theme_minimal theme coord_fixed geom_point scale_color_manual aes
 #' @export
 setMethod("spatial_plot", "STGrid",
-           function(object=NULL,
-                    feat_list=NULL,
-                    colors=NULL,
-                    size=0.1,
-                    coord_fixed=TRUE){
+          function(object = NULL,
+                   feat_list = NULL,
+                   colors = NULL,
+                   size = 0.1,
+                   coord_fixed = TRUE) {
+            if (is.null(object))
+              print_this_msg("Please provide an STGrid object.",
+                             msg_type = "STOP")
+            if (!is.null(colors)) {
+              if (length(colors) < length(feat_list))
+                print_this_msg("More colors are needed...", msg_type = "STOP")
+            }
 
-             if(is.null(object))
-               print_this_msg("Please provide an STGrid object.",
-                         msg_type = "STOP")
-              if(!is.null(colors)){
-                if(length(colors) < length(feat_list))
-                  print_this_msg("More colors are needed...", msg_type = "STOP")
-              }
+            if (is.null(feat_list))
+              print_this_msg("Please provide feature names (see feat_list arguments).",
+                             msg_type = "STOP")
 
-             if(is.null(feat_list))
-               print_this_msg("Please provide feature names (see feat_list arguments).",
-                         msg_type = "STOP")
+            if (!all(feat_list %in% feat_names(object)))
+              print_this_msg("One or several features were not found in the object.", msg_type = "STOP")
 
-             if(!all(feat_list %in% feat_names(object)))
-               print_this_msg("One or several features were not found in the object.", msg_type = "STOP")
+            coord <-
+              get_coord(object, feat_list = feat_list, as.factor = TRUE)
 
-             coord <- get_coord(object, feat_list = feat_list, as.factor=TRUE)
+            x <- y <- feature <- NULL
+            p <- ggplot2::ggplot(data = coord,
+                                 mapping = ggplot2::aes(x = x,
+                                                        y = y,
+                                                        color = feature)) +
+              ggplot2::geom_point(size = size) +
+              ggplot2::xlab("x")  +
+              ggplot2::ylab("y") +
+              ggplot2::theme_minimal() +
+              ggplot2::theme(axis.text = element_text(size = 6))
 
-             x <- y <- feature <- NULL
-             p <- ggplot2::ggplot(data=coord,
-                                  mapping = ggplot2::aes(x=x,
-                                                         y=y,
-                                                         color= feature)) +
-               ggplot2::geom_point(size=size) +
-               ggplot2::xlab("x")  +
-               ggplot2::ylab("y") +
-               ggplot2::theme_minimal() +
-               ggplot2::theme(axis.text = element_text(size=6))
+            if (!is.null(colors))
+              p <- p + ggplot2::scale_color_manual(values = colors)
 
-              if(!is.null(colors))
-                p <- p +ggplot2::scale_color_manual(values=colors)
+            if (coord_fixed)
+              p <- p + ggplot2::coord_fixed()
 
-             if(coord_fixed)
-               p <- p + ggplot2::coord_fixed()
+            return(p)
 
-             return(p)
-
-           }
-)
+          })
 
 # -------------------------------------------------------------------------
 ##     cmp_bar_plot()
@@ -369,12 +392,11 @@ setMethod("spatial_plot", "STGrid",
 #' @keywords internal
 setGeneric("cmp_bar_plot",
            function(object,
-                    features=utils::head(feat_names(object)),
-                    normalized=FALSE,
-                    transform=c("None", "log2", "log10", "log"),
-                    colors=c("#3074BB", "#BE5B52"))
-             standardGeneric("cmp_bar_plot")
-)
+                    features = utils::head(feat_names(object)),
+                    normalized = FALSE,
+                    transform = c("None", "log2", "log10", "log"),
+                    colors = c("#3074BB", "#BE5B52"))
+             standardGeneric("cmp_bar_plot"))
 
 #' @title Create a barplot to show counts for selected features.
 #' @description
@@ -397,53 +419,61 @@ setGeneric("cmp_bar_plot",
 #' cmp_bar_plot(cmp,
 #'              features=c("Chat", "Nwd2", "Ano1"))
 #' @export
-setMethod(
-  "cmp_bar_plot", signature("STCompR"),
-    function(object,
-             features=utils::head(feat_names(object)),
-             normalized=FALSE,
-             transform=c("None", "log2", "log10", "log"),
-             colors=c("#3074BB", "#BE5B52")) {
+setMethod("cmp_bar_plot", signature("STCompR"),
+          function(object,
+                   features = utils::head(feat_names(object)),
+                   normalized = FALSE,
+                   transform = c("None", "log2", "log10", "log"),
+                   colors = c("#3074BB", "#BE5B52")) {
+            if (is.null(features)) {
+              print_this_msg("Please provide some features...", msg_type = "STOP")
+            }
 
+            transform <- match.arg(transform)
 
-    if(is.null(features)){
-      print_this_msg("Please provide some features...", msg_type = "STOP")
-    }
+            counts <- stat_test(
+              object,
+              normalized = normalized,
+              count_only = TRUE,
+              melted_count = TRUE,
+              transform = transform,
+              features = features
+            )
 
-    transform <- match.arg(transform)
+            ylabel <- ifelse(
+              transform %in% c("log2", "log10", "log"),
+              paste0(transform, "(Molecule counts)"),
+              "Molecule counts"
+            )
+            counts$Features <- factor(counts$Features,
+                                      levels = features,
+                                      ordered = TRUE)
 
-    counts <- stat_test(object,
-                        normalized=normalized,
-                        count_only = TRUE,
-                        melted_count = TRUE,
-                        transform=transform,
-                        features=features)
+            Features <- Counts <- Conditions <- NULL
 
-    ylabel <- ifelse(transform %in% c("log2", "log10", "log"),
-                     paste0(transform, "(Molecule counts)"),
-                     "Molecule counts")
-    counts$Features <- factor(counts$Features,
-                              levels=features,
-                              ordered = TRUE)
+            ggplot2::ggplot(data = counts,
+                            mapping = ggplot2::aes(x = Features, y = Counts,
+                                                   fill = Conditions)) +
+              ggplot2::geom_col(color = "black",
+                                linewidth = 0,
+                                position = "dodge") +
+              ggplot2::theme_bw() +
+              ggplot2::theme(
+                axis.text.x = ggplot2::element_text(
+                  size = 10,
+                  angle = 45,
+                  vjust = 0.5
+                ),
+                axis.text.y = ggplot2::element_text(size = 8),
+                panel.grid.major.y = ggplot2::element_blank(),
+                panel.grid.minor.x = ggplot2::element_blank(),
+                panel.grid.minor.y = ggplot2::element_blank(),
+                panel.border = ggplot2::element_blank()
+              ) +
+              ggplot2::ylab(ylabel) +
+              ggplot2::scale_fill_manual(values = colors)
 
-    Features <- Counts <- Conditions <- NULL
-
-    ggplot2::ggplot(data=counts,
-                    mapping = ggplot2::aes(x=Features, y=Counts,
-                                           fill=Conditions)) +
-    ggplot2::geom_col(color="black", linewidth=0, position="dodge") +
-    ggplot2::theme_bw() +
-    ggplot2::theme(axis.text.x = ggplot2::element_text(size=10, angle=45, vjust = 0.5),
-          axis.text.y = ggplot2::element_text(size=8),
-          panel.grid.major.y = ggplot2::element_blank(),
-          panel.grid.minor.x = ggplot2::element_blank(),
-          panel.grid.minor.y =ggplot2:: element_blank(),
-          panel.border = ggplot2::element_blank()) +
-    ggplot2::ylab(ylabel) +
-    ggplot2::scale_fill_manual(values = colors)
-
-  }
-)
+          })
 
 # -------------------------------------------------------------------------
 ##    Boxplot / jitter
@@ -468,12 +498,11 @@ setMethod(
 #' @keywords internal
 setGeneric("cmp_boxplot",
            function(object,
-                    normalized=TRUE,
-                    transform=c("None", "log2", "log10", "log"),
-                    colors=c("#3074BB", "#BE5B52"),
+                    normalized = TRUE,
+                    transform = c("None", "log2", "log10", "log"),
+                    colors = c("#3074BB", "#BE5B52"),
                     ...)
-             standardGeneric("cmp_boxplot")
-)
+             standardGeneric("cmp_boxplot"))
 
 #' @title Create a boxplot/jitter plot to show molecule counts distribution.
 #' @description
@@ -495,43 +524,52 @@ setGeneric("cmp_boxplot",
 #' @importFrom ggplot2 ggplot aes theme_bw ylab scale_fill_manual
 #' @importFrom ggsci pal_npg
 #' @importFrom ggpol geom_boxjitter
-setMethod(
-  "cmp_boxplot", signature("STCompR"),
-  function(object,
-           normalized=TRUE,
-           transform=c("None", "log2", "log10", "log"),
-           colors=c("#3074BB", "#BE5B52"),
-           ...) {
+setMethod("cmp_boxplot", signature("STCompR"),
+          function(object,
+                   normalized = TRUE,
+                   transform = c("None", "log2", "log10", "log"),
+                   colors = c("#3074BB", "#BE5B52"),
+                   ...) {
+            transform <- match.arg(transform)
 
-    transform <- match.arg(transform)
+            counts <- stat_test(
+              object,
+              normalized = normalized,
+              count_only = TRUE,
+              melted_count = TRUE,
+              transform = transform
+            )
 
-    counts <- stat_test(object,
-                        normalized=normalized,
-                        count_only = TRUE,
-                        melted_count = TRUE,
-                        transform=transform)
+            ylabel <- ifelse(
+              transform %in% c("log2", "log10", "log"),
+              paste0(transform, "(Molecule counts)"),
+              "Molecule counts"
+            )
 
-    ylabel <- ifelse(transform %in% c("log2", "log10", "log"),
-                     paste0(transform, "(Molecule counts)"),
-                     "Molecule counts")
+            Conditions <- Counts <- Conditions <- NULL
 
-    Conditions <- Counts <- Conditions <- NULL
+            ggplot2::ggplot(
+              data = counts,
+              mapping = ggplot2::aes(x = Conditions, y = Counts, fill = Conditions)
+            ) +
+              ggpol::geom_boxjitter(...) +
+              ggplot2::theme_bw() +
+              ggplot2::theme(
+                axis.text.x = ggplot2::element_text(
+                  size = 10,
+                  angle = 45,
+                  vjust = 0.5
+                ),
+                axis.text.y = ggplot2::element_text(size = 12),
+                panel.grid.major.y = ggplot2::element_blank(),
+                panel.grid.minor.x = ggplot2::element_blank(),
+                panel.grid.minor.y = ggplot2::element_blank(),
+                panel.border = ggplot2::element_blank()
+              ) +
+              ggplot2::ylab(ylabel) +
+              ggplot2::scale_fill_manual(values = colors)
 
-    ggplot2::ggplot(data=counts,
-           mapping = ggplot2::aes(x=Conditions, y=Counts, fill=Conditions)) +
-      ggpol::geom_boxjitter(...) +
-      ggplot2::theme_bw() +
-      ggplot2::theme(axis.text.x = ggplot2::element_text(size=10, angle=45, vjust = 0.5),
-            axis.text.y = ggplot2::element_text(size=12),
-            panel.grid.major.y = ggplot2::element_blank(),
-            panel.grid.minor.x = ggplot2::element_blank(),
-            panel.grid.minor.y = ggplot2::element_blank(),
-            panel.border = ggplot2::element_blank()) +
-      ggplot2::ylab(ylabel) +
-      ggplot2::scale_fill_manual(values = colors)
-
-  }
-)
+          })
 
 
 # -------------------------------------------------------------------------
@@ -561,15 +599,21 @@ setMethod(
 #' @keywords internal
 setGeneric("cmp_volcano",
            function(object,
-                    x_axis=c("log2_ratio", "log2_odds", "odd_ratio"),
-                    y_axis=c("p_values", "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr"),
-                    x_lim=c(-2.5, 2.5),
-                    colors=RColorBrewer::brewer.pal(7, "Spectral"),
-                    text_y_lim=100,
-                    text_x_lim=2,
-                    text_size=5)
-             standardGeneric("cmp_volcano")
-)
+                    x_axis = c("log2_ratio", "log2_odds", "odd_ratio"),
+                    y_axis = c("p_values",
+                               "holm",
+                               "hochberg",
+                               "hommel",
+                               "bonferroni",
+                               "BH",
+                               "BY",
+                               "fdr"),
+                    x_lim = c(-2.5, 2.5),
+                    colors = RColorBrewer::brewer.pal(7, "Spectral"),
+                    text_y_lim = 100,
+                    text_x_lim = 2,
+                    text_size = 5)
+           standardGeneric("cmp_volcano"))
 
 #' @title Create a volcano plot to compare molecule counts between 2 conditions.
 #' @description
@@ -593,71 +637,88 @@ setGeneric("cmp_volcano",
 #' @importFrom  ggrepel geom_text_repel
 #' @importFrom stringr str_to_title
 #' @export cmp_volcano
-setMethod(
-  "cmp_volcano", signature("STCompR"),
-  function(object,
-             x_axis=c("log2_ratio", "log2_odds", "odd_ratio"),
-           y_axis=c("p_values", "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr"),
-           x_lim=c(-2.5, 2.5),
-           colors=rev(RColorBrewer::brewer.pal(7, "Spectral")),
-           text_y_lim=100,
-           text_x_lim=1,
-           text_size=4) {
+setMethod("cmp_volcano", signature("STCompR"),
+          function(object,
+                   x_axis = c("log2_ratio", "log2_odds", "odd_ratio"),
+                   y_axis = c("p_values",
+                              "holm",
+                              "hochberg",
+                              "hommel",
+                              "bonferroni",
+                              "BH",
+                              "BY",
+                              "fdr"),
+                   x_lim = c(-2.5, 2.5),
+                   colors = rev(RColorBrewer::brewer.pal(7, "Spectral")),
+                   text_y_lim = 100,
+                   text_x_lim = 1,
+                   text_size = 4) {
+            x_axis <- match.arg(x_axis)
+            y_axis <- match.arg(y_axis)
 
-    x_axis <- match.arg(x_axis)
-    y_axis <- match.arg(y_axis)
+            if (y_axis != "p_values")
+              y_axis <- paste0("padj_", y_axis)
 
-    if(y_axis != "p_values")
-      y_axis <- paste0("padj_", y_axis)
+            volc_data <- stat_test(
+              object,
+              count_only = FALSE,
+              melted_count = FALSE,
+              features = NULL
+            )
 
-    volc_data <- stat_test(object,
-                          count_only = FALSE,
-                          melted_count = FALSE,
-                          features=NULL)
+            volc_data <- volc_data[, c(x_axis, y_axis)]
+            colnames(volc_data) <- c("x", "y")
 
-    volc_data <- volc_data[, c(x_axis, y_axis)]
-    colnames(volc_data) <- c("x", "y")
+            counts <- stat_test(
+              object,
+              count_only = TRUE,
+              melted_count = FALSE,
+              features = NULL
+            )
 
-    counts <- stat_test(object,
-                        count_only = TRUE,
-                        melted_count = FALSE,
-                        features=NULL)
+            volc_data$mean_counts <- rowMeans(counts)
+            volc_data$feature <- rownames(volc_data)
+            volc_data$feature[-log10(volc_data$y) < text_y_lim] <- NA
+            volc_data$feature[abs(volc_data$x) < text_x_lim] <- NA
 
-    volc_data$mean_counts <- rowMeans(counts)
-    volc_data$feature <- rownames(volc_data)
-    volc_data$feature[-log10(volc_data$y) < text_y_lim] <- NA
-    volc_data$feature[abs(volc_data$x) < text_x_lim] <- NA
+            x <- y <- mean_counts <- feature <- NULL
 
-    x <- y <- mean_counts <- feature <- NULL
+            ggplot2::ggplot(
+              data = volc_data,
+              mapping = ggplot2::aes(
+                x = x,
+                y = -log10(y),
+                fill = x,
+                size = mean_counts
+              )
+            ) +
+              ggplot2::geom_vline(xintercept = 0) +
+              ggplot2::geom_hline(yintercept = 0) +
+              ggplot2::geom_point(shape = 21,
+                                  color = "black",
+                                  stroke = 0.2) +
+              ggplot2::theme_bw() +
+              ggrepel::geom_text_repel(
+                data = stats::na.omit(volc_data),
+                mapping = ggplot2::aes(label = feature),
+                size = text_size,
+                color = "black"
+              ) +
+              ggplot2::theme(
+                axis.text.x = ggplot2::element_text(size = 10,  vjust = 0.5),
+                axis.text.y = ggplot2::element_text(size = 8),
+                panel.grid.major.y = ggplot2::element_blank(),
+                panel.grid.minor.x = ggplot2::element_blank(),
+                panel.grid.minor.y = ggplot2::element_blank(),
+                panel.border = ggplot2::element_blank()
+              ) +
+              ggplot2::xlab(paste0(stringr::str_to_title(gsub("_", " ", x_axis)))) +
+              ggplot2::ylab(paste0("-log10(", y_axis, ")")) +
+              ggplot2::expand_limits(x = x_lim) +
+              ggplot2::scale_fill_gradientn(colors = colors,
+                                            name = paste0(stringr::str_to_title(gsub("_", " ", x_axis))))
 
-    ggplot2::ggplot(data=volc_data,
-           mapping = ggplot2::aes(x=x, y=-log10(y),
-                         fill=x,
-                         size=mean_counts)) +
-      ggplot2::geom_vline(xintercept = 0) +
-      ggplot2::geom_hline(yintercept = 0) +
-      ggplot2::geom_point(shape=21,
-                          color="black",
-                          stroke=0.2) +
-      ggplot2::theme_bw() +
-      ggrepel::geom_text_repel(data=stats::na.omit(volc_data),
-                               mapping=ggplot2::aes(label=feature),
-                               size=text_size,
-                               color="black") +
-      ggplot2::theme(axis.text.x = ggplot2::element_text(size=10,  vjust = 0.5),
-            axis.text.y = ggplot2::element_text(size=8),
-            panel.grid.major.y = ggplot2::element_blank(),
-            panel.grid.minor.x = ggplot2::element_blank(),
-            panel.grid.minor.y = ggplot2::element_blank(),
-            panel.border = ggplot2::element_blank()) +
-      ggplot2::xlab(paste0(stringr::str_to_title(gsub("_", " ", x_axis)))) +
-      ggplot2::ylab(paste0("-log10(", y_axis, ")")) +
-      ggplot2::expand_limits(x = x_lim) +
-      ggplot2::scale_fill_gradientn(colors=colors,
-                                    name =paste0(stringr::str_to_title(gsub("_", " ", x_axis))))
-
-  }
-)
+          })
 
 # -------------------------------------------------------------------------
 ##    Ripley's K function
@@ -675,15 +736,14 @@ setMethod(
 #' @keywords internal
 setGeneric("plot_rip_k",
            function(object,
-                    correction=c("border",
-                                 "isotropic",
-                                 "Ripley",
-                                 "translate"),
-                    max_feat_label=8,
-                    color=NULL,
-                    size=4)
-             standardGeneric("plot_rip_k")
-)
+                    correction = c("border",
+                                   "isotropic",
+                                   "Ripley",
+                                   "translate"),
+                    max_feat_label = 8,
+                    color = NULL,
+                    size = 4)
+             standardGeneric("plot_rip_k"))
 
 #' @title Call the Ripley's k function.
 #' @description
@@ -702,77 +762,88 @@ setGeneric("plot_rip_k",
 #' plot_rip_k(compute_k_ripley(Xenium_Mouse_Brain_Coronal_7g[c("Ano1", "Chat", "Ebf3")]))
 #'
 #' @export plot_rip_k
-setMethod(
-  "plot_rip_k", signature("STGrid"),
-  function(object,
-           correction=c("border",
-                        "isotropic",
-                        "Ripley",
-                        "translate"),
-           max_feat_label=8,
-           color=NULL,
-           size=4
-           ) {
-
-    gg_color_hue <- function(n) {
-      hues <-  seq(15, 375, length = n + 1)
-      grDevices::hcl(h = hues, l = 65, c = 100)[1:n]
-    }
+setMethod("plot_rip_k", signature("STGrid"),
+          function(object,
+                   correction = c("border",
+                                  "isotropic",
+                                  "Ripley",
+                                  "translate"),
+                   max_feat_label = 8,
+                   color = NULL,
+                   size = 4) {
+            gg_color_hue <- function(n) {
+              hues <-  seq(15, 375, length = n + 1)
+              grDevices::hcl(h = hues, l = 65, c = 100)[1:n]
+            }
 
 
-    if(is.null(color)){
-      color <- gg_color_hue(max_feat_label)
-    }
+            if (is.null(color)) {
+              color <- gg_color_hue(max_feat_label)
+            }
 
 
-    if(nrow(ripley_k_function(object)) == 0){
-      print_this_msg("Please run ripley_k_function() first.", msg_type = "STOP")
-    }
+            if (nrow(ripley_k_function(object)) == 0) {
+              print_this_msg("Please run ripley_k_function() first.", msg_type = "STOP")
+            }
 
-    correction <- match.arg(correction)
-    ripk <- ripley_k_function(object)
+            correction <- match.arg(correction)
+            ripk <- ripley_k_function(object)
 
-    if(max_feat_label > nrow(ripk))
-      print_this_msg("Too much selected gehes...", msg_type = "STOP")
+            if (max_feat_label > nrow(ripk))
+              print_this_msg("Too much selected gehes...", msg_type = "STOP")
 
-    voi <- ripk %>%
-      dplyr::group_by(feature) %>%
-      dplyr::filter(border == max(border)) %>%
-      dplyr::filter(r == max(r)) %>%
-      dplyr::arrange(dplyr::desc(border)) %>%
-          utils::head(n=max_feat_label)
+            voi <- ripk %>%
+              dplyr::group_by(feature) %>%
+              dplyr::filter(border == max(border)) %>%
+              dplyr::filter(r == max(r)) %>%
+              dplyr::arrange(dplyr::desc(border)) %>%
+              utils::head(n = max_feat_label)
 
-    voi <- voi[!duplicated(voi$feature),]
+            voi <- voi[!duplicated(voi$feature), ]
 
-    goi <- unique(voi$feature)
+            goi <- unique(voi$feature)
 
-    ripk_sub <- ripk[ripk$feature %in% goi, ]
+            ripk_sub <- ripk[ripk$feature %in% goi,]
 
-    r <- border <- feature <- NULL
-    p <- ggplot2::ggplot(data= ripk) +
-      ggplot2::geom_line(mapping = ggplot2::aes(x=r,
-                                                y=border,
-                                                group=feature), color="black") +
-      ggplot2::theme_bw() +
-      ggplot2::theme(legend.text = ggplot2::element_text(size=4),
-                      legend.position = "none",
-                      panel.grid.minor =  ggplot2::element_blank()) +
-      ggplot2::geom_line(data=ripk_sub,
-                 mapping=ggplot2::aes(x=r,
-                                      y=border,
-                                      group=feature,
-                                      color=feature),
-                 inherit.aes = FALSE) +
-      ggrepel::geom_label_repel(data=voi,
-                                mapping=ggplot2::aes(x=r, y=border, label=feature, color=feature),
-                                inherit.aes = FALSE,
-                                size = size,
-                                force=20) +
-      ggplot2::ylab(paste0("Ripley's K function (correction=", correction, ")")) +
-      ggplot2::scale_color_manual(values=color)
+            r <- border <- feature <- NULL
+            p <- ggplot2::ggplot(data = ripk) +
+              ggplot2::geom_line(mapping = ggplot2::aes(x = r,
+                                                        y = border,
+                                                        group = feature),
+                                 color = "black") +
+              ggplot2::theme_bw() +
+              ggplot2::theme(
+                legend.text = ggplot2::element_text(size = 4),
+                legend.position = "none",
+                panel.grid.minor =  ggplot2::element_blank()
+              ) +
+              ggplot2::geom_line(
+                data = ripk_sub,
+                mapping = ggplot2::aes(
+                  x = r,
+                  y = border,
+                  group = feature,
+                  color = feature
+                ),
+                inherit.aes = FALSE
+              ) +
+              ggrepel::geom_label_repel(
+                data = voi,
+                mapping = ggplot2::aes(
+                  x = r,
+                  y = border,
+                  label = feature,
+                  color = feature
+                ),
+                inherit.aes = FALSE,
+                size = size,
+                force = 20
+              ) +
+              ggplot2::ylab(paste0("Ripley's K function (correction=", correction, ")")) +
+              ggplot2::scale_color_manual(values = color)
 
-    return(p)
-})
+            return(p)
+          })
 
 
 # -------------------------------------------------------------------------
@@ -807,21 +878,20 @@ setMethod(
 #' cmp_images(xen_1, xen_2, feat_list = c("Nwd2", "Kctd8", "Necab2", "Nrp2"))
 #' @export
 cmp_images <- function(...,
-                       feat_list=NULL,
-                       names=NULL,
-                       colors=viridis::inferno(10),
-                       saturation=1,
-                       coord_fixed=TRUE,
-                       scale=TRUE,
-                       logb=10,
-                       pseudo_count=1,
-                       condition_vs_feat=TRUE){
-
-  if(saturation > 1 | saturation < 0)
+                       feat_list = NULL,
+                       names = NULL,
+                       colors = viridis::inferno(10),
+                       saturation = 1,
+                       coord_fixed = TRUE,
+                       scale = TRUE,
+                       logb = 10,
+                       pseudo_count = 1,
+                       condition_vs_feat = TRUE) {
+  if (saturation > 1 | saturation < 0)
     print_this_msg("Saturation should be between 0 and 1.",
                    msg_type = "STOP")
 
-  if(is.null(feat_list))
+  if (is.null(feat_list))
     print_this_msg("Please provide a feature list.", msg_type = "STOP")
 
   print_this_msg("Checking STGrid objects", msg_type = "DEBUG")
@@ -833,65 +903,66 @@ cmp_images <- function(...,
   bin_y_order <- unlist(lapply(st_list, bin_y))
   bin_y_order <- bin_y_order[!duplicated(bin_y_order)]
 
-  if(any(unlist(lapply(lapply(st_list, class), "[", 1)) != "STGrid")){
+  if (any(unlist(lapply(lapply(st_list, class), "[", 1)) != "STGrid")) {
     print_this_msg("Object should be of type STGrid", msg_type = "STOP")
   }
 
-  if(length(st_list) < 1){
+  if (length(st_list) < 1) {
     print_this_msg("Need at least one experiment !!", msg_type = "STOP")
   }
 
-  if(is.null(names)){
-    names <- paste("Condition_", 1:length(st_list), sep="")
-  }else{
-    if(length(names) != length(st_list))
+  if (is.null(names)) {
+    names <- paste("Condition_", 1:length(st_list), sep = "")
+  } else{
+    if (length(names) != length(st_list))
       print_this_msg("The number of names should be same as the number of objects.",
-                msg_type = "STOP")
+                     msg_type = "STOP")
   }
 
   print_this_msg("Subsetting STGrid objects.", msg_type = "DEBUG")
 
-  for(i in 1:length(st_list)){
-    st_list[[i]] <- st_list[[i]][feat_list, ]
+  for (i in 1:length(st_list)) {
+    st_list[[i]] <- st_list[[i]][feat_list,]
   }
 
-  st_list <- lapply(st_list,
-                    bin_mat,
-                    melt_tab = TRUE,
-                    as_factor = TRUE,
-                    feat_list =feat_list)
+  st_list <- lapply(
+    st_list,
+    bin_mat,
+    melt_tab = TRUE,
+    as_factor = TRUE,
+    feat_list = feat_list
+  )
 
 
   print_this_msg("Preparing data.", msg_type = "DEBUG")
 
-  for(i in 1:length(st_list)){
-      for(j in feat_list){
+  for (i in 1:length(st_list)) {
+    for (j in feat_list) {
+      tmp <- st_list[[i]]$value[st_list[[i]]$feature == j]
 
-          tmp <- st_list[[i]]$value[st_list[[i]]$feature == j]
-
-          if(saturation < 1){
-            print_this_msg("Ceiling.", msg_type = "DEBUG")
-            q_sat <- stats::quantile(tmp[tmp != 0], saturation)
-            tmp[tmp > q_sat] <- q_sat
-          }
-
-          if(!is.null(logb)){
-            print_this_msg("Transforming in log base ", logb, ".", msg_type = "DEBUG")
-            tmp <- log(tmp + pseudo_count, base = logb)
-          }
-
-          if(scale){
-            print_this_msg("Rescaling", msg_type = "DEBUG")
-            tmp <- (tmp - min(tmp)) / (max(tmp) - min(tmp))
-          }
-
-          st_list[[i]]$value[st_list[[i]]$feature == j] <- tmp
-
+      if (saturation < 1) {
+        print_this_msg("Ceiling.", msg_type = "DEBUG")
+        q_sat <- stats::quantile(tmp[tmp != 0], saturation)
+        tmp[tmp > q_sat] <- q_sat
       }
+
+      if (!is.null(logb)) {
+        print_this_msg("Transforming in log base ", logb, ".", msg_type = "DEBUG")
+        tmp <- log(tmp + pseudo_count, base = logb)
+      }
+
+      if (scale) {
+        print_this_msg("Rescaling", msg_type = "DEBUG")
+        tmp <- (tmp - min(tmp)) / (max(tmp) - min(tmp))
+      }
+
+      st_list[[i]]$value[st_list[[i]]$feature == j] <- tmp
+
+    }
 
   }
 
-  for(i in 1:length(st_list)){
+  for (i in 1:length(st_list)) {
     st_list[[i]]$condition <- names[i]
   }
 
@@ -902,47 +973,53 @@ cmp_images <- function(...,
   print_this_msg("Converting columns 'condition' to ordered factor.", msg_type = "DEBUG")
 
   st_list$condition <- factor(st_list$condition,
-                              levels=names,
+                              levels = names,
                               ordered = TRUE)
 
   print_this_msg("Converting columns 'gene' to ordered factor.", msg_type = "DEBUG")
 
   st_list$gene <- factor(st_list$feature,
-                              levels=feat_list,
-                              ordered = TRUE)
+                         levels = feat_list,
+                         ordered = TRUE)
 
   print_this_msg("Building diagram", msg_type = "DEBUG")
 
   value <- bin_x <- bin_y <- NULL
 
   st_list$bin_x <- factor(st_list$bin_x,
-                          levels=bin_x_order,
+                          levels = bin_x_order,
                           ordered = TRUE)
   st_list$bin_y <- factor(st_list$bin_y,
-                          levels=bin_y_order,
+                          levels = bin_y_order,
                           ordered = TRUE)
 
-  p <- ggplot2::ggplot(data=st_list,
-                       mapping = ggplot2::aes(x=bin_x,
-                                              y=bin_y,
-                                              fill= value)) +
+  p <- ggplot2::ggplot(data = st_list,
+                       mapping = ggplot2::aes(x = bin_x,
+                                              y = bin_y,
+                                              fill = value)) +
     ggplot2::geom_tile() +
     ggplot2::xlab("")  +
     ggplot2::ylab("") +
-    ggplot2::theme(axis.ticks = ggplot2::element_blank(),
-                   axis.text = ggplot2::element_blank(),
-                   strip.background = ggplot2::element_rect(fill="gray30"),
-                   strip.text = ggplot2::element_text(color="white")) +
-    ggplot2::scale_fill_gradientn(colours=colors)
+    ggplot2::theme(
+      axis.ticks = ggplot2::element_blank(),
+      axis.text = ggplot2::element_blank(),
+      strip.background = ggplot2::element_rect(fill = "gray30"),
+      strip.text = ggplot2::element_text(color = "white")
+    ) +
+    ggplot2::scale_fill_gradientn(colours = colors)
 
-    if(condition_vs_feat){
-      p <- p + ggh4x::facet_grid2(condition~feature, scale="free", independent = "x")
-    }else{
-      p <- p + ggh4x::facet_grid2(feature~condition, scale="free", independent = "y")
-    }
+  if (condition_vs_feat) {
+    p <-
+      p + ggh4x::facet_grid2(condition ~ feature,
+                             scale = "free",
+                             independent = "x")
+  } else{
+    p <-
+      p + ggh4x::facet_grid2(feature ~ condition,
+                             scale = "free",
+                             independent = "y")
+  }
 
   p
 }
-
-
 
