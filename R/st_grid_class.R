@@ -1110,9 +1110,8 @@ setMethod("compute_k_ripley", signature("STGrid"),
 #'
 #' @param path Either a file (if method is set to "coordinates") or a directory (if method
 #' is set to "merscope"). If method is set to "coordinates" the file should contain at least 3 columns
-#' ("x", "y", "gene"), ("x", "y", "feature") or ("x", "y", "cell"). However, when column contains "global_x",
-#' "global_y" and "gene", "global_x" and "global_y" will be prefered to "x" and "y" (to support Merscope csv format).
-#' @param method The type of technology.
+#' ("x", "y", "gene"), ("x", "y", "feature") or ("x", "y", "cell").
+#' @param method The type of technology/file/directory structure. See details.
 #' @param bin_size Numeric value representing the bin size (default to 25).
 #' @param control A regular expression to identify controls. As the function computes the sum of
 #' counts, this will allow to delete these blanks/controls for computation.
@@ -1122,6 +1121,12 @@ setMethod("compute_k_ripley", signature("STGrid"),
 #' @return An object of class STGrid.
 #' @importFrom Seurat ReadVizgen
 #' @importFrom Seurat ReadXenium
+#' @details
+#' If method is set to 'coordinates' a flat file with ("x", "y", "gene"), ("x", "y", "feature") or ("x", "y", "cell")
+#' expected for path. If method is set to 'merscope_csv' the transcript csv file exported by Merscope should be provided
+#' as path (contains 'global_x', 'global_y' and 'gene' column). If method is set to 'xenium' or 'merscope'
+#' path is passed to the 'data.dir' argument of Seurat::ReadXenium and Seurat::ReadVizgen respectively (see corresponding docs).
+#'
 #' @examples
 #'   fp <- file.path(system.file("extdata", package = "stcompr"), "tyni_xenium.txt")
 #'   st <- load_spatial(fp, method = "coordinates")
@@ -1130,6 +1135,7 @@ setMethod("compute_k_ripley", signature("STGrid"),
 load_spatial <- function(path = "",
                          method = c("coordinates",
                                     "merscope",
+                                    "merscope_csv",
                                     "xenium"),
                          bin_size = 25,
                          control = NULL,
@@ -1157,16 +1163,25 @@ load_spatial <- function(path = "",
     if (is.null(control))
       control <-  "(NegControl)|(^BLANK)"
 
-  }  else if (method == "coordinates") {
+  } else if(method == "merscope_csv"){
     check_this_file(path, mode = "read")
     spat_input <- as.data.frame(data.table::fread(path,
                                                   sep = sep,
                                                   head = TRUE, nThread = threads))
-    if(all(c("global_x", "global_y") %in% colnames(spat_input))){
-      col_needed <- c("global_x", "global_y")
-    }else{
+    col_needed <- c("global_x", "global_y", "gene")
+    spat_input <- spat_input[, col_needed]
+
+    if (is.null(control))
+      control <- "^Blank\\-[0-9]+"
+
+  }else if (method == "coordinates") {
+    check_this_file(path, mode = "read")
+    spat_input <- as.data.frame(data.table::fread(path,
+                                                  sep = sep,
+                                                  head = TRUE, nThread = threads))
+
       col_needed <- c("x", "y")
-    }
+
 
     if("cell" %in% colnames(spat_input)){
       col_needed <- c(col_needed, "cell")

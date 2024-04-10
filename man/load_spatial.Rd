@@ -6,7 +6,7 @@
 \usage{
 load_spatial(
   path = "",
-  method = c("coordinates", "merscope", "xenium"),
+  method = c("coordinates", "merscope", "merscope_csv", "xenium"),
   bin_size = 25,
   control = NULL,
   sep = "\\t",
@@ -17,10 +17,9 @@ load_spatial(
 \arguments{
 \item{path}{Either a file (if method is set to "coordinates") or a directory (if method
 is set to "merscope"). If method is set to "coordinates" the file should contain at least 3 columns
-("x", "y", "gene"), ("x", "y", "feature") or ("x", "y", "cell"). However, when column contains "global_x",
-"global_y" and "gene", "global_x" and "global_y" will be prefered to "x" and "y" (to support Merscope csv format).}
+("x", "y", "gene"), ("x", "y", "feature") or ("x", "y", "cell").}
 
-\item{method}{The type of technology.}
+\item{method}{The type of technology/file/directory structure. See details.}
 
 \item{bin_size}{Numeric value representing the bin size (default to 25).}
 
@@ -39,6 +38,12 @@ An object of class STGrid.
 \description{
 The load_spatial() function is the entry point of the stcompr package.
 It will load the molecule coordinates and create a 2D binned grid with default size 25µm.
+}
+\details{
+If method is set to 'coordinates' a flat file with ("x", "y", "gene"), ("x", "y", "feature") or ("x", "y", "cell")
+expected for path. If method is set to 'merscope_csv' the transcript csv file exported by Merscope should be provided
+as path (contains 'global_x', 'global_y' and 'gene' column). If method is set to 'xenium' or 'merscope'
+path is passed to the 'data.dir' argument of Seurat::ReadXenium and Seurat::ReadVizgen respectively (see corresponding docs).
 }
 \examples{
   fp <- file.path(system.file("extdata", package = "stcompr"), "tyni_xenium.txt")
