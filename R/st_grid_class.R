@@ -348,9 +348,9 @@ setMethod("bin_mat", "STGrid",
               feat_list <- feat_names(object)
             }
 
-            if("sum_of_cts" %in% feat_list){
+            if("count_sum" %in% feat_list){
               this_bin_mat <- object@bin_mat
-              this_bin_mat$sum_of_cts <- object@meta$count_sums
+              this_bin_mat$count_sum <- object@meta$count_sum
             }else{
               this_bin_mat <- object@bin_mat
             }
@@ -884,7 +884,7 @@ setMethod("[[", signature(x = "STGrid"),
 #' @param name The metadata to extract.
 #' @examples
 #' example_dataset()
-#' head(Xenium_Mouse_Brain_Coronal_7g$count_sums)
+#' head(Xenium_Mouse_Brain_Coronal_7g$count_sum)
 #' head(Xenium_Mouse_Brain_Coronal_7g[[1]])
 #' @keywords internal
 #' @export
@@ -911,7 +911,7 @@ setMethod ("$", "STGrid",
 #' @keywords internal
 #' @examples
 #' example_dataset()
-#' Xenium_Mouse_Brain_Coronal_7g$count_sums <- Xenium_Mouse_Brain_Coronal_7g$count_sums
+#' Xenium_Mouse_Brain_Coronal_7g$count_sum <- Xenium_Mouse_Brain_Coronal_7g$count_sum
 #' @export
 setMethod ("$<-", "STGrid",
            function (x, name, value) {
@@ -1210,7 +1210,7 @@ load_spatial <- function(path = "",
                                 bin_size = bin_size,
                                 verbose = verbose)
 
-  sum_of_cts <- sum_of_counts(bin_matrix$spatial_matrix,
+  count_sum <- sum_of_counts(bin_matrix$spatial_matrix,
                               control = control)
 
   # create a STGrid object                             ---------
@@ -1228,7 +1228,7 @@ load_spatial <- function(path = "",
   STGrid_obj@method <- method
   STGrid_obj@meta <-
     data.frame(row.names = rownames(STGrid_obj@bin_mat),
-               count_sums = sum_of_cts)
+               count_sum = count_sum)
   STGrid_obj@bin_size <- bin_size
   STGrid_obj@bin_x <- bin_matrix$possible_levels_x
   STGrid_obj@bin_y <- bin_matrix$possible_levels_y
@@ -1276,14 +1276,14 @@ sum_of_counts <- function(spatial_matrix = NULL,
               paste0(utils::head(colnames(tmp)[pos_ctrl], 3),
                      collapse = ", "),
               "...")
-    sum_of_cts <- rowSums(tmp[, -pos_ctrl, drop=FALSE])
+    count_sum <- rowSums(tmp[, -pos_ctrl, drop=FALSE])
 
   } else{
 
-    sum_of_cts <- rowSums(tmp)
+    count_sum <- rowSums(tmp)
   }
 
-  return(sum_of_cts)
+  return(count_sum)
 
 }
 
@@ -1493,12 +1493,12 @@ setMethod("re_bin", signature(object = "STGrid"),
                                           verbose = verbose)
 
             print_this_msg("Re-computing sum of counts .")
-            sum_of_cts <- sum_of_counts(bin_matrix$spatial_matrix,
+            count_sum <- sum_of_counts(bin_matrix$spatial_matrix,
                                         control=object@control)
 
             # create a STGrid object                             ---------
             print_this_msg("Creating an STGrid object")
-            print_this_msg("Note that meta data will be lost (except 'sum_of_cts').")
+            print_this_msg("Note that meta data will be lost (except 'count_sum').")
 
             STGrid_obj <- methods::new("STGrid",
                               path = object@path)
@@ -1514,7 +1514,7 @@ setMethod("re_bin", signature(object = "STGrid"),
             STGrid_obj@meta <- object@meta
 
             STGrid_obj@meta <- data.frame(row.names = rownames(STGrid_obj@bin_mat),
-                                          count_sums = sum_of_cts)
+                                          count_sum = count_sum)
             STGrid_obj@bin_size <- bin_size
             STGrid_obj@bin_x <- bin_matrix$possible_levels_x
             STGrid_obj@bin_y <- bin_matrix$possible_levels_y
@@ -1800,7 +1800,7 @@ check_st_list <- function(st_list,
   }
 
   for (i in 1:length(st_list)) {
-    if (!all(feat_list %in% c(feat_names(st_list[[i]]), "sum_of_cts"))) {
+    if (!all(feat_list %in% c(feat_names(st_list[[i]]), "count_sum"))) {
       print_this_msg("The feature was not found in the object.", msg_type = "STOP")
     }
   }

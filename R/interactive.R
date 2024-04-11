@@ -33,13 +33,17 @@
 #'
 
 fov_selection <- function(object=NULL) {
+
   if(is.null(object))
     print_this_msg("Need an input object.")
+
   initialize_data <- function() {
+    print_this_msg("Initializing data", msg_type = "DEBUG")
     tmp <- object[, c("x", "y", "feature")]
     tmp$color <- "selected"
     tmp$to_be_checked <- 0
 
+    print_this_msg("Preparing a reactive object", msg_type = "DEBUG")
     ## Set up the reactive dataframe
     my_val <- shiny::reactiveValues()
     my_val$DT <- tmp
@@ -74,8 +78,13 @@ fov_selection <- function(object=NULL) {
     }
 
     print_this_msg("Preparing ggplot", msg_type = "DEBUG")
+    set.seed(123)
+    data_gg <- my_val$DT[my_val$DT$feature == input$repr_feature, ]
+    sample_pts <- sample(1:nrow(data_gg),
+                         size = round(nrow(data_gg) * as.double(input$sampling_ratio), 0),
+                         replace = FALSE)
     ggprep <-
-      ggplot2::ggplot(my_val$DT[my_val$DT$feature == input$repr_feature, ],
+      ggplot2::ggplot(data_gg[sample_pts, ],
                       ggplot2::aes(x = x, y = y, color = color)) +
       ggplot2::geom_point(size = as.double(input$pts_size))  +
       ggplot2::theme_bw() +
@@ -137,8 +146,12 @@ fov_selection <- function(object=NULL) {
         shinydashboard::menuItem("Menu",
                                  tabName = "main",
                                  icon = shiny::icon("th")),
-        shiny::uiOutput("feature_select")
-        ,
+        shiny::uiOutput("feature_select"),
+        shiny::textInput(
+          "sampling_ratio",
+          "Sampling ratio",
+          value = "0.1"
+        ),
         shiny::selectInput(
           "tool",
           "Tool:",
@@ -205,6 +218,7 @@ fov_selection <- function(object=NULL) {
   )
 
   server <- function(input, output, session) {
+    print_this_msg("Initializing server", msg_type = "DEBUG")
     my_val <- initialize_data()
 
     output$feature_select <- renderUI({
