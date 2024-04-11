@@ -176,6 +176,12 @@ fov_selection <- function(object=NULL) {
           value = "0.5",
           placeholder = "0.5"
         ),
+        shiny::textInput("plot_width",
+                         "Plot width",
+                         value = 800),
+        shiny::textInput("plot_heigth",
+                         "Plot heigth",
+                         value = 800),
         shiny::checkboxInput(
           "save_selected",
           "Save selected (default) or unselected points",
@@ -218,6 +224,7 @@ fov_selection <- function(object=NULL) {
   )
 
   server <- function(input, output, session) {
+
     print_this_msg("Initializing server", msg_type = "DEBUG")
     my_val <- initialize_data()
 
@@ -304,8 +311,8 @@ fov_selection <- function(object=NULL) {
       gp
 
     },
-    height = 800,
-    width = 800)
+    height = function() {as.double(input$plot_heigth)},
+    width = function() {as.double(input$plot_width)})
 
     ## Observe event (click)
     shiny::observeEvent(input$click, {
@@ -415,7 +422,7 @@ fov_selection <- function(object=NULL) {
             data = seg_pts,
             size = 1,
             color = "blue",
-            aes(
+            ggplot2::aes(
               x = x,
               y = y,
               xend = xend,
@@ -431,8 +438,8 @@ fov_selection <- function(object=NULL) {
       output$main_plot <- shiny::renderPlot({
         draw_plot(input, my_val)
       },
-      height = 800,
-      width = 800)
+      height = function() {as.double(input$plot_heigth)},
+      width = function() {as.double(input$plot_width)})
     })
 
     ## Observe event (brush_select)
@@ -474,8 +481,8 @@ fov_selection <- function(object=NULL) {
         output$main_plot <- shiny::renderPlot({
           draw_plot(input, my_val)
         },
-        height = 800,
-        width = 800)
+        height = function() {as.double(input$plot_heigth)},
+        width = function() {as.double(input$plot_width)})
       }
 
     })
@@ -496,7 +503,7 @@ fov_selection <- function(object=NULL) {
           data = polygons,
           size = 2,
           color = "blue",
-          aes(
+          ggplot2::aes(
             x = x,
             y = y,
             xend = xend,
@@ -535,8 +542,8 @@ fov_selection <- function(object=NULL) {
         output$main_plot <- shiny::renderPlot({
           draw_plot(input, my_val)
         },
-        height = 800,
-        width = 800)
+        height = function() {as.double(input$plot_heigth)},
+        width = function() {as.double(input$plot_width)})
       }
 
 
@@ -557,8 +564,8 @@ fov_selection <- function(object=NULL) {
       output$main_plot <- shiny::renderPlot({
         draw_plot(input, my_val)
       },
-      height = 800,
-      width = 800)
+      height = function() {as.double(input$plot_heigth)},
+      width = function() {as.double(input$plot_width)})
     })
 
     ## Observe event (swap_points)
@@ -586,8 +593,8 @@ fov_selection <- function(object=NULL) {
       output$main_plot <- shiny::renderPlot({
         draw_plot(input, my_val)
       },
-      height = 800,
-      width = 800)
+      height = function() {as.double(input$plot_heigth)},
+      width = function() {as.double(input$plot_width)})
 
     })
 
@@ -612,8 +619,8 @@ fov_selection <- function(object=NULL) {
       output$main_plot <- shiny::renderPlot({
         draw_plot(input, my_val)
       },
-      height = 800,
-      width = 800)
+      height = function() {as.double(input$plot_heigth)},
+      width = function() {as.double(input$plot_width)})
     })
 
     ## Observe event (download_data)
