@@ -423,6 +423,8 @@ setMethod(
   if(!is.null(filter)){
     TF <- abs(obj) > filter
     obj <- obj[rowSums(TF) > 0 , colSums(TF) > 0]
+    if(nrow(obj)==0)
+      print_this_msg("No feature left after filtering. Adapt 'filter' argument please.", msg_type = "STOP")
   }
 
 
@@ -442,10 +444,10 @@ setMethod(
                  annotation_cols = NULL,
                  annotation_color = NULL
   )
-  #%>% ggheatmap::ggheatmap_theme(1,
-  #                     theme=list(ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90,
-  #                                                                 size = size, hjust=1),
-  #                                      axis.text.y = ggplot2::element_text(size=size))))
+  p <- ggheatmap::ggheatmap_theme(p, 1,
+                       theme=list(ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45,
+                                                                   size = size, hjust=1),
+                                        axis.text.y = ggplot2::element_text(size=size))))
   p
 
 }
