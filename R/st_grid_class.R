@@ -1814,7 +1814,7 @@ check_st_list <- function(st_list,
 #' Create an STGrid from a data.frame
 #'
 #' @param this_df A data.frame
-#' @mapping Please provide a named vector indicating which column map to "x", "y", and "feature" in the STGrid object.
+#' @param mapping Please provide a named vector indicating which column map to "x", "y", and "feature" in the STGrid object.
 #' @bin_size The size of the bin.
 #' @return An STGrid object.
 #' @examples

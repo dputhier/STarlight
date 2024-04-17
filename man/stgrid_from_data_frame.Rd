@@ -8,6 +8,8 @@ stgrid_from_data_frame(this_df = NULL, mapping = NULL, bin_size = 25)
 }
 \arguments{
 \item{this_df}{A data.frame}
+
+\item{mapping}{Please provide a named vector indicating which column map to "x", "y", and "feature" in the STGrid object.}
 }
 \value{
 An STGrid object.
