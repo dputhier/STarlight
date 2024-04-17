@@ -172,8 +172,8 @@ st_obj_r2 <- st_obj[x_bins, y_bins]
 Below is the density of molecules counts in this regions:
 
 ```{r all_genes}
-spatial_image(st_obj_r1, feature="sum_of_cts") + Seurat::NoLegend() + 
-  spatial_image(st_obj_r2, feature="sum_of_cts") 
+spatial_image(st_obj_r1, feature="count_sum") + Seurat::NoLegend() + 
+  spatial_image(st_obj_r2, feature="count_sum") 
 ```
 Now we can create an STCompR object using the stcompr() function. 
 

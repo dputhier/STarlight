@@ -130,14 +130,14 @@ setMethod("spatial_image",
                              msg_type = "STOP")
 
 
-            if (!all(features %in% c(feat_names(object), "sum_of_cts"))) {
+            if (!all(features %in% c(feat_names(object), "count_sum"))) {
               print_this_msg("The feature was not found in the object.", msg_type = "STOP")
             }
 
-            if ("sum_of_cts" %in% features) {
-              print_this_msg("Using sum_of_cts", msg_type = "DEBUG")
-              spatial_matrix <- object@bin_mat[, c("bin_x", "bin_y", setdiff(features, "sum_of_cts"))]
-              spatial_matrix$sum_of_cts <- object@meta$count_sums
+            if ("count_sum" %in% features) {
+              print_this_msg("Using count_sum", msg_type = "DEBUG")
+              spatial_matrix <- object@bin_mat[, c("bin_x", "bin_y", setdiff(features, "count_sum"))]
+              spatial_matrix$count_sum <- object@meta$count_sum
 
             } else{
               spatial_matrix <- object@bin_mat[, c("bin_x", "bin_y", features)]
@@ -457,6 +457,94 @@ setMethod("cmp_bar_plot", signature("STCompR"),
 
           })
 
+# -------------------------------------------------------------------------
+##    Compare counts across multiple st_grid_objects
+# -------------------------------------------------------------------------
+
+barplot_st <- function(...,
+         features = NULL,
+         normalized = FALSE,
+         names=NULL,
+         transform = c("None", "log2", "log10", "log"),
+         colors = c("#3074BB", "#BE5B52")) {
+
+  if (is.null(features)) {
+    print_this_msg("Please provide some features...", msg_type = "STOP")
+  }
+
+  print_this_msg("Checking STGrid objects", msg_type = "DEBUG")
+
+  st_list <- list(...)
+
+  check_st_list(st_list, features)
+
+  if (is.null(names)) {
+    names <- paste("Condition_", 1:length(st_list), sep = "")
+  } else{
+    if (length(names) != length(st_list))
+      print_this_msg("The number of names should be same as the number of objects.",
+                     msg_type = "STOP")
+  }
+
+  print_this_msg("Subsetting STGrid objects.", msg_type = "DEBUG")
+
+  st_list_grid <- st_list
+
+  for (i in 1:length(st_list)) {
+    st_list[[i]] <- st_list[[i]][feat_list,]
+  }
+
+  st_list <- lapply(
+    st_list,
+    bin_mat,
+    melt_tab = TRUE,
+    as_factor = TRUE,
+    feat_list = feat_list
+  )
+
+  counts <- stat_test(
+    object,
+    normalized = normalized,
+    count_only = TRUE,
+    melted_count = TRUE,
+    transform = transform,
+    features = features
+  )
+
+  ylabel <- ifelse(
+    transform %in% c("log2", "log10", "log"),
+    paste0(transform, "(Molecule counts)"),
+    "Molecule counts"
+  )
+  counts$Features <- factor(counts$Features,
+                            levels = features,
+                            ordered = TRUE)
+
+  Features <- Counts <- Conditions <- NULL
+
+  ggplot2::ggplot(data = counts,
+                  mapping = ggplot2::aes(x = Features, y = Counts,
+                                         fill = Conditions)) +
+    ggplot2::geom_col(color = "black",
+                      linewidth = 0,
+                      position = "dodge") +
+    ggplot2::theme_bw() +
+    ggplot2::theme(
+      axis.text.x = ggplot2::element_text(
+        size = 10,
+        angle = 45,
+        vjust = 0.5
+      ),
+      axis.text.y = ggplot2::element_text(size = 8),
+      panel.grid.major.y = ggplot2::element_blank(),
+      panel.grid.minor.x = ggplot2::element_blank(),
+      panel.grid.minor.y = ggplot2::element_blank(),
+      panel.border = ggplot2::element_blank()
+    ) +
+    ggplot2::ylab(ylabel) +
+    ggplot2::scale_fill_manual(values = colors)
+
+}
 # -------------------------------------------------------------------------
 ##    Boxplot / jitter
 # -------------------------------------------------------------------------
@@ -882,13 +970,7 @@ cmp_images <- function(...,
 
   st_list <- list(...)
 
-  if (any(unlist(lapply(lapply(st_list, class), "[", 1)) != "STGrid")) {
-    print_this_msg("Object should be of type STGrid", msg_type = "STOP")
-  }
-
-  if (length(st_list) < 1) {
-    print_this_msg("Need at least one experiment !!", msg_type = "STOP")
-  }
+  check_st_list(st_list, feat_list)
 
   if (is.null(names)) {
     names <- paste("Condition_", 1:length(st_list), sep = "")
@@ -898,19 +980,11 @@ cmp_images <- function(...,
                      msg_type = "STOP")
   }
 
-  for (i in 1:length(st_list)) {
-    if (!all(feat_list %in% c(feat_names(st_list[[i]]), "sum_of_cts"))) {
-      print_this_msg("The feature was not found in the object.", msg_type = "STOP")
-    }
-  }
 
   print_this_msg("Subsetting STGrid objects.", msg_type = "DEBUG")
 
+  # Save STGrid version
   st_list_grid <- st_list
-  #bin_x_order <- unlist(lapply(st_list, bin_x))
-  #bin_x_order <- bin_x_order[!duplicated(bin_x_order)]
-  #bin_y_order <- unlist(lapply(st_list, bin_y))
-  #bin_y_order <- bin_y_order[!duplicated(bin_y_order)]
 
   for (i in 1:length(st_list)) {
     st_list[[i]] <- st_list[[i]][feat_list,]
