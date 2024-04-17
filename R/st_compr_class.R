@@ -278,9 +278,9 @@ stcompr <- function(object_1,
 #' stored in the object.
 #'
 #' @param object An object of class 'STCompR'.
-#' @param what A character string specifying what to plot: "changes" (the difference in manhattan distances between conditions 2 and 1),
-#' "changes_2" (the difference in manhattan distances between conditions 1 and 2), "c1" (the manhattan distances of conditions 1), or "c2"
-#' (the manhattan distances of conditions 2).
+#' @param what A character string specifying what to plot: "changes" (the difference in pairwise Manhattan distances between conditions 2 and 1),
+#' "changes_2" (the difference in pairwise Manhattan distances between conditions 1 and 2), "c1" (the pairwise Manhattan distances of features in condition 1), or "c2"
+#' (the pairwise Manhattan distances of features in condition 2).
 #' @param hclust_method A character string specifying the agglomerative criteria for hierarchical clustering ("ward.D", "ward.D2",
 #' "single", "complete", "average", "mcquitty", "median", "centroid").
 #' @param dist_method A character string specifying the distance method to be used ("euclidean",
@@ -326,9 +326,9 @@ setGeneric("heatmap_cmp",
 #' stored in the object.
 #'
 #' @param object An object of class 'STCompR'.
-#' @param what A character string specifying what to plot: "changes" (the difference in manhattan distances between conditions 2 and 1),
-#' "changes_2" (the difference in manhattan distances between conditions 1 and 2), "c1" (the manhattan distances of conditions 1), or "c2"
-#' (the manhattan distances of conditions 2).
+#' @param what A character string specifying what to plot: "changes" (the difference in pairwise Manhattan distances between conditions 2 and 1),
+#' "changes_2" (the difference in pairwise Manhattan distances between conditions 1 and 2), "c1" (the pairwise Manhattan distances of features in condition 1), or "c2"
+#' (the pairwise Manhattan distances of features in condition 2).
 #' @param hclust_method A character string specifying the agglomerative criteria for hierarchical clustering ("ward.D", "ward.D2",
 #' "single", "complete", "average", "mcquitty", "median", "centroid").
 #' @param dist_method A character string specifying the distance method to be used ("euclidean",
