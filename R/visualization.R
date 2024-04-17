@@ -424,8 +424,8 @@ setMethod("cmp_bar_plot", signature("STCompR"),
 
             ylabel <- ifelse(
               transform %in% c("log2", "log10", "log"),
-              paste0(transform, "(Molecule counts)"),
-              "Molecule counts"
+              paste0(transform, "(Feature counts)"),
+              "Feature counts"
             )
             counts$Features <- factor(counts$Features,
                                       levels = features,
