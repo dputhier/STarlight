@@ -1,5 +1,4 @@
 ---
-author: "D. Puthier"
 title: "Guided tutorial"
 author: "D. Puthier"
 date: "2024-03-06"
