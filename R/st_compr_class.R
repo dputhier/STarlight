@@ -444,10 +444,10 @@ setMethod(
                  annotation_cols = NULL,
                  annotation_color = NULL
   )
-  p <- ggheatmap::ggheatmap_theme(p, 1,
-                       theme=list(ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45,
-                                                                   size = size, hjust=1),
-                                        axis.text.y = ggplot2::element_text(size=size))))
+  # p <- ggheatmap::ggheatmap_theme(p, 1,
+  #                      theme=list(ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45,
+  #                                                                  size = size, hjust=1),
+  #                                       axis.text.y = ggplot2::element_text(size=size))))
   p
 
 }
