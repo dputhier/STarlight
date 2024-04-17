@@ -1805,3 +1805,53 @@ check_st_list <- function(st_list,
     }
   }
 }
+
+# -------------------------------------------------------------------------
+#      Create an STGrid from a data.frame
+# -------------------------------------------------------------------------
+#' @title Create an STGrid from a data.frame
+#' @description
+#' Create an STGrid from a data.frame
+#'
+#' @param this_df A data.frame
+#' @mapping Please provide a named vector indicating which column map to "x", "y", and "feature" in the STGrid object.
+#' @bin_size The size of the bin.
+#' @return An STGrid object.
+#' @examples
+#' d <- data.frame(foo=runif(1000, 0, 1000), bar=runif(1000, 0, 1000), bla=sample(letters, 1000, replace=TRUE))
+#' st <- stgrid_from_data_frame(d, mapping=c("x"="foo", "y"="bar", "feature"="bla"))
+#' st
+#' @export
+stgrid_from_data_frame <- function(this_df=NULL,
+                                   mapping=NULL,
+                                   bin_size=25){
+
+  if(is.null(this_df) | !inherits(this_df, "data.frame")){
+    print_this_msg("Please provide a data.frame object.", msg_type = "STOP")
+  }
+
+  if(is.null(mapping)){
+    print_this_msg("Please provide a column mapping.")
+  }
+
+  if(!all(c("x", "y", "feature") %in% names(mapping) )){
+    print_this_msg("Please provide a mapping for x, y and feature.", msg_type = "STOP")
+  }
+
+  if(!all(mapping %in% colnames(this_df) )){
+    print_this_msg("Some columns are not part of the data.frame", msg_type = "STOP")
+  }
+
+  this_df <- this_df[, mapping]
+  colnames(this_df) <- names(mapping)
+
+  tmp_file <- tempfile()
+  write.table(file=tmp_file, x = this_df, sep="\t", quote = FALSE, col.names = NA)
+
+  STGrid_obj <- load_spatial(path=tmp_file, method = "coordinates", bin_size = bin_size)
+
+  unlink(tmp_file)
+
+  return(STGrid_obj)
+
+}
