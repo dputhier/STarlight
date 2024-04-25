@@ -13,7 +13,8 @@ heatmap_cmp(
   del_feat = NULL,
   only_feat = NULL,
   filter = 0.2,
-  size = 6
+  size = 6,
+  title = NULL
 )
 }
 \arguments{

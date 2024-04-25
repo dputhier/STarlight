@@ -6,20 +6,21 @@
 \usage{
 \S4method{cmp_volcano}{STCompR}(
   object,
-  x_axis = c("log2_ratio", "log2_odds", "odd_ratio"),
+  x_axis = c("log2_ratio", "log2_odds"),
   y_axis = c("p_values", "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr"),
   x_lim = c(-2.5, 2.5),
   colors = rev(RColorBrewer::brewer.pal(7, "Spectral")),
   text_y_lim = 100,
   text_x_lim = 1,
-  text_size = 4
+  text_size = 4,
+  title = NULL
 )
 }
 \arguments{
 \item{object}{A STCompR object.}
 
 \item{x_axis}{Character vector specifying the x-axis variable.
-Options are "log2_ratio", "log2_odds", or "odd_ratio".}
+Options are "log2_ratio" or "log2_odds".}
 
 \item{y_axis}{Character vector specifying the y-axis variable.
 Options are "p_values", "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", or "fdr".}
@@ -33,6 +34,8 @@ Options are "p_values", "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", 
 \item{text_x_lim}{Numeric value specifying the threshold for feature labels on the x-axis. Genes with absolute x-values less than this threshold will not be labeled. Default is 2.}
 
 \item{text_size}{Numeric value specifying the size of text labels in the plot. Default is 5.}
+
+\item{title}{A title for the diagram.}
 }
 \description{
 Create a boxplot/jitter plot to show molecule counts distribution.

@@ -650,7 +650,7 @@ setMethod("cmp_boxplot", signature("STCompR"),
 #' Create a boxplot/jitter plot to show molecule counts distribution.
 #' @param object A STCompR object.
 #' @param x_axis Character vector specifying the x-axis variable.
-#' Options are "log2_ratio", "log2_odds", or "odd_ratio".
+#' Options are "log2_ratio" or "log2_odds".
 #' @param y_axis Character vector specifying the y-axis variable.
 #' Options are "p_values", "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", or "fdr".
 #' @param x_lim Numeric vector specifying the x-axis limits. Default is c(-2.5, 2.5).
@@ -658,6 +658,7 @@ setMethod("cmp_boxplot", signature("STCompR"),
 #' @param text_y_lim Numeric value specifying the threshold for feature labels on the y-axis. Features with -log10(p-value) less than this threshold won't be labeled. Default is 100.
 #' @param text_x_lim Numeric value specifying the threshold for feature labels on the x-axis. Features with absolute x-values less than this threshold won't not be labeled. Default is 2.
 #' @param text_size Numeric value specifying the size of text labels in the plot. Default is 5.
+#' @param title A title for the diagram.
 #' @keywords internal
 #' @importFrom ggplot2 aes geom_vline geom_hline geom_point theme_bw xlab ylab expand_limits scale_fill_gradientn
 #' @importFrom  ggrepel geom_text_repel
@@ -669,7 +670,7 @@ setMethod("cmp_boxplot", signature("STCompR"),
 #' @keywords internal
 setGeneric("cmp_volcano",
            function(object,
-                    x_axis = c("log2_ratio", "log2_odds", "odd_ratio"),
+                    x_axis = c("log2_ratio", "log2_odds"),
                     y_axis = c("p_values",
                                "holm",
                                "hochberg",
@@ -682,7 +683,8 @@ setGeneric("cmp_volcano",
                     colors = RColorBrewer::brewer.pal(7, "Spectral"),
                     text_y_lim = 100,
                     text_x_lim = 2,
-                    text_size = 5)
+                    text_size = 5,
+                    title=NULL)
            standardGeneric("cmp_volcano"))
 
 #' @title Create a volcano plot to compare molecule counts between 2 conditions.
@@ -690,7 +692,7 @@ setGeneric("cmp_volcano",
 #' Create a boxplot/jitter plot to show molecule counts distribution.
 #' @param object A STCompR object.
 #' @param x_axis Character vector specifying the x-axis variable.
-#' Options are "log2_ratio", "log2_odds", or "odd_ratio".
+#' Options are "log2_ratio" or "log2_odds".
 #' @param y_axis Character vector specifying the y-axis variable.
 #' Options are "p_values", "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", or "fdr".
 #' @param x_lim Numeric vector specifying the x-axis limits. Default is c(-2.5, 2.5).
@@ -698,18 +700,19 @@ setGeneric("cmp_volcano",
 #' @param text_y_lim Numeric value specifying the threshold for feature labels on the y-axis. Genes with -log10(p-value) less than this threshold will not be labeled. Default is 100.
 #' @param text_x_lim Numeric value specifying the threshold for feature labels on the x-axis. Genes with absolute x-values less than this threshold will not be labeled. Default is 2.
 #' @param text_size Numeric value specifying the size of text labels in the plot. Default is 5.
+#' @param title A title for the diagram.
 #' @keywords internal
 #' @examples
 #' example_dataset("10819270/files/cmp_xen")
 #' cmp_xen
 #' cmp_volcano(cmp_xen)
-#' @importFrom ggplot2 aes geom_vline geom_hline geom_point theme_bw xlab ylab expand_limits scale_fill_gradientn
+#' @importFrom ggplot2 aes geom_vline geom_hline geom_point theme_bw xlab ylab expand_limits scale_fill_gradientn ggtitle
 #' @importFrom  ggrepel geom_text_repel
 #' @importFrom stringr str_to_title
 #' @export cmp_volcano
 setMethod("cmp_volcano", signature("STCompR"),
           function(object,
-                   x_axis = c("log2_ratio", "log2_odds", "odd_ratio"),
+                   x_axis = c("log2_ratio", "log2_odds"),
                    y_axis = c("p_values",
                               "holm",
                               "hochberg",
@@ -722,12 +725,34 @@ setMethod("cmp_volcano", signature("STCompR"),
                    colors = rev(RColorBrewer::brewer.pal(7, "Spectral")),
                    text_y_lim = 100,
                    text_x_lim = 1,
-                   text_size = 4) {
+                   text_size = 4,
+                   title=NULL) {
+
             x_axis <- match.arg(x_axis)
             y_axis <- match.arg(y_axis)
 
             if (y_axis != "p_values")
               y_axis <- paste0("padj_", y_axis)
+
+            if(x_axis == "log2_ratio"){
+
+              x_axis_lab <- paste0("log2(",
+                                   object@conditions[2],
+                                   "/",
+                                   object@conditions[1],
+                                   ")")
+
+            }else if(x_axis == "log2_odds"){
+              x_axis_lab <- "Log2(odds)"
+
+            }
+
+            if(is.null(title)){
+              title <- paste0("Comparison of ",
+                              object@conditions[1],
+                              " vs ",
+                              object@conditions[2])
+            }
 
             volc_data <- stat_test(
               object,
@@ -736,7 +761,13 @@ setMethod("cmp_volcano", signature("STCompR"),
               features = NULL
             )
 
-            volc_data <- volc_data[, c(x_axis, y_axis)]
+            if(x_axis == "log2_ratio"){
+              volc_data <- volc_data[, c(x_axis, y_axis)]
+            }else if(x_axis == "log2_odds"){
+              volc_data <- volc_data[, c("odd_ratio", y_axis)]
+              volc_data$odd_ratio <- log2(volc_data$odd_ratio)
+            }
+
             colnames(volc_data) <- c("x", "y")
 
             counts <- stat_test(
@@ -774,6 +805,8 @@ setMethod("cmp_volcano", signature("STCompR"),
                 size = text_size,
                 color = "black"
               ) +
+              ggplot2::ggtitle(title) +
+              ggplot2::xlab(x_axis_lab) +
               ggplot2::theme(
                 axis.text.x = ggplot2::element_text(size = 10,  vjust = 0.5),
                 axis.text.y = ggplot2::element_text(size = 8),
@@ -782,7 +815,6 @@ setMethod("cmp_volcano", signature("STCompR"),
                 panel.grid.minor.y = ggplot2::element_blank(),
                 panel.border = ggplot2::element_blank()
               ) +
-              ggplot2::xlab(paste0(stringr::str_to_title(gsub("_", " ", x_axis)))) +
               ggplot2::ylab(paste0("-log10(", y_axis, ")")) +
               ggplot2::expand_limits(x = x_lim) +
               ggplot2::scale_fill_gradientn(colors = colors,

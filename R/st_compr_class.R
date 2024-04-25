@@ -181,7 +181,7 @@ stcompr <- function(object_1,
   norm_counts <- norm_counts + pseudo_count
 
   print_this_msg("Computing log2 ratio...")
-  ratio <- norm_counts[, name_2]/norm_counts[, name_1]
+  ratio <- norm_counts[, name_2] / norm_counts[, name_1]
   log2_ratio <- log2(ratio)
 
   p_values <- c()
@@ -313,7 +313,8 @@ setGeneric("heatmap_cmp",
                     del_feat=NULL,
                     only_feat=NULL,
                     filter=0.2,
-                    size=6)
+                    size=6,
+                    title=NULL)
              standardGeneric("heatmap_cmp")
 )
 
@@ -375,24 +376,31 @@ setMethod(
     print_this_msg("Parameter 'what' is set to 'changes'...")
     obj <- as.matrix(object@neighborhood_changes)
     legend_name <- "Changes"
+    if(is.null(title))
+      title <- paste0("d(", object@conditions[2], ") - d(",object@conditions[1],")" )
 
   } else if(what == "changes_2"){
 
     print_this_msg("Parameter 'what' is set to 'changes_2'...")
     obj <- object@neighborhood[[1]] - object@neighborhood[[2]]
     legend_name <- "Changes"
+    if(is.null(title))
+      title <- paste0("d(", object@conditions[1], ") - d(",object@conditions[2],")" )
 
   }else if(what=="c1"){
 
     print_this_msg("Parameter 'what' is set to 'c1'...")
     obj <- object@neighborhood[[1]]
     legend_name <- "Dist"
+    if(is.null(title))
+      title <- paste0("d(", object@conditions[1], ")")
 
   }else {
 
     print_this_msg("Parameter 'what' is set to 'c2'...")
     obj <- object@neighborhood[[2]]
     legend_name <- "Dist"
+    title <- paste0("d(", object@conditions[2], ")")
 
   }
 
@@ -444,10 +452,12 @@ setMethod(
                  annotation_cols = NULL,
                  annotation_color = NULL
   )
-  # p <- ggheatmap::ggheatmap_theme(p, 1,
-  #                      theme=list(ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45,
-  #                                                                  size = size, hjust=1),
-  #                                       axis.text.y = ggplot2::element_text(size=size))))
+
+  p$plotlist[[1]] <- p$plotlist[[1]] + ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45,
+                                                                                          size = size,
+                                                                                          hjust=1),
+                                                      axis.text.y = ggplot2::element_text(size=size))
+
   p
 
 }

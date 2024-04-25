@@ -1815,7 +1815,7 @@ check_st_list <- function(st_list,
 #'
 #' @param this_df A data.frame
 #' @param mapping Please provide a named vector indicating which column map to "x", "y", and "feature" in the STGrid object.
-#' @bin_size The size of the bin.
+#' @param bin_size The size of the bin.
 #' @return An STGrid object.
 #' @examples
 #' d <- data.frame(foo=runif(1000, 0, 1000), bar=runif(1000, 0, 1000), bla=sample(letters, 1000, replace=TRUE))
