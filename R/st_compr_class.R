@@ -289,6 +289,7 @@ stcompr <- function(object_1,
 #' @param only_feat A character vector specifying features to be included in the heatmap.
 #' @param filter A numeric value specifying the threshold for filtering out low values in the heatmap.
 #' @param size A numeric value specifying the size of text in the heatmap.
+#' @param title A title for the diagram.
 #'
 #' @return A heatmap plot comparing conditions in the 'STCompR' object.
 #'
@@ -338,6 +339,7 @@ setGeneric("heatmap_cmp",
 #' @param only_feat A character vector specifying features to be included in the heatmap.
 #' @param filter A numeric value specifying the threshold for filtering out low values in the heatmap.
 #' @param size A numeric value specifying the size of text in the heatmap.
+#' @param title A title for the diagram.
 #'
 #' @return A heatmap plot comparing conditions in the 'STCompR' object.
 #'
@@ -365,7 +367,8 @@ setMethod(
            del_feat=NULL,
            only_feat=NULL,
            filter=0.2,
-           size=6) {
+           size=6,
+           title=NULL) {
 
     what <- match.arg(what)
     dist_method <- match.arg(dist_method)
@@ -457,6 +460,8 @@ setMethod(
                                                                                           size = size,
                                                                                           hjust=1),
                                                       axis.text.y = ggplot2::element_text(size=size))
+
+  p$plotlist[[3]] <- p$plotlist[[3]] + ggplot2::ggtitle(title)
 
   p
 
