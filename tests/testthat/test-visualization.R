@@ -256,3 +256,41 @@ test_that("cmp_images...", {
 
 })
 
+
+
+test_that("dist_st", {
+  library(stcompr)
+  set_verb_level(0)
+  example_dataset()
+
+  xen <- Xenium_Mouse_Brain_Coronal_7g
+  x_bins <-  bin_x(xen)[180:nbin_x(xen)]
+  y_bins <-  bin_y(xen)[100:nbin_y(xen)]
+  xen_r1 <- xen[x_bins, y_bins]
+  x_bins <-  bin_x(xen)[60:100]
+  y_bins <-  bin_y(xen)[100:nbin_y(xen)]
+  xen_r2 <- xen[x_bins, y_bins]
+  x_bins <-  bin_x(xen)[20:60]
+  y_bins <-  bin_y(xen)[20:60]
+  xen_r3 <- xen[x_bins, y_bins]
+  expect_no_error(dist_st(xen_r1, xen_r2, xen_r3,
+                        fill_color=c("red", "black", "green"),
+                        type="density",
+                      transform="log10"))
+  expect_no_error(dist_st(xen_r1, xen_r2, xen_r3,
+                          fill_color=c("red", "black", "green"),
+                          type="hist",
+                          transform="log10"))
+  expect_no_error(dist_st(xen_r1, xen_r2, xen_r3,
+                          fill_color=c("red", "black", "green"),
+                          type="boxplot",
+                          transform="log10"))
+  expect_no_error(dist_st(xen_r1, xen_r2, xen_r3,
+                          fill_color=c("red", "black", "green"),
+                          type="boxjitter",
+                          transform="log10"))
+})
+
+
+
+

@@ -37,6 +37,8 @@ heatmap_cmp(
 \item{filter}{A numeric value specifying the threshold for filtering out low values in the heatmap.}
 
 \item{size}{A numeric value specifying the size of text in the heatmap.}
+
+\item{title}{A title for the diagram.}
 }
 \value{
 A heatmap plot comparing conditions in the 'STCompR' object.

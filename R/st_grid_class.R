@@ -348,9 +348,11 @@ setMethod("bin_mat", "STGrid",
               feat_list <- feat_names(object)
             }
 
-            if("count_sum" %in% feat_list){
+            if(any(colnames(object@meta) %in% feat_list)){
+              print_this_msg("Using a feature from meta slot.", msg_type = "DEBUG")
               this_bin_mat <- object@bin_mat
-              this_bin_mat$count_sum <- object@meta$count_sum
+              for(i in feat_list[feat_list %in% colnames(object@meta)])
+                this_bin_mat[[i]] <- object@meta[[i]]
             }else{
               this_bin_mat <- object@bin_mat
             }
@@ -562,6 +564,32 @@ setMethod("feat_names", signature(object = "STGrid"),
             fn
           })
 
+#' @title The names of meta informations stored in a STGrid object
+#' @description
+#' The names of meta informations stored in a STGrid object
+#' @param object The STGrid object
+#' @keywords internal
+#' @examples
+#' example_dataset()
+#' meta_names(Xenium_Mouse_Brain_Coronal_7g)
+#' @export
+setGeneric("meta_names",
+           function(object)
+             standardGeneric("meta_names"))
+
+#' @title The names of meta informations stored in a STGrid object
+#' @description
+#' The names of meta informations stored in a STGrid object
+#' @param object The STGrid object
+#' @examples
+#' example_dataset()
+#' meta_names(Xenium_Mouse_Brain_Coronal_7g)
+#' @export
+setMethod("meta_names",
+          signature(object = "STGrid"),
+          function(object) {
+            colnames(object@meta)
+          })
 
 #' @title The size of the bins stored in an STGrid object
 #' @description
@@ -895,6 +923,18 @@ setMethod ("$", "STGrid",
 
 
 
+#' @title This functions makes STGrid objects look like list and allow completion after $.
+#' @description
+#' This functions makes STGrid objects look like list and allow completion after $.
+#' @param x The STGtrid object.
+#' @param pattern The pattern to be searched.
+#' @keywords internal
+#' @examples
+#' example_dataset()
+#' xen <- Xenium_Mouse_Brain_Coronal_7g
+#' xen$bla <- "foo"
+#' head(xen@meta)
+#' @export
 .DollarNames.STGrid <- function (x, pattern = '') {
   grep(pattern,
        colnames(x@meta),
@@ -1118,6 +1158,9 @@ setMethod("compute_k_ripley", signature("STGrid"),
 #' @param sep The separator when method is set to "coordinates" (default "\\t").
 #' @param threads The number of threads (see data.table::fread).
 #' @param verbose Whether to display the progress bar.
+#' @param constrain Whether to put a constrain on a column when method is set to 'coordinates'. E.g: "global_z==0".
+#' @param mapping if method='coordinates' is used and non conventional column names are used in the input file,
+#'
 #' @return An object of class STGrid.
 #' @importFrom Seurat ReadVizgen
 #' @importFrom Seurat ReadXenium
@@ -1141,7 +1184,9 @@ load_spatial <- function(path = "",
                          control = NULL,
                          sep="\t",
                          threads=1,
-                         verbose = TRUE) {
+                         constrain=NULL,
+                         verbose = TRUE,
+                         mapping=NULL) {
   method <- match.arg(method)
 
   print_this_msg("Technology is '", method, "'.")
@@ -1180,22 +1225,52 @@ load_spatial <- function(path = "",
                                                   sep = sep,
                                                   head = TRUE, nThread = threads))
 
-      col_needed <- c("x", "y")
+    if(!is.null(constrain)){
+      print_this_msg('Evaluating provided contrain.')
+      print_this_msg("Checking column ('contrain').", msg_type = "DEBUG")
+      if(!gsub("^(\\w+)\\s?[!=><].*","\\1",constrain) %in% colnames(spat_input))
+        print_this_msg("Column not found (see 'constrain').", msg_type = "STOP")
 
+      print_this_msg("Evaluating test ('contrain').", msg_type = "DEBUG")
+      contrain_col <- paste0("spat_input$", constrain)
+      my_eval <- eval(parse(text=contrain_col))
 
-    if("cell" %in% colnames(spat_input)){
-      col_needed <- c(col_needed, "cell")
-    }else if("feature" %in% colnames(spat_input)){
-      col_needed <- c(col_needed, "feature")
-    }else if("gene" %in% colnames(spat_input)){
-      col_needed <- c(col_needed, "gene")
-    }else{
-      print_this_msg("Could not find a cell/feature/gene columns.", msg_type = "STOP")
+      print_this_msg("Table size before applying constrain:", nrow(spat_input))
+      spat_input <- spat_input[my_eval, ]
+      print_this_msg("Table after before applying constrain:", nrow(spat_input))
+      if(nrow(spat_input) ==0)
+        print_this_msg("No line left after 'contrain'...",  msg_type = "STOP")
     }
 
-    if (any(!col_needed %in% colnames(spat_input))) {
-      print_this_msg("Please check the column name of the input file.", msg_type = "STOP")
-    }
+     if(!is.null(mapping)){
+       if(!all(c("x", "y", "feature") %in% names(mapping) )){
+         print_this_msg("Please provide a mapping for both x, y and feature.", msg_type = "STOP")
+       }
+
+       if(!all(mapping %in% colnames(spat_input) )){
+         print_this_msg("Some columns are not part of the data.frame", msg_type = "STOP")
+       }
+
+       col_needed <- mapping[c("x", "y", "feature")]
+
+     }else{
+       col_needed <- c("x", "y")
+
+       if("cell" %in% colnames(spat_input)){
+         col_needed <- c(col_needed, "cell")
+       }else if("feature" %in% colnames(spat_input)){
+         col_needed <- c(col_needed, "feature")
+       }else if("gene" %in% colnames(spat_input)){
+         col_needed <- c(col_needed, "gene")
+       }else{
+         print_this_msg("Could not find a cell/feature/gene columns.", msg_type = "STOP")
+       }
+
+       if (any(!col_needed %in% colnames(spat_input))) {
+         print_this_msg("Please check the column name of the input file.", msg_type = "STOP")
+       }
+
+     }
 
     spat_input <- spat_input[, col_needed]
 
@@ -1599,7 +1674,7 @@ setMethod("get_coord", "STGrid",
 #' @keywords internal
 setGeneric("hc_tree",
            function(object,
-                    method = c("complete", "ward.D", "ward.D2", "single",
+                    method = c("ward.D", "complete", "ward.D2", "single",
                                "average", "mcquitty", "median", "centroid"),
                     layout = c("circular", "rectangular",
                                "slanted", "fan", "unrooted",
@@ -1627,10 +1702,11 @@ setGeneric("hc_tree",
 #' @importFrom tidytree MRCA
 #' @examples
 #' example_dataset()
-#' p <- hc_tree(Xenium_Mouse_Brain_Coronal_7g, class_nb = 7, class_name = letters[1:7])
+#' p <- hc_tree(Xenium_Mouse_Brain_Coronal_7g, class_nb = 4, class_name = letters[1:4])
 #' print(p)
+#' # Get classes:
+#' p$tree_classes
 #' @export
-#' @keywords internal
 setMethod("hc_tree", "STGrid",
 
           function(object,
@@ -1642,7 +1718,7 @@ setMethod("hc_tree", "STGrid",
                    dist_method = "pearson",
                    branch_length = "none",
                    class_nb = 1,
-                   class_name = "All",
+                   class_name = NULL,
                    size = 2.25) {
 
             method <- match.arg(method)
@@ -1652,10 +1728,19 @@ setMethod("hc_tree", "STGrid",
             print_this_msg("Using layout", layout, msg_type="INFO")
 
             if (class_nb > 0) {
-              if (length(class_name) != class_nb) {
-                print_this_msg("Please set the right number of class names",
-                               "see 'class_name' and 'class_nb'. ",
-                          msg_type = "STOP")
+              if(is.null(class_name)){
+                if(class_name <= 26){
+                  class_name <- LETTERS[1:class_name]
+                }else{
+                  print_this_msg("Please provide some class names...")
+                }
+
+              }else{
+                if (length(class_name) != class_nb) {
+                  print_this_msg("Please set the right number of class names",
+                                 "see 'class_name' and 'class_nb'. ",
+                                 msg_type = "STOP")
+                }
               }
             } else{
               print_this_msg("The class_nb argument should be an integer > than 0...",
@@ -1710,7 +1795,7 @@ setMethod("hc_tree", "STGrid",
               ggtree::geom_tiplab(
                 ggplot2::aes(label = label),
                 offset = 1,
-                size = 2.25,
+                size = size,
                 color = 'black'
               ) +
               ggnewscale::new_scale_fill() +
@@ -1722,7 +1807,13 @@ setMethod("hc_tree", "STGrid",
             # inherit.aes = TRUE,
             #show.legend = FALSE
             #) +
+            nm <- names(tree_classes)
+            tree_classes <- paste0("module_", tree_classes)
+            names(tree_classes) <- nm
+            p[["tree_classes"]] <- split(names(tree_classes), tree_classes)
+
             return(p)
+
           })
 
 
@@ -1800,7 +1891,7 @@ check_st_list <- function(st_list,
   }
 
   for (i in 1:length(st_list)) {
-    if (!all(feat_list %in% c(feat_names(st_list[[i]]), "count_sum"))) {
+    if (!all(feat_list %in% c(feat_names(st_list[[i]]), colnames(st_list[[i]]@meta)))) {
       print_this_msg("The feature was not found in the object.", msg_type = "STOP")
     }
   }
@@ -1855,3 +1946,74 @@ stgrid_from_data_frame <- function(this_df=NULL,
   return(STGrid_obj)
 
 }
+
+
+# -------------------------------------------------------------------------
+#      Compute module scores
+# -------------------------------------------------------------------------
+#' @title From a list of feature (e.g gene) modules, compute a score (e.g. mean value) accross bins.
+#'
+#' @description
+#' From a list of feature (e.g gene) modules, compute a score (e.g. mean value) accross bins.
+#'
+#' @param object An \code{STGrid} object.
+#' @param modules A list of modules.
+#' @param rename Force the renaming of the modules to module_1, module_2...
+#' @param fun The function to be applied (e.g. mean, median, sd...)
+#' @keywords internal
+#' @export
+setGeneric("compute_module_score",
+           function(object,
+                    modules=NULL,
+                    rename=FALSE,
+                    fun="mean"
+           )
+             standardGeneric("compute_module_score"))
+
+#' @title From a list of feature (e.g gene) modules, compute a score (e.g. mean value) accross bins.
+#'
+#' @description
+#' From a list of feature (e.g gene) modules, compute a score (e.g. mean value) accross bins.
+#'
+#' @param object An \code{STGrid} object.
+#' @param modules A list of modules.
+#' @param rename Force the renaming of the modules to module_1, module_2...
+#' @param fun The function to be applied (e.g. mean, median, sd...)
+#' @examples
+#' example_dataset()
+#' xen <- Xenium_Mouse_Brain_Coronal_7g
+#' p <- hc_tree(xen, class_nb = 4, class_name = letters[1:4])
+#' print(p)
+#' # Get classes:
+#' xen <- compute_module_score(xen, modules=p$tree_classes)
+#' @export
+setMethod("compute_module_score", "STGrid",
+          function(object,
+                   modules=NULL,
+                   rename=FALSE,
+                   fun="mean"
+                   ){
+
+            print_this_msg("Computing module score...")
+
+            if(is.null(modules))
+              print_this_msg("Need at list one module", msg_type = "STOP")
+
+            if(!is.list(modules))
+              print_this_msg("'modules' argument should be a list", msg_type = "STOP")
+
+            if(is.null(names(modules)) | rename == TRUE)
+              names(modules) <- paste0("module_", 1:length(modules))
+
+            print_this_msg("Iterating over modules...")
+            for(mod_nm in names(modules)){
+              print_this_msg(paste("Processing module: ", mod_nm), msg_type = "DEBUG")
+              check_st_list(list(object), feat_list = modules[[mod_nm]])
+              object@meta[[mod_nm]] <- apply(bin_mat(object)[, modules[[mod_nm]], drop=FALSE],
+                                             1,
+                                             eval(parse(text =fun)))
+            }
+
+            return(object)
+})
+

@@ -104,6 +104,7 @@ setMethod("spatial_image",
                    size = 0.5,
                    logb = 10,
                    pseudo_count = 1) {
+
             check_this_var(grid_by, null_accepted = TRUE, type = "int")
 
             if (saturation > 1 | saturation < 0)
@@ -130,14 +131,16 @@ setMethod("spatial_image",
                              msg_type = "STOP")
 
 
-            if (!all(features %in% c(feat_names(object), "count_sum"))) {
+            if (!all(features %in% c(feat_names(object), colnames(object@meta)))) {
               print_this_msg("The feature was not found in the object.", msg_type = "STOP")
             }
 
-            if ("count_sum" %in% features) {
-              print_this_msg("Using count_sum", msg_type = "DEBUG")
-              spatial_matrix <- object@bin_mat[, c("bin_x", "bin_y", setdiff(features, "count_sum"))]
-              spatial_matrix$count_sum <- object@meta$count_sum
+            if (any(colnames(object@meta) %in% features)) {
+              print_this_msg("Using a feature from meta slot.", msg_type = "DEBUG")
+              spatial_matrix <- object@bin_mat[, c("bin_x", "bin_y",
+                                                   setdiff(features, colnames(object@meta)))]
+              for(i in features[features %in% colnames(object@meta)])
+              spatial_matrix[[i]] <- object@meta[[i]]
 
             } else{
               spatial_matrix <- object@bin_mat[, c("bin_x", "bin_y", features)]
@@ -461,20 +464,267 @@ setMethod("cmp_bar_plot", signature("STCompR"),
 ##    Compare counts across multiple st_grid_objects
 # -------------------------------------------------------------------------
 
-barplot_st <- function(...,
+cmp_counts_st <- function(...,
          features = NULL,
          normalized = FALSE,
+         type=c("barplot",
+                "radar"),
          names=NULL,
          transform = c("None", "log2", "log10", "log"),
-         colors = c("#3074BB", "#BE5B52")) {
+         fill_color = NULL,
+         border_color="black") {
 
-  if (is.null(features)) {
-    print_this_msg("Please provide some features...", msg_type = "STOP")
+  type <- match.arg(type)
+  transform <- match.arg(transform)
+  st_list <- list(...)
+
+  if(is.null(features))
+    print_this_msg("Provide at least a feature...",
+                   msg_type = "STOP")
+
+  check_st_list(st_list, features)
+
+  all_features <- Reduce(intersect, lapply(st_list, feat_names))
+  if(length(all_features) == 0){
+      print_this_msg("No shared features between objects...",
+                     msg_type = "STOP")
   }
+
+  if (is.null(names)) {
+    names <- paste("Condition_", 1:length(st_list), sep = "")
+  } else{
+    if (length(names) != length(st_list))
+      print_this_msg("The number of names should be same as the number of objects.",
+                     msg_type = "STOP")
+  }
+
+  print_this_msg("Subsetting STGrid objects.", msg_type = "DEBUG")
+
+  names(st_list) <- names
+
+  for (i in 1:length(st_list)) {
+    st_list[[i]] <- st_list[[i]][features,]
+  }
+
+  st_list <- lapply(
+    st_list,
+    coord
+  )
+
+  st_list <- lapply(
+    st_list,
+    "[[",
+    "feature"
+  )
+
+  st_list <- lapply(
+    st_list,
+    table
+  )
+
+  count_per_gene <- reshape2::melt(st_list)
+  colnames(count_per_gene) <- c("Gene", "value", "Conditions")
+
+
+  if(!is.null(fill_color)){
+    if(length(fill_color) < length(unique(count_per_gene$Conditions))){
+      print_this_msg("Not enough color provided. Using default palette...", msg_type = "WARNING")
+      fill_color <- NULL
+    }
+  }
+
+  if(transform == "log2"){
+    x_label <- "Log2(counts)"
+    count_per_gene$value <- log2(count_per_gene$value)
+  }else if(transform ==  "log10"){
+    x_label <- "Log10(counts)"
+    count_per_gene$value <- log10(count_per_gene$value)
+  }else if(transform ==  "log"){
+    x_label <- "Log(counts)"
+    count_per_gene$value <- log(count_per_gene$value)
+  }else{
+    x_label <- "Counts"
+  }
+
+  if(type=="barplot"){
+
+    p <- ggplot2::ggplot(data = count_per_gene,
+                         mapping = ggplot2::aes(x = Gene,
+                                                y=value,
+                                                fill=Conditions,
+                                                group=Conditions)) +
+      ggplot2::geom_line(color = border_color,
+                        show.legend = TRUE,
+
+                        alpha = .9) + ggplot2::coord_polar()
+
+  }else if(type=="radar"){
+
+    make_radar_chart <- function(dframe, subtitle) {
+
+      # assign constants
+      tick <- 0.3
+      grid_lines <- c(-3, -1, 3)
+      medium_gray <- "gray70"
+
+      # delete all but the required columns
+      dframe <- dframe[, .(Bacteria, Penicillin, Streptomycin, Neomycin)]
+      # create the radar chart using a subset of the data frame
+      ggradar(plot.data = dframe,
+
+              # three grid lines allowed
+              values.radar = grid_lines,
+              grid.min = grid_lines[1],
+              grid.mid = grid_lines[2],
+              grid.max = grid_lines[3],
+
+              # manual adjustments for clear viewing
+              gridline.label.offset = 1.5,
+              plot.extent.x.sf = 1.5,
+              plot.extent.y.sf = 1.25,
+              centre.y = -4,
+
+              # aesthetics
+              background.circle.colour = "transparent",
+              grid.label.size = 5,
+              group.line.width = 0.5,
+              group.point.size = 3) +
+
+        # ggplot2 edits, including tick marks along the P-axis
+        labs(subtitle = subtitle) +
+        theme(plot.subtitle = element_text(size = 18,
+                                           face = "bold",
+                                           hjust = 0,
+                                           vjust = -4,
+                                           color = medium_gray),
+              legend.justification = c(0, 1),
+              legend.background = element_blank(),
+              legend.key.height = unit(6, "mm"),
+              legend.position = c(-0.04, 0.93), # c(-0.04, 1.05),
+              legend.text  = element_text(size = 12, face = "italic"),
+              legend.title = element_blank()) +
+        geom_segment(x = -tick, y = 2, xend = tick, yend = 2, color = medium_gray) +
+        geom_segment(x = -tick, y = 4, xend = tick, yend = 4, color = medium_gray) +
+        geom_segment(x = -tick, y = 5, xend = tick, yend = 5, color = medium_gray) +
+        geom_segment(x = -tick, y = 6, xend = tick, yend = 6, color = medium_gray)
+    }
+
+    make_radar_chart(count_per_gene)
+    return(count_per_gene)
+  }else if(type=="density"){
+    p <- ggplot2::ggplot(data = count_per_gene,
+                         mapping = ggplot2::aes(x = value,
+                                                fill=Conditions)) +
+      ggplot2::geom_density(color = border_color)
+
+
+  }else if(type=="boxjitter"){
+    p <- ggplot2::ggplot(data = count_per_gene,
+                         mapping = ggplot2::aes(x = Conditions,
+                                                y=value,
+                                                fill=Conditions)) +
+      ggpol::geom_boxjitter(color = border_color)
+  }
+
+  if(!is.null(fill_color))
+    p <- p + scale_fill_manual(values=fill_color)
+
+  p <- p + ggplot2::theme_bw() +
+    ggplot2::theme(
+      axis.text.x = ggplot2::element_text(
+        size = 10,
+        angle = 45,
+        vjust = 0.5
+      ),
+      axis.text.y = ggplot2::element_text(size = 8),
+      panel.grid.major.y = ggplot2::element_blank(),
+      panel.grid.minor.x = ggplot2::element_blank(),
+      panel.grid.minor.y = ggplot2::element_blank(),
+      panel.border = ggplot2::element_blank()
+    )
+
+
+  if(type %in% c("hist", "density")){
+    p <- p + ggplot2::facet_wrap(~Conditions,
+                                 ncol = ncol) +
+      ggplot2::ylab("Number") +
+      ggplot2::xlab(x_label)
+  }else{
+    p <- p + ggplot2::ylab(x_label) +
+      ggplot2::xlab("Conditions")
+  }
+
+  return(p)
+
+}
+
+# -------------------------------------------------------------------------
+##    Compare count distributions across multiple st_grid_objects
+# -------------------------------------------------------------------------
+#' @title Compare distribution of features across various STGrid objects.
+#'
+#' @description
+#'  This function compares distributions of features across various STGrid objects using different plot types, including histograms, density plots, boxplots, or boxjitter plots.
+#'
+#' @param ... One or more objects of class "STGrid" to be compared.
+#' @param features A character vector specifying the features to be included in the distribution Defaults to NULL, which compares all features.
+#' @param normalized Logical, indicating whether counts should be normalized. Defaults to FALSE.
+#' @param names A character vector specifying the names for each object. Defaults to NULL, where default names are assigned.
+#' @param type The type of plot to be generated. Can be one of "hist" (histogram), "density" (density plot), "boxplot", or "boxjitter". Defaults to "hist".
+#' @param transform The transformation to be applied to the counts. Can be one of "None", "log2", "log10", or "log". Defaults to "None".
+#' @param border_color The color of the border for plot elements. Defaults to "#333333".
+#' @param fill_color A character vector specifying the fill colors for the plot. If NULL, default palette is used. Defaults to NULL.
+#' @param ncol Number of columns for facet wrap. Defaults to 2.
+#' @importFrom ggplot2 aes facet_wrap geom_boxplot geom_density geom_histogram scale_fill_manual theme_bw theme element_text element_blank
+#' @importFrom ggpol geom_boxjitter
+#' @examples
+#' example_dataset()
+#' xen <- Xenium_Mouse_Brain_Coronal_7g
+#' x_bins <-  bin_x(xen)[180:nbin_x(xen)]
+#' y_bins <-  bin_y(xen)[100:nbin_y(xen)]
+#' xen_r1 <- xen[x_bins, y_bins]
+#' x_bins <-  bin_x(xen)[60:100]
+#' y_bins <-  bin_y(xen)[100:nbin_y(xen)]
+#' xen_r2 <- xen[x_bins, y_bins]
+#' x_bins <-  bin_x(xen)[20:60]
+#' y_bins <-  bin_y(xen)[20:60]
+#' xen_r3 <- xen[x_bins, y_bins]
+#' dist_st(xen_r1, xen_r2, xen_r3,
+#'         fill_color=c("red", "black", "green"),
+#'         type="density",
+#'         transform="log10")
+#' dist_st(xen_r1, xen_r2, xen_r3,
+#'         fill_color=c("red", "black", "green"),
+#'         type="boxjitter",
+#'         transform="log2")
+#' @export
+dist_st <- function(...,
+                    features = NULL,
+                    normalized = FALSE,
+                    names=NULL,
+                    type=c("boxjitter", "hist", "density", "boxplot"),
+                    transform = c("None", "log2", "log10", "log"),
+                    border_color = "#333333",
+                    fill_color = NULL,
+                    ncol=2) {
 
   print_this_msg("Checking STGrid objects", msg_type = "DEBUG")
 
+  type <- match.arg(type)
+  transform <- match.arg(transform)
   st_list <- list(...)
+
+  check_st_list(st_list, feat_list = NULL)
+
+  if(length(border_color) > 1)
+    border_color <- border_color[1]
+
+  if (is.null(features)) {
+    features <- Reduce(intersect, lapply(st_list, feat_names))
+    if(length(features) == 0)
+      print_this_msg("No shared features between objects...",
+                     msg_type = "STOP")
+  }
 
   check_st_list(st_list, features)
 
@@ -488,49 +738,86 @@ barplot_st <- function(...,
 
   print_this_msg("Subsetting STGrid objects.", msg_type = "DEBUG")
 
-  st_list_grid <- st_list
+  names(st_list) <- names
 
   for (i in 1:length(st_list)) {
-    st_list[[i]] <- st_list[[i]][feat_list,]
+    st_list[[i]] <- st_list[[i]][features,]
   }
 
   st_list <- lapply(
     st_list,
-    bin_mat,
-    melt_tab = TRUE,
-    as_factor = TRUE,
-    feat_list = feat_list
+    coord
   )
 
-  counts <- stat_test(
-    object,
-    normalized = normalized,
-    count_only = TRUE,
-    melted_count = TRUE,
-    transform = transform,
-    features = features
+  st_list <- lapply(
+    st_list,
+    "[[",
+    "feature"
   )
 
-  ylabel <- ifelse(
-    transform %in% c("log2", "log10", "log"),
-    paste0(transform, "(Molecule counts)"),
-    "Molecule counts"
+  st_list <- lapply(
+    st_list,
+    table
   )
-  counts$Features <- factor(counts$Features,
-                            levels = features,
-                            ordered = TRUE)
 
-  Features <- Counts <- Conditions <- NULL
+  count_per_gene <- reshape2::melt(st_list)
+  colnames(count_per_gene) <- c("Gene", "value", "Conditions")
 
-  ggplot2::ggplot(data = counts,
-                  mapping = ggplot2::aes(x = Features, y = Counts,
-                                         fill = Conditions)) +
-    ggplot2::geom_col(color = "black",
-                      linewidth = 0,
-                      position = "dodge") +
-    ggplot2::theme_bw() +
-    ggplot2::theme(
-      axis.text.x = ggplot2::element_text(
+  if(!is.null(fill_color)){
+    if(length(fill_color) < length(unique(count_per_gene$Conditions))){
+      print_this_msg("Not enough color provided. Using default palette...", msg_type = "WARNING")
+      fill_color <- NULL
+    }
+  }
+
+  if(transform == "log2"){
+    x_label <- "Log2(counts)"
+    count_per_gene$value <- log2(count_per_gene$value)
+  }else if(transform ==  "log10"){
+    x_label <- "Log10(counts)"
+    count_per_gene$value <- log10(count_per_gene$value)
+  }else if(transform ==  "log"){
+    x_label <- "Log(counts)"
+    count_per_gene$value <- log(count_per_gene$value)
+  }else{
+    x_label <- "Counts"
+  }
+
+  if(type=="hist"){
+
+      p <- ggplot2::ggplot(data = count_per_gene,
+                           mapping = ggplot2::aes(x = value,
+                                                  fill=Conditions)) +
+        ggplot2::geom_histogram(color = border_color)
+
+  }else if(type=="boxplot"){
+    p <- ggplot2::ggplot(data = count_per_gene,
+                         mapping = ggplot2::aes(x = Conditions,
+                                                y=value,
+                                                fill=Conditions)) +
+      ggplot2::geom_boxplot(color = border_color)
+
+  }else if(type=="density"){
+    p <- ggplot2::ggplot(data = count_per_gene,
+                         mapping = ggplot2::aes(x = value,
+                                                fill=Conditions)) +
+      ggplot2::geom_density(color = border_color)
+
+
+  }else if(type=="boxjitter"){
+    p <- ggplot2::ggplot(data = count_per_gene,
+                         mapping = ggplot2::aes(x = Conditions,
+                                                y=value,
+                                                fill=Conditions)) +
+      ggpol::geom_boxjitter(color = border_color)
+  }
+
+  if(!is.null(fill_color))
+    p <- p + scale_fill_manual(values=fill_color)
+
+  p <- p + ggplot2::theme_bw() +
+       ggplot2::theme(
+        axis.text.x = ggplot2::element_text(
         size = 10,
         angle = 45,
         vjust = 0.5
@@ -540,11 +827,23 @@ barplot_st <- function(...,
       panel.grid.minor.x = ggplot2::element_blank(),
       panel.grid.minor.y = ggplot2::element_blank(),
       panel.border = ggplot2::element_blank()
-    ) +
-    ggplot2::ylab(ylabel) +
-    ggplot2::scale_fill_manual(values = colors)
+    )
+
+
+  if(type %in% c("hist", "density")){
+    p <- p + ggplot2::facet_wrap(~Conditions,
+                                 ncol = ncol) +
+      ggplot2::ylab("Number") +
+      ggplot2::xlab(x_label)
+  }else{
+    p <- p + ggplot2::ylab(x_label) +
+      ggplot2::xlab("Conditions")
+  }
+
+  return(p)
 
 }
+
 # -------------------------------------------------------------------------
 ##    Boxplot / jitter
 # -------------------------------------------------------------------------
@@ -1018,10 +1317,6 @@ cmp_images <- function(...,
   # Save STGrid version
   st_list_grid <- st_list
 
-  for (i in 1:length(st_list)) {
-    st_list[[i]] <- st_list[[i]][feat_list,]
-  }
-
   st_list <- lapply(
     st_list,
     bin_mat,
@@ -1134,13 +1429,13 @@ cmp_images <- function(...,
       p + ggh4x::facet_grid2(condition ~ feature,
                              scale = "free",
                              independent = "x") +
-      theme(panel.spacing = grid::unit(0.25, "lines"))
+      ggplot2::theme(panel.spacing = grid::unit(0.25, "lines"))
   } else{
     p <-
       p + ggh4x::facet_grid2(feature ~ condition,
                              scale = "free",
                              independent = "y") +
-      theme(panel.spacing = grid::unit(0.25, "lines"))
+      ggplot2::theme(panel.spacing = grid::unit(0.25, "lines"))
   }
 
   p

@@ -13,7 +13,7 @@
   dist_method = "pearson",
   branch_length = "none",
   class_nb = 1,
-  class_name = "All",
+  class_name = NULL,
   size = 2.25
 )
 }
@@ -37,7 +37,8 @@ Create a tree from an STGrid object
 }
 \examples{
 example_dataset()
-p <- hc_tree(Xenium_Mouse_Brain_Coronal_7g, class_nb = 7, class_name = letters[1:7])
+p <- hc_tree(Xenium_Mouse_Brain_Coronal_7g, class_nb = 4, class_name = letters[1:4])
 print(p)
+# Get classes:
+p$tree_classes
 }
-\keyword{internal}

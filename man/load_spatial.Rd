@@ -11,7 +11,9 @@ load_spatial(
   control = NULL,
   sep = "\\t",
   threads = 1,
-  verbose = TRUE
+  constrain = NULL,
+  verbose = TRUE,
+  mapping = NULL
 )
 }
 \arguments{
@@ -30,7 +32,11 @@ counts, this will allow to delete these blanks/controls for computation.}
 
 \item{threads}{The number of threads (see data.table::fread).}
 
+\item{constrain}{Whether to put a constrain on a column when method is set to 'coordinates'. E.g: "global_z==0".}
+
 \item{verbose}{Whether to display the progress bar.}
+
+\item{mapping}{if method='coordinates' is used and non conventional column names are used in the input file,}
 }
 \value{
 An object of class STGrid.
