@@ -1240,7 +1240,7 @@ load_spatial <- function(path = "",
 
         print_this_msg("Table size before applying constrain:", nrow(spat_input))
         spat_input <- spat_input[my_eval, ]
-        print_this_msg("Table after before applying constrain:", nrow(spat_input))
+        print_this_msg("Table after applying constrain:", nrow(spat_input))
         if(nrow(spat_input) ==0)
           print_this_msg("No line left after 'contrain'...",  msg_type = "STOP")
       }
@@ -1479,24 +1479,28 @@ bin_this_matrix <- function(coord = NULL,
     n_loop <- 0
   }
 
+  coord_as_list <- split(coord, coord$feature)
+
+
   for (goi in unique(coord$feature)) {
     print_this_msg("Processing", goi, msg_type = "DEBUG")
     x_molec <- cut(
-      coord$x[coord$feature == goi],
+      coord_as_list[[goi]]$x,
       breaks = x_lim,
       include.lowest = TRUE,
       right = FALSE
     )
 
-    coord$bin_x[coord$feature == goi] <- as.character(x_molec)
+    coord_as_list[[goi]]$bin_x <- as.character(x_molec)
 
     y_molec <- cut(
-      coord$y[coord$feature == goi],
+      coord_as_list[[goi]]$y,
       breaks = y_lim,
       include.lowest = TRUE,
       right = FALSE
     )
-    coord$bin_y[coord$feature == goi] <- as.character(y_molec)
+
+    coord_as_list[[goi]]$bin_y <- as.character(y_molec)
 
     nb_items <- table(paste(x_molec, y_molec, sep = "~"))
     spatial_matrix[, goi] <- 0
@@ -1516,6 +1520,7 @@ bin_this_matrix <- function(coord = NULL,
   if (verbose)
     close(pb)
 
+  coord <- do.call("rbind", coord_as_list)
   return(
     list(
       spatial_matrix = spatial_matrix,
