@@ -238,10 +238,11 @@ stcompr <- function(object_1,
                      MARGIN = 2,
                      STATS = colSums(bin_mat_2, na.rm = TRUE), FUN = "/")
 
-
+  print_this_msg("Computing distance (matrix 1)...")
   spatial_matrix_ratio_1 <- as.matrix(stats::dist(t(bin_mat_1),
                                            method = "manhattan"))
 
+  print_this_msg("Computing distance (matrix 2)...")
   spatial_matrix_ratio_2 <- as.matrix(stats::dist(t(bin_mat_2),
                                            method = "manhattan"))
 
