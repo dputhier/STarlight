@@ -19,6 +19,7 @@
 #' @param size The size of the overlayed points.
 #' @param logb The basis for the log transformation. Default to 10. If NULL no log transformation.
 #' @param pseudo_count a value for the pseudo count used for log transformation (default to 1).
+#' @param ncol The number of columns for the facets.
 #' @keywords internal
 #' @examples
 #' example_dataset()
@@ -49,7 +50,8 @@ setGeneric("spatial_image",
                     color_grid = "white",
                     size = 0.5,
                     logb = 10,
-                    pseudo_count = 1)
+                    pseudo_count = 1,
+                    ncol=4)
            standardGeneric("spatial_image"))
 
 #' Color-coded representation of the object (e.g. molecules) density
@@ -70,6 +72,7 @@ setGeneric("spatial_image",
 #' @param size The size of the overlayed points.
 #' @param logb The basis for the log transformation. Default to 10. If NULL no log transformation.
 #' @param pseudo_count a value for the pseudo count used for log transformation (default to 1).
+#' @param ncol The number of columns for the facets.
 #' @importFrom ggplot2 aes coord_fixed facet_wrap geom_point geom_tile scale_fill_gradientn theme xlab ylab element_blank element_rect element_text scale_x_discrete scale_y_discrete
 #' @importFrom reshape2 melt
 #' @importFrom viridis inferno
@@ -103,7 +106,8 @@ setMethod("spatial_image",
                    color_grid = "white",
                    size = 0.5,
                    logb = 10,
-                   pseudo_count = 1) {
+                   pseudo_count = 1,
+                   ncol=4) {
 
             check_this_var(grid_by, null_accepted = TRUE, type = "int")
 
@@ -198,7 +202,7 @@ setMethod("spatial_image",
                                                      "white")
               ) +
               ggplot2::scale_fill_gradientn(colours = colors) +
-              ggplot2::facet_wrap( ~ variable, nrow = 3, ncol = 3)
+              ggplot2::facet_wrap( ~ variable, ncol = ncol)
 
             if (coord_fixed)
               p <- p + ggplot2::coord_fixed()
@@ -610,7 +614,7 @@ cmp_counts_st <- function(...,
     }
 
     make_radar_chart(count_per_gene)
-    return(count_per_gene)
+
   }else if(type=="density"){
     p <- ggplot2::ggplot(data = count_per_gene,
                          mapping = ggplot2::aes(x = value,
