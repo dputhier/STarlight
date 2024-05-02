@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.0.3
+
+* Significant improvement of load_spatial() performances.
+
 ## v0.0.2
 
 * load_spatial() now accept several constrains

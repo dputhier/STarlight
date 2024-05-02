@@ -1,6 +1,6 @@
 Package: stcompr
 Title: Comparison of Merscope spatial transcriptomic datasets using segmentation-free approach
-Version: 0.0.2
+Version: 0.0.3
 Depends: R (>= 4.0.0), methods
 biocViews: Transcriptomics, ReportWriting
 Authors@R: c(
