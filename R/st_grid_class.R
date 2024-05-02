@@ -1158,7 +1158,7 @@ setMethod("compute_k_ripley", signature("STGrid"),
 #' @param sep The separator when method is set to "coordinates" (default "\\t").
 #' @param threads The number of threads (see data.table::fread).
 #' @param verbose Whether to display the progress bar.
-#' @param constrain Whether to put a constrain on a column when method is set to 'coordinates'. E.g: "global_z==0".
+#' @param constrain Whether to put constrains on a column when method is set to 'coordinates'. E.g: 'list("global_z==0", "fov==0")'.
 #' @param mapping if method='coordinates' is used and non conventional column names are used in the input file,
 #'
 #' @return An object of class STGrid.
@@ -1226,20 +1226,25 @@ load_spatial <- function(path = "",
                                                   head = TRUE, nThread = threads))
 
     if(!is.null(constrain)){
+      if(!is.list(constrain))
+        print_this_msg("Argument 'contrain' should be a list", msg_type = "STOP")
       print_this_msg('Evaluating provided contrain.')
-      print_this_msg("Checking column ('contrain').", msg_type = "DEBUG")
-      if(!gsub("^(\\w+)\\s?[!=><].*","\\1",constrain) %in% colnames(spat_input))
-        print_this_msg("Column not found (see 'constrain').", msg_type = "STOP")
+      for(this_contrain in constrain){
+        print_this_msg("Checking column ('", this_contrain, "').", msg_type = "DEBUG")
+        if(!gsub("^(\\w+)\\s?[!=><].*","\\1", this_contrain) %in% colnames(spat_input))
+          print_this_msg("Column not found (see 'constrain').", msg_type = "STOP")
 
-      print_this_msg("Evaluating test ('contrain').", msg_type = "DEBUG")
-      contrain_col <- paste0("spat_input$", constrain)
-      my_eval <- eval(parse(text=contrain_col))
+        print_this_msg("Evaluating test ('", this_contrain, "').", msg_type = "DEBUG")
+        contrain_col <- paste0("spat_input$", this_contrain)
+        my_eval <- eval(parse(text=contrain_col))
 
-      print_this_msg("Table size before applying constrain:", nrow(spat_input))
-      spat_input <- spat_input[my_eval, ]
-      print_this_msg("Table after before applying constrain:", nrow(spat_input))
-      if(nrow(spat_input) ==0)
-        print_this_msg("No line left after 'contrain'...",  msg_type = "STOP")
+        print_this_msg("Table size before applying constrain:", nrow(spat_input))
+        spat_input <- spat_input[my_eval, ]
+        print_this_msg("Table after before applying constrain:", nrow(spat_input))
+        if(nrow(spat_input) ==0)
+          print_this_msg("No line left after 'contrain'...",  msg_type = "STOP")
+      }
+
     }
 
      if(!is.null(mapping)){
@@ -1475,6 +1480,7 @@ bin_this_matrix <- function(coord = NULL,
   }
 
   for (goi in unique(coord$feature)) {
+    print_this_msg("Processing", goi, msg_type = "DEBUG")
     x_molec <- cut(
       coord$x[coord$feature == goi],
       breaks = x_lim,
@@ -2007,13 +2013,21 @@ setMethod("compute_module_score", "STGrid",
 
             print_this_msg("Iterating over modules...")
             for(mod_nm in names(modules)){
-              print_this_msg(paste("Processing module: ", mod_nm), msg_type = "DEBUG")
+              print_this_msg("Processing module: ", mod_nm, msg_type = "DEBUG")
               check_st_list(list(object), feat_list = modules[[mod_nm]])
-              object@meta[[mod_nm]] <- apply(bin_mat(object)[, modules[[mod_nm]], drop=FALSE],
-                                             1,
-                                             eval(parse(text =fun)))
+              if(fun=="mean"){
+                row_m <- rowMeans(bin_mat(object)[, modules[[mod_nm]], drop=FALSE])
+                object@meta[[mod_nm]] <-row_m
+              }else{
+                object@meta[[mod_nm]] <- apply(bin_mat(object)[, modules[[mod_nm]], drop=FALSE],
+                                               1,
+                                               eval(parse(text =fun)))
+              }
+
             }
 
-            return(object)
+      print_this_msg("Returning object...")
+
+      return(object)
 })
 

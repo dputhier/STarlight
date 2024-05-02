@@ -32,7 +32,7 @@ counts, this will allow to delete these blanks/controls for computation.}
 
 \item{threads}{The number of threads (see data.table::fread).}
 
-\item{constrain}{Whether to put a constrain on a column when method is set to 'coordinates'. E.g: "global_z==0".}
+\item{constrain}{Whether to put constrains on a column when method is set to 'coordinates'. E.g: 'list("global_z==0", "fov==0")'.}
 
 \item{verbose}{Whether to display the progress bar.}
 
