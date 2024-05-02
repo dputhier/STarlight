@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.0.2
+
+* load_spatial() now accept several constrains
+
 ## Wed May  1 15:46:15 CEST 2024
 
 * Add meta_names() (to get access to meta_features)
