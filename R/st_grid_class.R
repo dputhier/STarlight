@@ -1751,7 +1751,7 @@ setMethod("hc_tree", "STGrid",
             if (class_nb > 0) {
               if(is.null(class_name)){
 
-                class_name <- paste0("M", stringr::str_pad(1:length(class_name),
+                class_name <- paste0("M", stringr::str_pad(1:class_nb,
                                                            2,
                                                            pad = "0"))
 
