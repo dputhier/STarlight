@@ -156,6 +156,57 @@ spatial_plot(st_obj[x_bins, y_bins], feat_list = c("Ano1",
              size=1)
 ```
 
+# Searching modules
+
+The hc_tree() allow to organize genes into subclusters.
+
+```{r spatial_plot}
+hc_st <- hc_tree(st_obj, method = "ward.D", 
+                 layout = "circular", dist_method = "pearson",
+                 class_nb = 20)
+hc_st
+```
+
+```{r}
+hc_st$tree_classes
+```
+
+Computing average module score:
+
+```{r}
+st_obj <- compute_module_score(st_obj, modules = hc_st$tree_classes)
+meta_names(st_obj)
+```
+```{r}
+spatial_image(st_obj, features = meta_names(st_obj))
+```
+
+```{r}
+spatial_image(st_obj, features = hc_st$tree_classes[["MOD18"]])
+```
+
+```{r}
+spatial_image(st_obj, features = hc_st$tree_classes[["MOD06"]])
+```
+
+# Molecule clustering
+
+## K Ripley's function
+
+We may use the K-Ripley's function to assess the level of clustering of each molecules in the two regions. Not that this step may be quite long as the density of molecule increases. Here we will thus just focus on representative genes.
+
+
+```{r compute_k_ripley}
+st_obj <- compute_k_ripley(st_obj, rmax = 200, verbose = FALSE)
+```
+
+```{r}
+plot_rip_k(st_obj)
+```
+```{r}
+spatial_image(st_obj, features = c("Chat", "Spag16", "Tacr1", "Sncg"))
+```
+
 # Comparing counts
 
 The stcompr() function allows to compare two datasets or regions of the organ. Here we will use it two compare two regions of the organ.
@@ -174,7 +225,7 @@ Below is the density of molecules counts in this regions:
 
 ```{r all_genes}
 spatial_image(st_obj_r1, feature="count_sum") + Seurat::NoLegend() + 
-  spatial_image(st_obj_r2, feature="count_sum") 
+spatial_image(st_obj_r2, feature="count_sum") 
 ```
 Now we can create an STCompR object using the stcompr() function. 
 
