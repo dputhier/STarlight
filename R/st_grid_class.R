@@ -1719,6 +1719,7 @@ setGeneric("hc_tree",
 #' @importFrom ggnewscale new_scale_fill
 #' @importFrom ggplot2 aes scale_color_viridis_d
 #' @importFrom ggsci scale_fill_jco
+#' @importFrom stringr str_pad
 #' @importFrom tidytree MRCA
 #' @examples
 #' example_dataset()
@@ -1749,11 +1750,11 @@ setMethod("hc_tree", "STGrid",
 
             if (class_nb > 0) {
               if(is.null(class_name)){
-                if(class_name <= 26){
-                  class_name <- LETTERS[1:class_name]
-                }else{
-                  print_this_msg("Please provide some class names...")
-                }
+
+                class_name <- paste0("M", stringr::str_pad(1:length(class_name),
+                                                           2,
+                                                           pad = "0"))
+
 
               }else{
                 if (length(class_name) != class_nb) {
