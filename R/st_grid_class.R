@@ -811,6 +811,7 @@ setMethod("[", signature(x = "STGrid"),
 
             n_coord <- x@coord
             n_bin_mat <- x@bin_mat
+            n_meta <- x@meta
             n_bin_x <- x@bin_x
             n_bin_y <- x@bin_y
             n_ripley_k_function <- x@ripley_k_function
@@ -830,17 +831,18 @@ setMethod("[", signature(x = "STGrid"),
                 } else {
                   n_coord <- n_coord[n_coord$bin_x %in% i, ]
                   n_bin_mat <- n_bin_mat[n_bin_mat$bin_x %in% i, ]
+                  n_meta <- n_meta[n_bin_mat$bin_x %in% i, ]
                   feat_left <- unique(n_coord$feature)
 
                   n_bin_mat <-
                       n_bin_mat[, colnames(n_bin_mat) %in% c("bin_x", "bin_y", feat_left)]
-
                 }
               }
             } else{
               if (missing(i)) {
                 n_coord <- n_coord[n_coord$bin_y %in% j, ]
                 n_bin_mat <- n_bin_mat[n_bin_mat$bin_y %in% j, ]
+                n_meta <- n_meta[n_bin_mat$bin_y %in% j, ]
 
               } else{
                 if (x_is_feat) {
@@ -854,6 +856,7 @@ setMethod("[", signature(x = "STGrid"),
                   n_coord <- n_coord[n_coord$bin_x %in% i & n_coord$bin_y %in% j, ]
 
                   n_bin_mat <- n_bin_mat[n_bin_mat$bin_x %in% i & n_bin_mat$bin_y %in% j, ]
+                  n_meta <- n_meta[n_bin_mat$bin_x %in% i & n_bin_mat$bin_y %in% j, ]
                   feat_left <- unique(n_coord$feature)
 
 
@@ -875,13 +878,12 @@ setMethod("[", signature(x = "STGrid"),
             STGrid_obj@x_max <- x@x_max
             STGrid_obj@x_min <- x@x_min
             STGrid_obj@method <- x@method
-            STGrid_obj@meta <- x@meta
+            STGrid_obj@meta <- n_meta
             STGrid_obj@bin_size <- x@bin_size
             STGrid_obj@bin_x <-
               x@bin_x[x@bin_x %in% n_bin_mat$bin_x]
             STGrid_obj@bin_y <-
               x@bin_y[x@bin_y %in% n_bin_mat$bin_y]
-            STGrid_obj@meta <- x@meta
             STGrid_obj@control <- n_control
 
             return(STGrid_obj)
