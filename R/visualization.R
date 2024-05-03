@@ -42,10 +42,11 @@ setGeneric("spatial_image",
                     features = NULL,
                     saturation = 1,
                     scale = TRUE,
-                    colors = viridis::inferno(10),
+                    colors = c("black", "#FFFF00", "#33FF00",
+                               "#FF0000", "#CC00FF"),
                     coord_fixed = TRUE,
                     overlay_feature = NULL,
-                    colors_overlay = c("#DEEBF7", "#9ECAE1", "#3182BD"),
+                    colors_overlay = c("#DEEBF7", "#9ECAE1", "#3182BD", "blue"),
                     grid_by = NULL,
                     color_grid = "white",
                     size = 0.5,
@@ -98,10 +99,11 @@ setMethod("spatial_image",
                    features = NULL,
                    saturation = 1,
                    scale = TRUE,
-                   colors = viridis::inferno(10),
+                   colors = c("black", "#FFFF00", "#33FF00",
+                              "#FF0000", "#CC00FF"),
                    coord_fixed = TRUE,
                    overlay_feature = NULL,
-                   colors_overlay = c("#DEEBF7", "#9ECAE1", "#3182BD"),
+                   colors_overlay = c("#DEEBF7", "#9ECAE1", "#3182BD", "blue"),
                    grid_by = NULL,
                    color_grid = "white",
                    size = 0.5,
@@ -122,7 +124,7 @@ setMethod("spatial_image",
                              msg_type = "STOP")
 
             if (!is.null(overlay_feature)) {
-              if (!overlay_feature %in% feat_names(object))
+              if (!overlay_feature %in% c(feat_names(object), meta_names(object)))
                 print_this_msg("The feature to overlay was not found in the object.",
                                msg_type = "STOP")
 
@@ -209,14 +211,22 @@ setMethod("spatial_image",
 
 
             if (!is.null(overlay_feature)) {
-              over <- bin_mat(object,
-                              as_factor = TRUE)[, c("bin_x", "bin_y", overlay_feature)]
-              over <- over[over[[overlay_feature]] != 0, ]
+              if(overlay_feature %in% feat_names(object)){
+                over <- bin_mat(object,
+                                as_factor = TRUE)[, c("bin_x", "bin_y", overlay_feature)]
+                over <- over[over[[overlay_feature]] != 0, ]
+              }else{
+                over <- bin_mat(object,
+                                as_factor = TRUE)[, c("bin_x", "bin_y")]
+                over[[overlay_feature]] <- object@meta[[overlay_feature]]
+                over <- over[over[[overlay_feature]] != 0, ]
+              }
+
 
               p <-
                 p + ggplot2::geom_point(
                   data = over,
-                  mapping = aes(
+                  mapping = ggplot2::aes(
                     x = bin_x,
                     y = bin_y,
                     color = log10(.data[[overlay_feature]])
@@ -517,6 +527,8 @@ cmp_counts_st <- function(...,
   type <- match.arg(type)
   transform <- match.arg(transform)
   st_list <- list(...)
+  if(is.list(st_list[[1]]))
+    st_list <- st_list[[1]]
 
   if(is.null(features))
     print_this_msg("Provide at least a feature...",
@@ -598,7 +610,7 @@ cmp_counts_st <- function(...,
   }
 
   if(type=="barplot"){
-    print(head(count_per_gene))
+
     p <- ggplot2::ggplot(data = count_per_gene,
                          mapping = ggplot2::aes(x = Gene,
                                                 y = value,
@@ -642,7 +654,6 @@ cmp_counts_st <- function(...,
 #'  This function compares distributions of features across various STGrid objects using different plot types, including histograms, density plots, boxplots, or boxjitter plots.
 #'
 #' @param ... One or more objects of class "STGrid" to be compared.
-#' @param features A character vector specifying the features to be included in the distribution Defaults to NULL, which compares all features.
 #' @param normalized Logical, indicating whether counts should be normalized. Defaults to FALSE.
 #' @param names A character vector specifying the names for each object. Defaults to NULL, where default names are assigned.
 #' @param type The type of plot to be generated. Can be one of "hist" (histogram), "density" (density plot), "boxplot", or "boxjitter". Defaults to "hist".
@@ -674,7 +685,6 @@ cmp_counts_st <- function(...,
 #'         transform="log2")
 #' @export
 dist_st <- function(...,
-                    features = NULL,
                     normalized = FALSE,
                     names=NULL,
                     type=c("boxjitter", "hist", "density", "boxplot"),
@@ -689,19 +699,22 @@ dist_st <- function(...,
   transform <- match.arg(transform)
   st_list <- list(...)
 
+  if(is.list(st_list[[1]]))
+    st_list <- st_list[[1]]
+
   check_st_list(st_list, feat_list = NULL)
 
   if(length(border_color) > 1)
     border_color <- border_color[1]
 
-  if (is.null(features)) {
+
     features <- Reduce(intersect, lapply(st_list, feat_names))
     if(length(features) == 0)
       print_this_msg("No shared features between objects...",
                      msg_type = "STOP")
-  }
 
-  check_st_list(st_list, features)
+
+  check_st_list(st_list)
 
   if (is.null(names)) {
     names <- paste("Condition_", 1:length(st_list), sep = "")
@@ -715,19 +728,11 @@ dist_st <- function(...,
 
   names(st_list) <- names
 
-  for (i in 1:length(st_list)) {
-    st_list[[i]] <- st_list[[i]][features,]
-  }
+  get_feat <- function(x){coord(x)$feature}
 
   st_list <- lapply(
     st_list,
-    coord
-  )
-
-  st_list <- lapply(
-    st_list,
-    "[[",
-    "feature"
+    get_feat
   )
 
   st_list <- lapply(
@@ -1257,7 +1262,8 @@ setMethod("plot_rip_k", signature("STGrid"),
 cmp_images <- function(...,
                        feat_list = NULL,
                        names = NULL,
-                       colors = viridis::inferno(10),
+                       colors = c("black", "#FFFF00", "#33FF00",
+                                  "#FF0000", "#CC00FF"),
                        saturation = 1,
                        coord_fixed = TRUE,
                        scale = TRUE,
@@ -1275,6 +1281,8 @@ cmp_images <- function(...,
   print_this_msg("Checking STGrid objects", msg_type = "DEBUG")
 
   st_list <- list(...)
+  if(is.list(st_list[[1]]))
+    st_list <- st_list[[1]]
 
   check_st_list(st_list, feat_list)
 
