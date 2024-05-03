@@ -1,8 +1,8 @@
 # -------------------------------------------------------------------------
-## Spatial transcriptomic anlysis class (STGrid) definition
+## Spatial transcriptomic analysis class (STGrid) definition
 # -------------------------------------------------------------------------
 
-#' Spatial transcriptomic anlysis class (STGrid).
+#' Spatial transcriptomic analysis class (STGrid).
 #'
 #' A class for representing spatial transcriptomic analysis results as x/y coordinates.
 #' This class stores transcript molecules or cell coordinates as a grid.
@@ -1210,20 +1210,22 @@ load_spatial <- function(path = "",
 
   } else if(method == "merscope_csv"){
     check_this_file(path, mode = "read")
-    spat_input <- data.table::fread(path,
-                                                  sep = sep,
-                                                  head = TRUE, nThread = threads)
+    spat_input <- as.data.frame(data.table::fread(path,
+                                    sep = sep,
+                                    head = TRUE,
+                                    nThread = threads))
+
     col_needed <- c("global_x", "global_y", "gene")
-    spat_input <- as.data.frame(spat_input[, col_needed])
+    spat_input <- spat_input[, col_needed]
 
     if (is.null(control))
       control <- "^Blank\\-[0-9]+"
 
   }else if (method == "coordinates") {
     check_this_file(path, mode = "read")
-    spat_input <- data.table::fread(path,
+    spat_input <- as.data.frame(data.table::fread(path,
                                     sep = sep,
-                                    head = TRUE, nThread = threads)
+                                    head = TRUE, nThread = threads))
 
     if(!is.null(constrain)){
       if(!is.list(constrain))
@@ -1277,7 +1279,7 @@ load_spatial <- function(path = "",
 
      }
 
-    spat_input <- as.data.frame(spat_input[, col_needed])
+    spat_input <- spat_input[, col_needed]
 
     if (is.null(control))
       control <- "^Blank\\-[0-9]+"
@@ -1484,7 +1486,7 @@ bin_this_matrix <- function(coord = NULL,
   coord_as_list <- split(coord, coord$feature)
 
   for (goi in unique(coord$feature)) {
-    print_this_msg("Processing", goi, msg_type = "DEBUG")
+
     x_molec <- cut(
       coord_as_list[[goi]]$x,
       breaks = x_lim,
@@ -1521,8 +1523,6 @@ bin_this_matrix <- function(coord = NULL,
   print_this_msg("Ordering")
   spatial_matrix <-
     spatial_matrix[, order(colnames(spatial_matrix))]
-
-
 
   print_this_msg("Merging...")
 

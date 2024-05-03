@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.0.4
+
+* Added new filtering method (cv) for heatmap_cmp(). This is the default now.
+* 
+
 ## v0.0.3
 
 * Significant improvement of load_spatial() performances.
