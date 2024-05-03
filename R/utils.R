@@ -85,8 +85,6 @@ print_this_msg <-
   function(...,
            msg_type = c("INFO", "DEBUG", "WARNING", "STOP", "ERROR")) {
 
-
-
     msg_type <- match.arg(msg_type)
 
     if(msg_type == "ERROR")
