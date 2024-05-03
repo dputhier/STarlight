@@ -831,7 +831,7 @@ setMethod("[", signature(x = "STGrid"),
                 } else {
                   n_coord <- n_coord[n_coord$bin_x %in% i, ]
                   n_bin_mat <- n_bin_mat[n_bin_mat$bin_x %in% i, ]
-                  n_meta <- n_meta[n_bin_mat$bin_x %in% i, ]
+                  n_meta <- n_meta[n_bin_mat$bin_x %in% i, ,drop=FALSE]
                   feat_left <- unique(n_coord$feature)
 
                   n_bin_mat <-
@@ -842,7 +842,7 @@ setMethod("[", signature(x = "STGrid"),
               if (missing(i)) {
                 n_coord <- n_coord[n_coord$bin_y %in% j, ]
                 n_bin_mat <- n_bin_mat[n_bin_mat$bin_y %in% j, ]
-                n_meta <- n_meta[n_bin_mat$bin_y %in% j, ]
+                n_meta <- n_meta[n_bin_mat$bin_y %in% j, ,drop=FALSE]
 
               } else{
                 if (x_is_feat) {
@@ -856,7 +856,7 @@ setMethod("[", signature(x = "STGrid"),
                   n_coord <- n_coord[n_coord$bin_x %in% i & n_coord$bin_y %in% j, ]
 
                   n_bin_mat <- n_bin_mat[n_bin_mat$bin_x %in% i & n_bin_mat$bin_y %in% j, ]
-                  n_meta <- n_meta[n_bin_mat$bin_x %in% i & n_bin_mat$bin_y %in% j, ]
+                  n_meta <- n_meta[n_bin_mat$bin_x %in% i & n_bin_mat$bin_y %in% j, ,drop=FALSE]
                   feat_left <- unique(n_coord$feature)
 
 
@@ -1751,8 +1751,8 @@ setMethod("hc_tree", "STGrid",
             method <- match.arg(method)
             layout <- match.arg(layout)
 
-            print_this_msg("Using method", method, msg_type="INFO")
-            print_this_msg("Using layout", layout, msg_type="INFO")
+            print_this_msg("Using", method ,"method", msg_type="INFO")
+            print_this_msg("Using", layout, "layout", msg_type="INFO")
 
             if (class_nb > 0) {
               if(is.null(class_name)){
@@ -1784,7 +1784,7 @@ setMethod("hc_tree", "STGrid",
                                                 method = dist_method)) / 2),
                                method = method)
 
-            print_this_msg("Building ggplot diagram.", msg_type="DEBUG")
+            print_this_msg("Preparing colors.", msg_type="DEBUG")
 
             if(is.null(colors) & class_nb > 0){
               gg_color_hue <- function(n) {
@@ -1794,10 +1794,13 @@ setMethod("hc_tree", "STGrid",
               colors <- gg_color_hue(class_nb)
 
             }
+            print_this_msg("Building ggplot diagram.", msg_type="DEBUG")
 
+            suppressWarnings(
             p <- ggtree::ggtree(hc_clust,
                                 layout = layout,
                                 branch.length = branch_length)
+            )
 
             print_this_msg("Cutting tree.", msg_type="DEBUG")
 
@@ -1806,9 +1809,11 @@ setMethod("hc_tree", "STGrid",
 
             print_this_msg("Retrieving classes.", msg_type="DEBUG")
 
+            suppressMessages({
             clades <-
               sapply(groups, function(n)
                 tidytree::MRCA(p, n))
+            })
 
             print_this_msg("Retrieving annotations", msg_type="DEBUG")
             annotation <- data.frame(id = clades[1:class_nb],
