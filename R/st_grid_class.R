@@ -1695,7 +1695,7 @@ setMethod("get_coord", "STGrid",
 #' @keywords internal
 setGeneric("hc_tree",
            function(object,
-                    method = c("ward.D", "complete", "ward.D2", "single",
+                    method = c("complete", "ward.D", "ward.D2", "single",
                                "average", "mcquitty", "median", "centroid"),
                     layout = c("circular", "rectangular",
                                "slanted", "fan", "unrooted",
