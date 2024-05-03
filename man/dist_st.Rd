@@ -6,7 +6,6 @@
 \usage{
 dist_st(
   ...,
-  features = NULL,
   normalized = FALSE,
   names = NULL,
   type = c("boxjitter", "hist", "density", "boxplot"),
@@ -18,8 +17,6 @@ dist_st(
 }
 \arguments{
 \item{...}{One or more objects of class "STGrid" to be compared.}
-
-\item{features}{A character vector specifying the features to be included in the distribution Defaults to NULL, which compares all features.}
 
 \item{normalized}{Logical, indicating whether counts should be normalized. Defaults to FALSE.}
 
