@@ -1687,6 +1687,7 @@ setMethod("get_coord", "STGrid",
 #' @param branch_length A variable for scaling branch, if 'none' draw cladogram. See ggtree::ggtree().
 #' @param class_nb An integer indicating the desired number of groups.
 #' @param size The size of the labels.
+#' @param colors A set of colors for the classes.
 #' @examples
 #' example_dataset()
 #' p <- hc_tree(Xenium_Mouse_Brain_Coronal_7g)
@@ -1703,7 +1704,8 @@ setGeneric("hc_tree",
                     branch_length = "none",
                     class_nb = 1,
                     class_name = NULL,
-                    size = 2.25)
+                    size = 2.25,
+                    colors=NULL)
              standardGeneric("hc_tree"))
 
 #' @title Create a tree from an STGrid object
@@ -1715,12 +1717,13 @@ setGeneric("hc_tree",
 #' @param branch_length A variable for scaling branch, if 'none' draw cladogram. See ggtree::ggtree().
 #' @param class_nb An integer indicating the desired number of groups.
 #' @param size The size of the labels.
+#' @param colors A set of colors for the classes.
 #' @importFrom ggtree ggtree geom_hilight geom_tippoint geom_tiplab MRCA
 #' @importFrom ggnewscale new_scale_fill
-#' @importFrom ggplot2 aes scale_color_viridis_d
-#' @importFrom ggsci scale_fill_jco
+#' @importFrom ggplot2 aes scale_color_viridis_d scale_fill_manual
 #' @importFrom stringr str_pad
 #' @importFrom tidytree MRCA
+#' @importFrom stringr str_pad
 #' @examples
 #' example_dataset()
 #' p <- hc_tree(Xenium_Mouse_Brain_Coronal_7g, class_nb = 4, class_name = letters[1:4])
@@ -1740,7 +1743,8 @@ setMethod("hc_tree", "STGrid",
                    branch_length = "none",
                    class_nb = 1,
                    class_name = NULL,
-                   size = 2.25) {
+                   size = 2.25,
+                   colors=NULL) {
 
             method <- match.arg(method)
             layout <- match.arg(layout)
@@ -1780,6 +1784,15 @@ setMethod("hc_tree", "STGrid",
 
             print_this_msg("Building ggplot diagram.", msg_type="DEBUG")
 
+            if(is.null(colors) & class_nb > 0){
+              gg_color_hue <- function(n) {
+                hues = seq(15, 375, length = n + 1)
+                grDevices::hcl(h = hues, l = 65, c = 100)[1:n]
+              }
+              colors <- gg_color_hue(class_nb)
+
+            }
+
             p <- ggtree::ggtree(hc_clust,
                                 layout = layout,
                                 branch.length = branch_length)
@@ -1812,15 +1825,16 @@ setMethod("hc_tree", "STGrid",
                             fill = Class),
               alpha = 0.3
             ) +
-              ggsci::scale_fill_jco() +
               ggtree::geom_tiplab(
                 ggplot2::aes(label = label),
                 offset = 1,
                 size = size,
                 color = 'black'
-              ) +
-              ggnewscale::new_scale_fill() +
-              ggplot2::scale_color_viridis_d()
+              )
+
+            if(class_nb != 0){
+              p <- p + ggplot2::scale_fill_manual(values=colors)
+
 
             # ggtree::geom_tippoint(
             # ggplot2::aes(color = cell_type),
@@ -1829,10 +1843,14 @@ setMethod("hc_tree", "STGrid",
             #show.legend = FALSE
             #) +
             nm <- names(tree_classes)
-            tree_classes <- paste0("module_", tree_classes)
+            tree_classes <- paste0("MOD", stringr::str_pad(tree_classes,
+                                                           nchar(as.character(class_nb)),
+                                                           pad = "0"))
             names(tree_classes) <- nm
             p[["tree_classes"]] <- split(names(tree_classes), tree_classes)
-
+            }else{
+              p[["tree_classes"]] <- list()
+            }
             return(p)
 
           })

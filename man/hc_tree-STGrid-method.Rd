@@ -14,7 +14,8 @@
   branch_length = "none",
   class_nb = 1,
   class_name = NULL,
-  size = 2.25
+  size = 2.25,
+  colors = NULL
 )
 }
 \arguments{
@@ -31,6 +32,8 @@
 \item{class_nb}{An integer indicating the desired number of groups.}
 
 \item{size}{The size of the labels.}
+
+\item{colors}{A set of colors for the classes.}
 }
 \description{
 Create a tree from an STGrid object
