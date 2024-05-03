@@ -9,7 +9,7 @@
   features = NULL,
   saturation = 1,
   scale = TRUE,
-  colors = c("black", "#FFFF00", "#33FF00", "#FF0000", "#CC00FF"),
+  colors = c("black", "#33FF00", "#FFFF00", "#FF0000", "#CC00FF"),
   coord_fixed = TRUE,
   overlay_feature = NULL,
   colors_overlay = c("#DEEBF7", "#9ECAE1", "#3182BD", "blue"),

@@ -8,7 +8,7 @@ cmp_images(
   ...,
   feat_list = NULL,
   names = NULL,
-  colors = c("black", "#FFFF00", "#33FF00", "#FF0000", "#CC00FF"),
+  colors = c("black", "#33FF00", "#FFFF00", "#FF0000", "#CC00FF"),
   saturation = 1,
   coord_fixed = TRUE,
   scale = TRUE,
