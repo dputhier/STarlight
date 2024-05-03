@@ -146,9 +146,9 @@ setMethod("spatial_image",
               spatial_matrix <- object@bin_mat[, c("bin_x", "bin_y",
                                                    setdiff(features, colnames(object@meta)))]
               for(i in features[features %in% colnames(object@meta)]){
-                print(dim(spatial_matrix))
-                print(dim(object@meta))
-                spatial_matrix[[i]] <- object@meta[[i]]
+                print(head(spatial_matrix))
+                print(head(spatial_matrix))
+                spatial_matrix[,i] <- object@meta[, i, drop=FALSE]
               }
 
 

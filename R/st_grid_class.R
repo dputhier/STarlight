@@ -660,6 +660,34 @@ setMethod("rm_controls", "STGrid",
 
           })
 
+#' @title The number of items (e.g molecules) per feature of an STGrid object.
+#' @description
+#' Returns the number of items (e.g molecules) per feature of an STGrid object.
+#' @param x The STGrid object
+#' @examples
+#' example_dataset()
+#' table(Xenium_Mouse_Brain_Coronal_7g)
+#' @keywords internal
+#' @export table
+setGeneric("table_st",
+           function(x)
+             standardGeneric("table_st"))
+
+#' @title The number of items (e.g molecules) per feature of an STGrid object.
+#' @description
+#' Returns the number of items (e.g molecules) per feature of an STGrid object.
+#' @param x The STGrid object
+#' @examples
+#' example_dataset()
+#' table(Xenium_Mouse_Brain_Coronal_7g)
+#' @export table
+setMethod("table_st", signature("STGrid"),
+          function(x){
+            table(coord(x)$feature)
+          }
+)
+
+
 #' @title  Get Ripley's K function slot from a STGrid object.
 #' @description
 #'   Get Ripley's K function slot from a STGrid object.
@@ -830,8 +858,9 @@ setMethod("[", signature(x = "STGrid"),
 
                 } else {
                   n_coord <- n_coord[n_coord$bin_x %in% i, ]
-                  n_bin_mat <- n_bin_mat[n_bin_mat$bin_x %in% i, ]
-                  n_meta <- n_meta[n_bin_mat$bin_x %in% i, ,drop=FALSE]
+                  test <- n_bin_mat$bin_x %in% i
+                  n_bin_mat <- n_bin_mat[test, ]
+                  n_meta <- n_meta[test, ,drop=FALSE]
                   feat_left <- unique(n_coord$feature)
 
                   n_bin_mat <-
@@ -841,8 +870,9 @@ setMethod("[", signature(x = "STGrid"),
             } else{
               if (missing(i)) {
                 n_coord <- n_coord[n_coord$bin_y %in% j, ]
-                n_bin_mat <- n_bin_mat[n_bin_mat$bin_y %in% j, ]
-                n_meta <- n_meta[n_bin_mat$bin_y %in% j, ,drop=FALSE]
+                test <- n_bin_mat$bin_y %in% j
+                n_bin_mat <- n_bin_mat[test, ]
+                n_meta <- n_meta[test, ,drop=FALSE]
 
               } else{
                 if (x_is_feat) {
@@ -854,9 +884,9 @@ setMethod("[", signature(x = "STGrid"),
                 } else {
 
                   n_coord <- n_coord[n_coord$bin_x %in% i & n_coord$bin_y %in% j, ]
-
-                  n_bin_mat <- n_bin_mat[n_bin_mat$bin_x %in% i & n_bin_mat$bin_y %in% j, ]
-                  n_meta <- n_meta[n_bin_mat$bin_x %in% i & n_bin_mat$bin_y %in% j, ,drop=FALSE]
+                  test <- n_bin_mat$bin_x %in% i & n_bin_mat$bin_y %in% j
+                  n_bin_mat <- n_bin_mat[test, ]
+                  n_meta <- n_meta[test, ,drop=FALSE]
                   feat_left <- unique(n_coord$feature)
 
 
@@ -923,7 +953,6 @@ setMethod ("$", "STGrid",
            function (x, name) {
              return(x[[name]])
            })
-
 
 
 #' @title This functions makes STGrid objects look like list and allow completion after $.

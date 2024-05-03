@@ -380,6 +380,7 @@ setMethod(
     what <- match.arg(what)
     dist_method <- match.arg(dist_method)
     hclust_method <- match.arg(hclust_method)
+    filter_method <- match.arg(filter_method)
 
   if(what=="changes"){
 

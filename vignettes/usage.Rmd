@@ -15,15 +15,15 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r loadlib}
-library(matrixStats)
 library(magrittr)
 library(Seurat)
 library(stcompr)
+stcompr::set_verb_level(1)
 library(patchwork)
 library(ggplot2)
 library(dplyr)
-stcompr::set_verb_level(1)
-library(stcompr)
+
+
 ```
 
 ## Loading data
@@ -193,16 +193,15 @@ spatial_image(st_obj, features = hc_st$tree_classes[["MOD06"]])
 
 ## K Ripley's function
 
-We may use the K-Ripley's function to assess the level of clustering of each molecules in the two regions. Not that this step may be quite long as the density of molecule increases. Here we will thus just focus on representative genes.
+We may use the K-Ripley's function to assess the level of clustering of each molecules in the two regions. Not that this step is rather long as the density of molecule increases. For the tutorial will thus concentrate on few genes.
 
 
 ```{r compute_k_ripley}
-st_obj <- compute_k_ripley(st_obj, rmax = 200, verbose = FALSE)
+gene_list <- c("Chat", "Spag16", "Tacr1", "Sncg", feat_names(st_obj)[1:10])
+plot_rip_k(compute_k_ripley(st_obj[gene_list, ], rmax = 200, verbose = FALSE))
 ```
 
-```{r}
-plot_rip_k(st_obj)
-```
+
 ```{r}
 spatial_image(st_obj, features = c("Chat", "Spag16", "Tacr1", "Sncg"))
 ```
@@ -222,7 +221,7 @@ st_obj_r2 <- st_obj[x_bins, y_bins]
 ```
 
 Below is the density of molecules counts in this regions:
-
+·
 ```{r all_genes}
 spatial_image(st_obj_r1, feature="count_sum") + Seurat::NoLegend() + 
 spatial_image(st_obj_r2, feature="count_sum") 
@@ -240,6 +239,7 @@ Here are the distribution of the counts:
 ```{r cmp_boxplot}
 cmp_boxplot(cmp, transform = "log10", normalized = F, colors = ggsci::pal_d3()(2))
 ```
+
 ## Count comparison
 
 As we can see below the two regions differ in the expression levels of several genes.
@@ -259,36 +259,6 @@ cmp_images(st_obj_r1,
            feat_list = markers)
 ```
 
-
-# Molecule clustering
-
-## K Ripley's function
-
-First we may use the K-Ripley's function to assess the level of clustering of each molecules in the two regions. Not that this step may be quite long as the density of molecule increases.
-
-
-```{r compute_k_ripley}
-st_obj_r1 <- compute_k_ripley(st_obj_r1, rmax = 200, verbose = FALSE)
-st_obj_r2 <- compute_k_ripley(st_obj_r2, rmax = 200, verbose = FALSE)
-```
-
-Plotting the results highlight the clustering levels of molecules in both regions:
-
-```{r plot_rip_k}
-plot_rip_k(st_obj_r1, size=2) +
-plot_rip_k(st_obj_r2, size=2)
-```
-
-We can confirm that these molecules are highly packed in the first and/or the second region.
-
-```{r ripley_image}
-cmp_images(st_obj_r1,
-           feat_list = head(order_feat_by_ripley(st_obj_r1)))
-```
-```{r}
-cmp_images(st_obj_r2,
-           feat_list = head(order_feat_by_ripley(st_obj_r2)))
-```
 
 ## Neighborhood dynamics
 
