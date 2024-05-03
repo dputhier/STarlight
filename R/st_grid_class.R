@@ -1210,20 +1210,20 @@ load_spatial <- function(path = "",
 
   } else if(method == "merscope_csv"){
     check_this_file(path, mode = "read")
-    spat_input <- as.data.frame(data.table::fread(path,
+    spat_input <- data.table::fread(path,
                                                   sep = sep,
-                                                  head = TRUE, nThread = threads))
+                                                  head = TRUE, nThread = threads)
     col_needed <- c("global_x", "global_y", "gene")
-    spat_input <- spat_input[, col_needed]
+    spat_input <- as.data.frame(spat_input[, col_needed])
 
     if (is.null(control))
       control <- "^Blank\\-[0-9]+"
 
   }else if (method == "coordinates") {
     check_this_file(path, mode = "read")
-    spat_input <- as.data.frame(data.table::fread(path,
-                                                  sep = sep,
-                                                  head = TRUE, nThread = threads))
+    spat_input <- data.table::fread(path,
+                                    sep = sep,
+                                    head = TRUE, nThread = threads)
 
     if(!is.null(constrain)){
       if(!is.list(constrain))
@@ -1277,7 +1277,7 @@ load_spatial <- function(path = "",
 
      }
 
-    spat_input <- spat_input[, col_needed]
+    spat_input <- as.data.frame(spat_input[, col_needed])
 
     if (is.null(control))
       control <- "^Blank\\-[0-9]+"
@@ -1385,7 +1385,7 @@ sum_of_counts <- function(spatial_matrix = NULL,
 #' res <- bin_this_matrix(Xenium_Mouse_Brain_Coronal_7g@coord)
 #'
 #' @keywords internal
-
+#' @importFrom data.table rbindlist
 #' @export bin_this_matrix
 bin_this_matrix <- function(coord = NULL,
                             bin_size = 25,
@@ -1467,6 +1467,8 @@ bin_this_matrix <- function(coord = NULL,
   coord$bin_x <- NA
   coord$bin_y <- NA
 
+  print_this_msg("Looping over genes...")
+
   if (verbose) {
     pb <- utils::txtProgressBar(
       min = 0,
@@ -1480,7 +1482,6 @@ bin_this_matrix <- function(coord = NULL,
   }
 
   coord_as_list <- split(coord, coord$feature)
-
 
   for (goi in unique(coord$feature)) {
     print_this_msg("Processing", goi, msg_type = "DEBUG")
@@ -1514,13 +1515,20 @@ bin_this_matrix <- function(coord = NULL,
 
   cat("\n")
 
-  spatial_matrix <-
-    spatial_matrix[, order(colnames(spatial_matrix))]
-
   if (verbose)
     close(pb)
 
-  coord <- do.call("rbind", coord_as_list)
+  print_this_msg("Ordering")
+  spatial_matrix <-
+    spatial_matrix[, order(colnames(spatial_matrix))]
+
+
+
+  print_this_msg("Merging...")
+
+  coord <- data.table::rbindlist(coord_as_list)
+
+  print_this_msg("Returning")
   return(
     list(
       spatial_matrix = spatial_matrix,
