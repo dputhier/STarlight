@@ -24,6 +24,7 @@
 #' @examples
 #' example_dataset()
 #' Xenium_Mouse_Brain_Coronal_7g
+#' show_methods(class = "STGrid")
 #' @export
 setClass(
   "STGrid",

@@ -3,7 +3,7 @@
 \docType{class}
 \name{STGrid-class}
 \alias{STGrid-class}
-\title{Spatial transcriptomic anlysis class (STGrid).}
+\title{Spatial transcriptomic analysis class (STGrid).}
 \description{
 A class for representing spatial transcriptomic analysis results as x/y coordinates.
 This class stores transcript molecules or cell coordinates as a grid.
@@ -43,4 +43,5 @@ This class stores transcript molecules or cell coordinates as a grid.
 \examples{
 example_dataset()
 Xenium_Mouse_Brain_Coronal_7g
+show_methods(class = "STGrid")
 }
