@@ -12,7 +12,8 @@ heatmap_cmp(
   dist_method = c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski"),
   del_feat = NULL,
   only_feat = NULL,
-  filter = 0.2,
+  filter_method = c("cv", "diff"),
+  filter = 0.5,
   size = 6,
   title = NULL
 )
@@ -34,7 +35,10 @@ heatmap_cmp(
 
 \item{only_feat}{A character vector specifying features to be included in the heatmap.}
 
-\item{filter}{A numeric value specifying the threshold for filtering out low values in the heatmap.}
+\item{filter_method}{If 'cv', select row/col by checking whether the variation coefficient of absolute changes is greater than 'filter'.
+If 'diff' select a row/col if at least one absolute value greater than 'filter' is observed.}
+
+\item{filter}{A numeric value as threshold.}
 
 \item{size}{A numeric value specifying the size of text in the heatmap.}
 

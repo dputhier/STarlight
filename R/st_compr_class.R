@@ -246,14 +246,16 @@ stcompr <- function(object_1,
   spatial_matrix_ratio_2 <- as.matrix(stats::dist(t(bin_mat_2),
                                            method = "manhattan"))
 
+  print_this_msg("Computing contrast... ")
+  neighborhood_changes <- as.data.frame(spatial_matrix_ratio_2 - spatial_matrix_ratio_1)
+
   print_this_msg("Preparing an STCompR object... ")
 
   STCompR <- methods::new("STCompR")
   STCompR@neighborhood <- list(spatial_matrix_ratio_1,
                                spatial_matrix_ratio_2)
 
-  STCompR@neighborhood_changes <- as.data.frame(spatial_matrix_ratio_2 - spatial_matrix_ratio_1)
-
+  STCompR@neighborhood_changes <- neighborhood_changes
   names(STCompR@neighborhood) <- c(name_1, name_2)
   STCompR@conditions <- c(name_1, name_2)
   STCompR@method <- c(object_1@method, object_2@method)
@@ -288,7 +290,9 @@ stcompr <- function(object_1,
 #' "maximum", "manhattan", "canberra", "binary","minkowski").
 #' @param del_feat A character vector specifying features to be excluded from the heatmap.
 #' @param only_feat A character vector specifying features to be included in the heatmap.
-#' @param filter A numeric value specifying the threshold for filtering out low values in the heatmap.
+#' @param filter_method If 'cv', select row/col by checking whether the variation coefficient of absolute changes is greater than 'filter'.
+#' If 'diff' select a row/col if at least one absolute value greater than 'filter' is observed.
+#' @param filter A numeric value as threshold.
 #' @param size A numeric value specifying the size of text in the heatmap.
 #' @param title A title for the diagram.
 #'
@@ -314,7 +318,8 @@ setGeneric("heatmap_cmp",
                                   "minkowski"),
                     del_feat=NULL,
                     only_feat=NULL,
-                    filter=0.2,
+                    filter_method=c("cv", "diff"),
+                    filter=0.5,
                     size=6,
                     title=NULL)
              standardGeneric("heatmap_cmp")
@@ -338,7 +343,7 @@ setGeneric("heatmap_cmp",
 #' "maximum", "manhattan", "canberra", "binary","minkowski").
 #' @param del_feat A character vector specifying feature to be excluded from the heatmap.
 #' @param only_feat A character vector specifying features to be included in the heatmap.
-#' @param filter A numeric value specifying the threshold for filtering out low values in the heatmap.
+#' @param filter A numeric value specifying the threshold for filtering out low absolute values in the heatmap.
 #' @param size A numeric value specifying the size of text in the heatmap.
 #' @param title A title for the diagram.
 #'
@@ -367,6 +372,7 @@ setMethod(
                          "minkowski"),
            del_feat=NULL,
            only_feat=NULL,
+           filter_method=c("diff", "cv"),
            filter=0.2,
            size=6,
            title=NULL) {
@@ -432,12 +438,36 @@ setMethod(
     print_this_msg("No more feature left", msg_type = "STOP")
   }
 
-  if(!is.null(filter)){
-    TF <- abs(obj) > filter
-    obj <- obj[rowSums(TF) > 0 , colSums(TF) > 0]
-    if(nrow(obj)==0)
-      print_this_msg("No feature left after filtering. Adapt 'filter' argument please.", msg_type = "STOP")
+  if(filter_method == "diff"){
+    if(!is.null(filter)){
+      TF <- abs(obj) > filter
+      obj <- obj[rowSums(TF) > 0 , colSums(TF) > 0]
+
+      if(is.vector(obj))
+        print_this_msg("No feature left after filtering. Adapt 'filter' argument please.", msg_type = "STOP")
+    }else{
+      print_this_msg("'filter' is set to NULL, no filtering...")
+    }
+  }else if(filter_method=="cv"){
+    if(!is.null(filter)){
+
+      sd_row <- apply(abs(obj), 1, sd)
+      mean_row <- apply(abs(obj), 1, mean)
+      cv_row <- sd_row/mean_row
+
+      sd_col <- apply(abs(obj), 2, sd)
+      mean_col <- apply(abs(obj), 2, mean)
+      cv_col <- sd_col/mean_col
+
+      obj <- obj[cv_row > filter , cv_col > filter]
+
+      if(is.vector(obj))
+        print_this_msg("No feature left after filtering. Adapt 'filter' argument please.", msg_type = "STOP")
+    }else{
+      print_this_msg("'filter' is set to NULL, no filtering...")
+    }
   }
+
 
 
   print_this_msg("Calling ggheatmap...")

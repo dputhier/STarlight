@@ -12,6 +12,7 @@
   dist_method = c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski"),
   del_feat = NULL,
   only_feat = NULL,
+  filter_method = c("diff", "cv"),
   filter = 0.2,
   size = 6,
   title = NULL
@@ -34,7 +35,7 @@
 
 \item{only_feat}{A character vector specifying features to be included in the heatmap.}
 
-\item{filter}{A numeric value specifying the threshold for filtering out low values in the heatmap.}
+\item{filter}{A numeric value specifying the threshold for filtering out low absolute values in the heatmap.}
 
 \item{size}{A numeric value specifying the size of text in the heatmap.}
 
