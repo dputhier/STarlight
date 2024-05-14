@@ -74,9 +74,20 @@ setClass("STCompR",
 #' @export
 estimSf <- function(cts) {
 
-  geomMean <- function(x) prod(x)^(1/length(x))
+  # Exclude genes with very high counts
+  nr_before <- nrow(x)
+  for(i in 1:ncol(x)){
+    x[x[,i] > quantile(x[,i], 0.95),i] <- NA
+  }
+
+  x <- na.omit(x)
+  nr_after <- nrow(x)
+  print_this_msg("Excluded ",
+                 nr_before-nr_after,
+                 "genes with high level for normalisation.")
 
   # Compute the geometric mean over the line
+  geomMean <- function(x) prod(x)^(1/length(x))
   gm.mean  <-  apply(cts, 1, geomMean)
 
   # Zero values are set to NA (avoid subsequent division by 0)
@@ -187,7 +198,7 @@ stcompr <- function(object_1,
   p_values <- c()
   odd_ratio <- c()
 
-  print_this_msg("Computing Fisher tests...")
+  print_this_msg("Computing Fisher' exact tests...")
 
   for(g in 1:nrow(norm_counts)){
 
@@ -238,15 +249,15 @@ stcompr <- function(object_1,
                      MARGIN = 2,
                      STATS = colSums(bin_mat_2, na.rm = TRUE), FUN = "/")
 
-  print_this_msg("Computing distance (matrix 1)...")
+  print_this_msg("Computing distances (matrix 1)...")
   spatial_matrix_ratio_1 <- as.matrix(stats::dist(t(bin_mat_1),
                                            method = "manhattan"))
 
-  print_this_msg("Computing distance (matrix 2)...")
+  print_this_msg("Computing distances (matrix 2)...")
   spatial_matrix_ratio_2 <- as.matrix(stats::dist(t(bin_mat_2),
                                            method = "manhattan"))
 
-  print_this_msg("Computing contrast... ")
+  print_this_msg("Computing contrasts... ")
   neighborhood_changes <- as.data.frame(spatial_matrix_ratio_2 - spatial_matrix_ratio_1)
 
   print_this_msg("Preparing an STCompR object... ")
