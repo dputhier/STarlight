@@ -266,13 +266,18 @@ The `stcompr()`function also asseses whether the molecule neighborhood tends to 
 To this aim, the number of RNA molecules for a gene per bin is converted into a fraction of the total count for that gene. A Manhattan distance between each gene is computed to quantify the spatial concordance or discordance in their expression patterns across cells. Finally, the function assesses whether the manhattan distance tend to increase or decrease between conditions/regions. An increase is indicative of molecules co-clustering while a decrease is indicative of a repulsion. As the matrix contains `r length(feat_names(cmp))` we will focus n genes with the highest changes in neighborhood by setting the filter argument to 1
 
 ```{r heatmap_cmp}
-heatmap_cmp(cmp, filter = 1, size = 4)
+heatmap_cmp(cmp, filter = 1.2, size = 6)
 ```
 
 As an example we can clearly see that  Kctd8, Necab2, Nrp2 or Chat molecules relocate toward Nwd2. indeed, a negative value indictae 
 
 ```{r heatmap_cmp_img}
-cmp_images(st_obj_r2, st_obj_r1, feat_list = c("Nwd2",
+markers <- c("Nwd2",
+  "Kctd8",
+  "Ccn2",
+  "Cplx3")
+cmp_images(re_bin(st_obj_r2[markers,], 10), 
+           re_bin(st_obj_r1[markers,], 10), feat_list = c("Nwd2",
                                                "Kctd8",
                                                "Ccn2",
                                                "Cplx3"), 
@@ -285,7 +290,8 @@ cmp_images(st_obj_r2, st_obj_r1, feat_list = c("Nwd2",
 p <- umap(as.matrix(cmp@neighborhood_changes))
 u <- p$layout
 colnames(u) <- c("x", "y")
-ggplot(as.data.frame(u), aes(x=x, y=y, label=rownames(u))) + geom_point() + ggrepel::geom_text_repel()
+u$class <- unlist(hc_st$tree_classes)
+ggplot(as.data.frame(u), aes(x=x, y=y, label=rownames(u))) + geom_point() + ggrepel::geom_text_repel(size=3)
 ```
 
 
