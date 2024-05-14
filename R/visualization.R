@@ -146,8 +146,6 @@ setMethod("spatial_image",
               spatial_matrix <- object@bin_mat[, c("bin_x", "bin_y",
                                                    setdiff(features, colnames(object@meta)))]
               for(i in features[features %in% colnames(object@meta)]){
-                print(head(spatial_matrix))
-                print(head(spatial_matrix))
                 spatial_matrix[,i] <- object@meta[, i, drop=FALSE]
               }
 
@@ -488,7 +486,7 @@ setMethod("cmp_bar_plot", signature("STCompR"),
 #' @param ... A set of STGrid objects.
 #' @param features A character vector specifying the features (e.g., genes) to compare. Default is NULL.
 #' @param normalized Logical indicating whether the counts should be normalized. Default is FALSE.
-#' @param type Type of plot to generate. Either "barplot" (default) for bar plots or "radar" for radar plots.
+#' @param type Type of plot to generate. Currently only barplot is supported.
 #' @param names Optional character vector specifying names for each STGrid object. If NULL, default names will be assigned.
 #' @param transform Transformation method for the counts. Options are "None" (default), "log2", "log10", or "log".
 #' @param fill_color Optional character vector specifying fill colors for different conditions in the plot.
@@ -518,8 +516,7 @@ setMethod("cmp_bar_plot", signature("STCompR"),
 cmp_counts_st <- function(...,
          features = NULL,
          normalized = FALSE,
-         type=c("barplot",
-                "radar"),
+         type=c("barplot"),
          names=NULL,
          transform = c("None",
                        "log2",
@@ -530,7 +527,11 @@ cmp_counts_st <- function(...,
 
   type <- match.arg(type)
   transform <- match.arg(transform)
+
   st_list <- list(...)
+  print_this_msg("Found ", length(st_list), "STGrid objects.",
+                 msg_type = "INFO")
+
   if(is.list(st_list[[1]]))
     st_list <- st_list[[1]]
 
@@ -555,14 +556,19 @@ cmp_counts_st <- function(...,
                      msg_type = "STOP")
   }
 
-  print_this_msg("Subsetting STGrid objects.", msg_type = "DEBUG")
+
+  print_this_msg("Naming objects.", msg_type = "DEBUG")
 
   names(st_list) <- names
+
+  print_this_msg("Getting 'coords' slot.", msg_type = "DEBUG")
 
   st_list <- lapply(
     st_list,
     coord
   )
+
+  print_this_msg("Subsetting STGrid objects.", msg_type = "DEBUG")
 
   st_list <- lapply(
     st_list,
@@ -570,10 +576,14 @@ cmp_counts_st <- function(...,
     "feature"
   )
 
+  print_this_msg("Counting...", msg_type = "DEBUG")
+
   st_list <- lapply(
     st_list,
     table
   )
+
+  print_this_msg("Merging...", msg_type = "DEBUG")
 
   st_list <- do.call("cbind", st_list)
 
@@ -582,9 +592,9 @@ cmp_counts_st <- function(...,
     st_list <- sweep(st_list, MARGIN = 2, STATS =  scaling_factor, FUN="/")
   }
 
-  st_list <- st_list[features, ]
+  st_list <- st_list[features, , drop=FALSE]
 
-  count_per_gene <- reshape2::melt(st_list)
+  count_per_gene <- reshape2::melt(as.matrix(st_list))
 
   colnames(count_per_gene) <- c("Gene", "Conditions", "value")
   count_per_gene$Conditions <- factor(count_per_gene$Conditions,
@@ -744,8 +754,19 @@ dist_st <- function(...,
     table
   )
 
+  st_list <- do.call("cbind", st_list)
+
+  if(normalized){
+    if(ncol(st_list) > 1){
+      print_this_msg("Normalizing...")
+      scaling_factor <- estimSf(st_list)
+      st_list <- as.matrix(sweep(st_list, MARGIN = 2, STATS =  scaling_factor, FUN="/"))
+    }
+
+  }
   count_per_gene <- reshape2::melt(st_list)
-  colnames(count_per_gene) <- c("Gene", "value", "Conditions")
+
+  colnames(count_per_gene) <- c("Gene", "Conditions", "value")
 
   if(!is.null(fill_color)){
     if(length(fill_color) < length(unique(count_per_gene$Conditions))){
@@ -942,6 +963,7 @@ setMethod("cmp_boxplot", signature("STCompR"),
 #' @param text_x_lim Numeric value specifying the threshold for feature labels on the x-axis. Features with absolute x-values less than this threshold won't not be labeled. Default is 2.
 #' @param text_size Numeric value specifying the size of text labels in the plot. Default is 5.
 #' @param title A title for the diagram.
+#' @param max.overlaps The maximum number of label overlaps.
 #' @keywords internal
 #' @importFrom ggplot2 aes geom_vline geom_hline geom_point theme_bw xlab ylab expand_limits scale_fill_gradientn
 #' @importFrom  ggrepel geom_text_repel
@@ -967,7 +989,8 @@ setGeneric("cmp_volcano",
                     text_y_lim = 100,
                     text_x_lim = 2,
                     text_size = 5,
-                    title=NULL)
+                    title=NULL,
+                    max.overlaps=10)
            standardGeneric("cmp_volcano"))
 
 #' @title Create a volcano plot to compare molecule counts between 2 conditions.
@@ -984,6 +1007,7 @@ setGeneric("cmp_volcano",
 #' @param text_x_lim Numeric value specifying the threshold for feature labels on the x-axis. Genes with absolute x-values less than this threshold will not be labeled. Default is 2.
 #' @param text_size Numeric value specifying the size of text labels in the plot. Default is 5.
 #' @param title A title for the diagram.
+#' @param max.overlaps The maximum number of label overlaps.
 #' @keywords internal
 #' @examples
 #' example_dataset("10819270/files/cmp_xen")
@@ -1009,7 +1033,8 @@ setMethod("cmp_volcano", signature("STCompR"),
                    text_y_lim = 100,
                    text_x_lim = 1,
                    text_size = 4,
-                   title=NULL) {
+                   title=NULL,
+                   max.overlaps=10) {
 
             x_axis <- match.arg(x_axis)
             y_axis <- match.arg(y_axis)
@@ -1067,6 +1092,7 @@ setMethod("cmp_volcano", signature("STCompR"),
 
             x <- y <- mean_counts <- feature <- NULL
 
+
             ggplot2::ggplot(
               data = volc_data,
               mapping = ggplot2::aes(
@@ -1086,7 +1112,8 @@ setMethod("cmp_volcano", signature("STCompR"),
                 data = stats::na.omit(volc_data),
                 mapping = ggplot2::aes(label = feature),
                 size = text_size,
-                color = "black"
+                color = "black",
+                max.overlaps=max.overlaps
               ) +
               ggplot2::ggtitle(title) +
               ggplot2::xlab(x_axis_lab) +
