@@ -13,7 +13,8 @@
   text_y_lim = 100,
   text_x_lim = 1,
   text_size = 4,
-  title = NULL
+  title = NULL,
+  max.overlaps = 10
 )
 }
 \arguments{
@@ -36,6 +37,8 @@ Options are "p_values", "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", 
 \item{text_size}{Numeric value specifying the size of text labels in the plot. Default is 5.}
 
 \item{title}{A title for the diagram.}
+
+\item{max.overlaps}{The maximum number of label overlaps.}
 }
 \description{
 Create a boxplot/jitter plot to show molecule counts distribution.

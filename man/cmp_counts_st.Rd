@@ -8,7 +8,7 @@ cmp_counts_st(
   ...,
   features = NULL,
   normalized = FALSE,
-  type = c("barplot", "radar"),
+  type = c("barplot"),
   names = NULL,
   transform = c("None", "log2", "log10", "log"),
   fill_color = NULL,
@@ -22,7 +22,7 @@ cmp_counts_st(
 
 \item{normalized}{Logical indicating whether the counts should be normalized. Default is FALSE.}
 
-\item{type}{Type of plot to generate. Either "barplot" (default) for bar plots or "radar" for radar plots.}
+\item{type}{Type of plot to generate. Currently only barplot is supported.}
 
 \item{names}{Optional character vector specifying names for each STGrid object. If NULL, default names will be assigned.}
 
