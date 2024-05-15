@@ -1,0 +1,178 @@
+---
+title: "Intratumoral dendritic cell"
+author: "D. Puthier"
+date: "2024-05-14"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Intratumoral dendritic cell–CD4+ T helper cell niches enable CD8+ T cell differentiation following PD-1 blockade in hepatocellular carcinoma
+
+https://zenodo.org/records/7758080
+
+### Loading data
+
+Here we focus on two samples (122_r1, untreated;  1012_r0, cemiplimab).
+
+```{r}
+library(stcompr)
+set_verb_level(1)
+wdir <- "/Users/puthier/Documents/ST_data/dendritic_cells/data"
+
+## Untreated
+sto_122_r1_unt <- load_spatial(file.path(wdir,
+                                        "122_region_1_detected_transcripts.csv"), 
+                              method = "merscope_csv", 
+                              sep=",", 
+                              bin_size = 25)
+sto_122_r1_unt <- rm_controls(sto_122_r1_unt)
+spatial_image(sto_122_r1_unt, features = "count_sum")
+
+
+sto_1012_r0_cem <- load_spatial(file.path(wdir, "1012_region_0_detected_transcripts.csv"),
+                              method = "merscope_csv",
+                              sep=",", bin_size = 25)
+sto_1012_r0_cem <- rm_controls(sto_1012_r0_cem)
+spatial_image(sto_1012_r0_cem, features = "count_sum")
+
+```
+
+### Distributions
+
+```{r}
+# Provide all STGrid object to dist_st()...
+
+nm <- c("sto_122_r1_unt",
+        "sto_1012_r0_cem")
+
+dist_st(sto_122_r1_unt,
+        sto_1012_r0_cem,
+        transform = "log10",
+        type = "boxjitter",
+        names = nm)
+
+
+dist_st(sto_122_r1_unt,
+        sto_1012_r0_cem,
+        transform = "log10",
+        names = nm,
+        type = "boxjitter",
+        normalized=TRUE)
+
+```
+
+
+### Compare images
+
+```{r}
+cmp_images(sto_122_r1_unt,
+              sto_1012_r0_cem,
+            feat_list = "count_sum",
+           names=nm)
+```
+
+### Density
+
+```{r}
+## This is extremely (too?) long...
+sto_122_r1_unt <- compute_k_ripley(sto_122_r1_unt, rmax = 200, nlarge = 2e6)
+sto_1012_r0_cem <- compute_k_ripley(sto_1012_r0_cem, rmax = 200, nlarge = 2e6)
+```
+
+### Compare objects
+
+```{r}
+st_comp <- stcompr(sto_122_r1_unt, 
+                   sto_1012_r0_cem, 
+                   name_1 = "sto_122_r0_unt", 
+                   name_2 = "sto_1012_r0_cem")
+```
+
+### Volcano
+
+```{r}
+cmp_volcano(st_comp, text_x_lim = 2, text_y_lim=100, text_size = 4, max.overlaps = 30)
+```
+
+### Look at DGE (img + barplot)
+
+```{r}
+feat <-  stat_test(st_comp) %>% 
+            dplyr::filter(abs(log2_ratio) >3.5) %>% 
+            dplyr::filter(-log10(p_values) > 300) %>% 
+            dplyr::arrange(log2_ratio, p_values) %>% 
+            rownames()
+
+cmp_images(sto_122_r1_unt, 
+                   sto_1012_r0_cem, 
+                   names= c("sto_122_r0_unt", "sto_1012_r0_cem"), feat_list= feat) 
+```
+
+```{r}
+cmp_bar_plot(st_comp, features = feat, normalized = TRUE, transform = "None")
+```
+
+### Are CD79A... JCHAIN co-localized
+
+```{r}
+hc_1012_r0_cem<- hc_tree(sto_1012_r0_cem, class_nb = 24, 
+        size = 1, 
+        method = "ward.D")
+hc_1012_r0_cem
+```
+
+```{r}
+hc_1012_r0_cem$tree_classes
+```
+```{r}
+# B / plasmablaste ?
+cmp_images(sto_122_r1_unt, 
+                   sto_1012_r0_cem, 
+                   names= c("sto_122_r0_unt", "sto_1012_r0_cem"), feat_list= hc_1012_r0_cem$tree_classes$MOD12) 
+
+# T
+cmp_images(sto_122_r1_unt, 
+                   sto_1012_r0_cem, 
+                   names= c("sto_122_r0_unt", "sto_1012_r0_cem"), feat_list= hc_1012_r0_cem$tree_classes$MOD16)
+# B (less mature ?)
+cmp_images(sto_122_r1_unt, 
+                   sto_1012_r0_cem, 
+                   names= c("sto_122_r0_unt", "sto_1012_r0_cem"), feat_list= hc_1012_r0_cem$tree_classes$MOD08)
+
+# Macro 
+cmp_images(sto_122_r1_unt, 
+                   sto_1012_r0_cem, 
+                   names= c("sto_122_r0_unt", "sto_1012_r0_cem"), feat_list= hc_1012_r0_cem$tree_classes$MOD13)
+```
+
+### Visualize the gene module/program
+
+```{r}
+sto_1012_r0_cem <- compute_module_score(sto_1012_r0_cem, 
+                                       modules = hc_1012_r0_cem$tree_classes)
+spatial_image(sto_1012_r0_cem, features = meta_names(sto_1012_r0_cem)[-1], ncol = 6)
+
+
+
+```
+
+### Identification of cell pops
+
+```{r}
+library(clustermole)
+markers_list <- 
+my_overlaps <- clustermole_overlaps(genes = markers_list, species = "hs")
+markers_list <- list()
+for(i in 2:length(markers_list)){ 
+  try(markers_list[[i]] <- clustermole_overlaps(genes = hc_1012_r0_cem$tree_classes[[i]], 
+                             species = "hs"))
+}
+```
+
+
+
+
