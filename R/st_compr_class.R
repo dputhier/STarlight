@@ -74,18 +74,6 @@ setClass("STCompR",
 #' @export
 estimSf <- function(cts) {
 
-  # Exclude genes with very high counts
-  nr_before <- nrow(x)
-  for(i in 1:ncol(x)){
-    x[x[,i] > quantile(x[,i], 0.95),i] <- NA
-  }
-
-  x <- na.omit(x)
-  nr_after <- nrow(x)
-  print_this_msg("Excluded ",
-                 nr_before-nr_after,
-                 "genes with high level for normalisation.")
-
   # Compute the geometric mean over the line
   geomMean <- function(x) prod(x)^(1/length(x))
   gm.mean  <-  apply(cts, 1, geomMean)
