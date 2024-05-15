@@ -30,14 +30,21 @@ sto_122_r1_unt <- load_spatial(file.path(wdir,
                               sep=",", 
                               bin_size = 25)
 sto_122_r1_unt <- rm_controls(sto_122_r1_unt)
-spatial_image(sto_122_r1_unt, features = "count_sum")
+
 
 
 sto_1012_r0_cem <- load_spatial(file.path(wdir, "1012_region_0_detected_transcripts.csv"),
                               method = "merscope_csv",
                               sep=",", bin_size = 25)
 sto_1012_r0_cem <- rm_controls(sto_1012_r0_cem)
-spatial_image(sto_1012_r0_cem, features = "count_sum")
+
+
+
+cmp_images(sto_122_r1_unt,
+              sto_1012_r0_cem,
+            feat_list = "count_sum",
+           names=nm)
+
 
 ```
 
@@ -66,14 +73,8 @@ dist_st(sto_122_r1_unt,
 ```
 
 
-### Compare images
 
-```{r}
-cmp_images(sto_122_r1_unt,
-              sto_1012_r0_cem,
-            feat_list = "count_sum",
-           names=nm)
-```
+
 
 ### Density
 
@@ -155,8 +156,6 @@ cmp_images(sto_122_r1_unt,
 sto_1012_r0_cem <- compute_module_score(sto_1012_r0_cem, 
                                        modules = hc_1012_r0_cem$tree_classes)
 spatial_image(sto_1012_r0_cem, features = meta_names(sto_1012_r0_cem)[-1], ncol = 6)
-
-
 
 ```
 

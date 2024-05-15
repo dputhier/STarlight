@@ -10,6 +10,8 @@ compute_k_ripley(
   nlarge = 1e+06,
   var.approx = FALSE,
   ratio = FALSE,
+  sampling_rate = 0.25,
+  seed = 123,
   verbose = TRUE
 )
 }
@@ -23,6 +25,10 @@ compute_k_ripley(
 \item{var.approx}{Logical. If TRUE, the approximate variance of K(r) under CSR will also be computed.}
 
 \item{ratio}{Logical. If TRUE, the numerator and denominator of each edge-corrected estimate will also be saved, for use in analyzing replicated point patterns.}
+
+\item{sampling_rate}{By default a subset of molecules is sampled. Set sampling_rate to 1 to keep all molecules.}
+
+\item{seed}{The seed for sampling_rate.}
 
 \item{verbose}{Whether to print porgress bar.}
 }

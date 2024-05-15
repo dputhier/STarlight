@@ -1045,6 +1045,8 @@ setMethod (f = '[[<-',
 #' @param nlarge Efficiency threshold. If the number of points exceeds nlarge, then only the border correction will be computed (by default), using a fast algorithm.
 #' @param var.approx Logical. If TRUE, the approximate variance of K(r) under CSR will also be computed.
 #' @param ratio Logical. If TRUE, the numerator and denominator of each edge-corrected estimate will also be saved, for use in analyzing replicated point patterns.
+#' @param sampling_rate By default a subset of molecules is sampled. Set sampling_rate to 1 to keep all molecules.
+#' @param seed The seed for sampling_rate.
 #' @param verbose Whether to print porgress bar.
 #' @return An updated object of class "STGrid" with the Ripley's K function estimates stored in the slot 'ripley_k_function'.
 #'
@@ -1059,6 +1061,8 @@ setGeneric("compute_k_ripley",
                     nlarge = 1e6,
                     var.approx = FALSE,
                     ratio = FALSE,
+                    sampling_rate=0.25,
+                    seed=123,
                     verbose = TRUE)
              standardGeneric("compute_k_ripley"))
 
@@ -1071,6 +1075,8 @@ setGeneric("compute_k_ripley",
 #' @param nlarge Efficiency threshold. If the number of points exceeds nlarge, then only the border correction will be computed (by default), using a fast algorithm.
 #' @param var.approx Logical. If TRUE, the approximate variance of K(r) under CSR will also be computed.
 #' @param ratio Logical. If TRUE, the numerator and denominator of each edge-corrected estimate will also be saved, for use in analyzing replicated point patterns.
+#' @param sampling_rate By default a subset of molecules is sampled. Set sampling_rate to 1 to keep all molecules.
+#' @param seed The seed for sampling_rate.
 #' @param verbose Whether to print porgress bar.
 #' @return An updated object of class "STGrid" with the Ripley's K function estimates stored in the slot 'ripley_k_function'.
 #'
@@ -1087,9 +1093,12 @@ setMethod("compute_k_ripley", signature("STGrid"),
                    nlarge = 1e6,
                    var.approx = FALSE,
                    ratio = FALSE,
+                   sampling_rate=0.25,
+                   seed=123,
                    verbose = TRUE) {
 
             molecules <- coord(object)[, c("x", "y", "feature")]
+
 
             data_out <- data.frame(
               r = NA,
@@ -1104,6 +1113,13 @@ setMethod("compute_k_ripley", signature("STGrid"),
             x_max <- object@x_max
             y_min <- object@y_min
             y_max <- object@y_max
+
+            if(sampling_rate != 1){
+              subset <- sample(1:nrow(molecules),
+                               round(sampling_rate*nrow(molecules), 0),
+                               replace = FALSE)
+
+            }
 
             rownames(molecules) <- paste0(1:nrow(molecules),
                                           '|',
