@@ -2,15 +2,15 @@
 % Please edit documentation in R/st_compr_class.R
 \name{stcompr}
 \alias{stcompr}
-\title{Create a STCompR compare class to compare two STGrid objects.}
+\title{Create a STCompR compare class to compare two sets of STGrid objects.}
 \usage{
 stcompr(
   object_1,
   object_2,
   name_1 = "Condition_1",
   name_2 = "Condition_2",
-  stat_test = c("Fisher"),
-  norm_method = c("RLE"),
+  fit_type = c("local", "mean", "parametric", "glmGamPoi"),
+  p_adj_method = c("BH", "holm", "hochberg", "hommel", "bonferroni", "BY", "fdr", "none"),
   pseudo_count = 1
 )
 }
@@ -19,23 +19,23 @@ stcompr(
 
 \item{object_2}{A STGrid object.}
 
-\item{name_1}{A character string specifying the name for Condition 1.}
+\item{name_1}{A string to name classe 1.}
 
-\item{name_2}{A character string specifying the name for Condition 2.}
+\item{name_2}{A string to name classe 2.}
 
-\item{stat_test}{A character string specifying the statistical test to be used.
-Currently, only "Fisher" is supported.}
+\item{fit_type}{See  estimateDispersions() in DESeq2 library.}
 
-\item{norm_method}{A character string specifying the normalization method to be used.
-Currently, only "RLE" is supported.}
+\item{p_adj_method}{The pvalue correction method. See stats::p.adjust.}
 
-\item{pseudo_count}{A numeric value specifying the pseudo-count to be added during normalization.}
+\item{pseudo_count}{A pseudo-count value to be stored in the object.}
 }
 \value{
 An object of class 'STCompR'.
 }
 \description{
-Create a STCompR compare class to compare two STGrid objects.
+Create a STCompR compare class to compare two sets of STGrid objects. By default differential
+expression is performed with DESeq2. If only one sample of each classe is provided, a Fisher's exact
+test is performed.
 }
 \examples{
 # Example usage:
@@ -47,6 +47,6 @@ xen_r1 <- xen[x_bins, y_bins]
 x_bins <-  bin_x(xen)[61:101]
 y_bins <-  bin_y(xen)[101:nbin_y(xen)]
 xen_r2 <- xen[x_bins, y_bins]
-cmp <- stcompr(xen_r1, xen_r2)
+cmp <- stcompr(list(xen_r1=xen_r1), list(xen_r2=xen_r2))
 
 }

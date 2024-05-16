@@ -402,7 +402,7 @@ setGeneric("cmp_bar_plot",
 #' @title Create a barplot to show counts for selected features.
 #' @description
 #' Create a barplot to show counts for selected features.
-#' @param object A STGrid object.
+#' @param object A STCompR object.
 #' @param features The list of features (NULL for all of them).
 #' @param normalized  Whether counts should be normalized.
 #' @param transform Whether the count should be transformed (the pseudo count defined for the object is added).
@@ -441,11 +441,15 @@ setMethod("cmp_bar_plot", signature("STCompR"),
               features = features
             )
 
+            counts$Conditions <- object@conditions[as.character(counts$Samples)]
+            counts$Conditions <- as.factor(counts$Condition)
+
             ylabel <- ifelse(
               transform %in% c("log2", "log10", "log"),
               paste0(transform, "(Feature counts)"),
               "Feature counts"
             )
+
             counts$Features <- factor(counts$Features,
                                       levels = features,
                                       ordered = TRUE)
@@ -453,7 +457,8 @@ setMethod("cmp_bar_plot", signature("STCompR"),
             Features <- Counts <- Conditions <- NULL
 
             ggplot2::ggplot(data = counts,
-                            mapping = ggplot2::aes(x = Features, y = Counts,
+                            mapping = ggplot2::aes(x = Samples,
+                                                   y = Counts,
                                                    fill = Conditions)) +
               ggplot2::geom_col(color = "black",
                                 linewidth = 0,
@@ -472,9 +477,10 @@ setMethod("cmp_bar_plot", signature("STCompR"),
                 panel.border = ggplot2::element_blank()
               ) +
               ggplot2::ylab(ylabel) +
-              ggplot2::scale_fill_manual(values = colors)
+              ggplot2::scale_fill_manual(values = colors) +
+              ggplot2::facet_wrap(~Features)
 
-          })
+})
 
 # -------------------------------------------------------------------------
 ##    Compare counts across multiple st_grid_objects
@@ -953,42 +959,30 @@ setMethod("cmp_boxplot", signature("STCompR"),
 #' @description
 #' Create a boxplot/jitter plot to show molecule counts distribution.
 #' @param object A STCompR object.
-#' @param x_axis Character vector specifying the x-axis variable.
-#' Options are "log2_ratio" or "log2_odds".
 #' @param y_axis Character vector specifying the y-axis variable.
-#' Options are "p_values", "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", or "fdr".
+#' Options are "p_values" or "padj".
 #' @param x_lim Numeric vector specifying the x-axis limits. Default is c(-2.5, 2.5).
 #' @param colors Color palette for the plot. Default is RColorBrewer::brewer.pal(7, "Spectral").
-#' @param text_y_lim Numeric value specifying the threshold for feature labels on the y-axis. Features with -log10(p-value) less than this threshold won't be labeled. Default is 100.
-#' @param text_x_lim Numeric value specifying the threshold for feature labels on the x-axis. Features with absolute x-values less than this threshold won't not be labeled. Default is 2.
+#' @param text_y_lim Numeric value specifying the threshold for feature labels on the y-axis. Genes with -log10(p-value) less than this threshold will not be labeled. Default is 100.
+#' @param text_x_lim Numeric value specifying the threshold for feature labels on the x-axis. Genes with absolute x-values less than this threshold will not be labeled. Default is 2.
 #' @param text_size Numeric value specifying the size of text labels in the plot. Default is 5.
 #' @param title A title for the diagram.
 #' @param max.overlaps The maximum number of label overlaps.
 #' @keywords internal
-#' @importFrom ggplot2 aes geom_vline geom_hline geom_point theme_bw xlab ylab expand_limits scale_fill_gradientn
-#' @importFrom  ggrepel geom_text_repel
 #' @examples
 #' example_dataset("10819270/files/cmp_xen")
 #' cmp_xen
 #' cmp_volcano(cmp_xen)
-#'
 #' @keywords internal
 setGeneric("cmp_volcano",
            function(object,
-                    x_axis = c("log2_ratio", "log2_odds"),
                     y_axis = c("p_values",
-                               "holm",
-                               "hochberg",
-                               "hommel",
-                               "bonferroni",
-                               "BH",
-                               "BY",
-                               "fdr"),
+                               "padj"),
                     x_lim = c(-2.5, 2.5),
-                    colors = RColorBrewer::brewer.pal(7, "Spectral"),
+                    colors = rev(RColorBrewer::brewer.pal(7, "Spectral")),
                     text_y_lim = 100,
-                    text_x_lim = 2,
-                    text_size = 5,
+                    text_x_lim = 1,
+                    text_size = 4,
                     title=NULL,
                     max.overlaps=10)
            standardGeneric("cmp_volcano"))
@@ -997,10 +991,8 @@ setGeneric("cmp_volcano",
 #' @description
 #' Create a boxplot/jitter plot to show molecule counts distribution.
 #' @param object A STCompR object.
-#' @param x_axis Character vector specifying the x-axis variable.
-#' Options are "log2_ratio" or "log2_odds".
 #' @param y_axis Character vector specifying the y-axis variable.
-#' Options are "p_values", "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", or "fdr".
+#' Options are "p_values" or "padj".
 #' @param x_lim Numeric vector specifying the x-axis limits. Default is c(-2.5, 2.5).
 #' @param colors Color palette for the plot. Default is RColorBrewer::brewer.pal(7, "Spectral").
 #' @param text_y_lim Numeric value specifying the threshold for feature labels on the y-axis. Genes with -log10(p-value) less than this threshold will not be labeled. Default is 100.
@@ -1019,15 +1011,8 @@ setGeneric("cmp_volcano",
 #' @export cmp_volcano
 setMethod("cmp_volcano", signature("STCompR"),
           function(object,
-                   x_axis = c("log2_ratio", "log2_odds"),
                    y_axis = c("p_values",
-                              "holm",
-                              "hochberg",
-                              "hommel",
-                              "bonferroni",
-                              "BH",
-                              "BY",
-                              "fdr"),
+                              "padj"),
                    x_lim = c(-2.5, 2.5),
                    colors = rev(RColorBrewer::brewer.pal(7, "Spectral")),
                    text_y_lim = 100,
@@ -1036,24 +1021,18 @@ setMethod("cmp_volcano", signature("STCompR"),
                    title=NULL,
                    max.overlaps=10) {
 
-            x_axis <- match.arg(x_axis)
             y_axis <- match.arg(y_axis)
 
             if (y_axis != "p_values")
-              y_axis <- paste0("padj_", y_axis)
+              y_axis <- paste0("padj")
 
-            if(x_axis == "log2_ratio"){
-
-              x_axis_lab <- paste0("log2(",
-                                   object@conditions[2],
+            uniq_conditions <- unique(object@conditions)
+            x_axis_lab <- paste0("log2(",
+                                 uniq_conditions[2],
                                    "/",
-                                   object@conditions[1],
+                                 uniq_conditions[1],
                                    ")")
 
-            }else if(x_axis == "log2_odds"){
-              x_axis_lab <- "Log2(odds)"
-
-            }
 
             if(is.null(title)){
               title <- paste0("Comparison of ",
@@ -1069,12 +1048,7 @@ setMethod("cmp_volcano", signature("STCompR"),
               features = NULL
             )
 
-            if(x_axis == "log2_ratio"){
-              volc_data <- volc_data[, c(x_axis, y_axis)]
-            }else if(x_axis == "log2_odds"){
-              volc_data <- volc_data[, c("odd_ratio", y_axis)]
-              volc_data$odd_ratio <- log2(volc_data$odd_ratio)
-            }
+            volc_data <- volc_data[, c("log2_ratio", y_axis)]
 
             colnames(volc_data) <- c("x", "y")
 
@@ -1128,9 +1102,9 @@ setMethod("cmp_volcano", signature("STCompR"),
               ggplot2::ylab(paste0("-log10(", y_axis, ")")) +
               ggplot2::expand_limits(x = x_lim) +
               ggplot2::scale_fill_gradientn(colors = colors,
-                                            name = paste0(stringr::str_to_title(gsub("_", " ", x_axis))))
+                                            name = "Log2 ratio")
 
-          })
+})
 
 # -------------------------------------------------------------------------
 ##    Ripley's K function

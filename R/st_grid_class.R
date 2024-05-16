@@ -668,7 +668,7 @@ setMethod("rm_controls", "STGrid",
 #' example_dataset()
 #' table(Xenium_Mouse_Brain_Coronal_7g)
 #' @keywords internal
-#' @export table
+#' @export
 setGeneric("table_st",
            function(x)
              standardGeneric("table_st"))
@@ -680,7 +680,7 @@ setGeneric("table_st",
 #' @examples
 #' example_dataset()
 #' table(Xenium_Mouse_Brain_Coronal_7g)
-#' @export table
+#' @export
 setMethod("table_st", signature("STGrid"),
           function(x){
             table(coord(x)$feature)
@@ -736,7 +736,6 @@ setMethod("ripley_k_function", "STGrid",
 setMethod("show", signature("STGrid"),
           function(object) {
             print_this_msg("An object of class STGrid")
-            print_this_msg("Memory used: ", utils::object.size(object))
             print_this_msg("Number of counts: ", nb_items(object))
             print_this_msg("Number of features: ", nb_feat(object))
             print_this_msg("Bin size: ", bin_size(object))
@@ -1115,9 +1114,15 @@ setMethod("compute_k_ripley", signature("STGrid"),
             y_max <- object@y_max
 
             if(sampling_rate != 1){
+              print_this_msg("Subsetting...", msg_type = "DEBUG")
+              print_this_msg("Nb items before:", nrow(molecules), msg_type = "DEBUG")
+
               subset <- sample(1:nrow(molecules),
                                round(sampling_rate*nrow(molecules), 0),
                                replace = FALSE)
+              molecules <- molecules[subset, ]
+
+              print_this_msg("Nb items after:", nrow(molecules), msg_type = "DEBUG")
 
             }
 

@@ -19,29 +19,58 @@ https://zenodo.org/records/7758080
 Here we focus on two samples (122_r1, untreated;  1012_r0, cemiplimab).
 
 ```{r}
+
+# Tested:
+# 1012_r0; 1012_r0
+
 library(stcompr)
-set_verb_level(1)
+set_verb_level(3)
 wdir <- "/Users/puthier/Documents/ST_data/dendritic_cells/data"
 
 ## Untreated
 sto_122_r1_unt <- load_spatial(file.path(wdir,
-                                        "122_region_1_detected_transcripts.csv"), 
+                                        "122_r1_detected_transcripts.csv"), 
                               method = "merscope_csv", 
                               sep=",", 
                               bin_size = 25)
 sto_122_r1_unt <- rm_controls(sto_122_r1_unt)
 
+## Untreated
+sto_122_r0_unt <- load_spatial(file.path(wdir,
+                                        "122_r0_detected_transcripts.csv"), 
+                              method = "merscope_csv", 
+                              sep=",", 
+                              bin_size = 25)
+sto_122_r0_unt <- rm_controls(sto_122_r0_unt)
 
 
-sto_1012_r0_cem <- load_spatial(file.path(wdir, "1012_region_0_detected_transcripts.csv"),
+# cemiplimab
+sto_1012_r0_cem <- load_spatial(file.path(wdir, "1012_r0_detected_transcripts.csv"),
                               method = "merscope_csv",
                               sep=",", bin_size = 25)
 sto_1012_r0_cem <- rm_controls(sto_1012_r0_cem)
 
+sto_1012_r1_cem <- load_spatial(file.path(wdir, "1012_r1_detected_transcripts.csv"),
+                              method = "merscope_csv",
+                              sep=",", bin_size = 25)
+sto_1012_r1_cem <- rm_controls(sto_1012_r1_cem)
 
+sto_1017_r0_cem <- load_spatial(file.path(wdir, "1017_r0_detected_transcripts.csv"),
+                              method = "merscope_csv",
+                              sep=",", bin_size = 25)
+sto_1017_r0_cem <- rm_controls(sto_1012_r1_cem)
 
-cmp_images(sto_122_r1_unt,
-              sto_1012_r0_cem,
+nm <- c("sto_122_r0_unt",
+        "sto_122_r1_unt",
+        "sto_1012_r0_cem",
+        "sto_1012_r1_cem",
+        "sto_1017_r0_cem")
+
+cmp_images(sto_122_r0_unt,
+            sto_122_r1_unt,
+            sto_1012_r0_cem,
+            sto_1012_r1_cem,
+            sto_1017_r0_cem,
             feat_list = "count_sum",
            names=nm)
 
@@ -53,18 +82,23 @@ cmp_images(sto_122_r1_unt,
 ```{r}
 # Provide all STGrid object to dist_st()...
 
-nm <- c("sto_122_r1_unt",
-        "sto_1012_r0_cem")
 
-dist_st(sto_122_r1_unt,
-        sto_1012_r0_cem,
+
+dist_st(sto_122_r0_unt,
+            sto_122_r1_unt,
+            sto_1012_r0_cem,
+            sto_1012_r1_cem,
+            sto_1017_r0_cem,
         transform = "log10",
         type = "boxjitter",
         names = nm)
 
 
-dist_st(sto_122_r1_unt,
-        sto_1012_r0_cem,
+dist_st(sto_122_r0_unt,
+            sto_122_r1_unt,
+            sto_1012_r0_cem,
+            sto_1012_r1_cem,
+            sto_1017_r0_cem,
         transform = "log10",
         names = nm,
         type = "boxjitter",
@@ -79,24 +113,42 @@ dist_st(sto_122_r1_unt,
 ### Density
 
 ```{r}
-## This is extremely (too?) long...
-sto_122_r1_unt <- compute_k_ripley(sto_122_r1_unt, rmax = 200, nlarge = 2e6)
-sto_1012_r0_cem <- compute_k_ripley(sto_1012_r0_cem, rmax = 200, nlarge = 2e6)
+## Here we take a subset of the full dataset, centered on the tissue.
+spatial_image(sto_122_r1_unt, grid_by = 20, features = "count_sum")
+sto_122_r1_unt_rip <- compute_k_ripley(sto_122_r1_unt[bin_x(sto_122_r1_unt)[100:200], 
+                                                  bin_y(sto_122_r1_unt)[60:180]], 
+                                   rmax = 100, nlarge = 2e6)
+plot_rip_k(sto_122_r1_unt_rip)
+spatial_image(sto_122_r1_unt, features = "ASPN")
+
+
+tt <- ggplot2::ggtitle("sto_1012_r0_cem_rip")
+spatial_image(sto_1012_r0_cem, grid_by = 20, features = "count_sum")
+sto_1012_r0_cem_rip <- compute_k_ripley(sto_1012_r0_cem[bin_x(sto_1012_r0_cem)[80:300], 
+                                                        bin_y(sto_1012_r0_cem)[20:260]], 
+                                        rmax = 100, nlarge = 2e6) 
+plot_rip_k(sto_1012_r0_cem_rip) + tt
+spatial_image(sto_1012_r0_cem, features = "SPP1") + tt
 ```
 
 ### Compare objects
 
 ```{r}
-st_comp <- stcompr(sto_122_r1_unt, 
-                   sto_1012_r0_cem, 
-                   name_1 = "sto_122_r0_unt", 
-                   name_2 = "sto_1012_r0_cem")
+st_comp <- stcompr(list(sto_122_r0_unt=sto_122_r0_unt,
+                        sto_122_r1_unt=sto_122_r1_unt),
+                   list(sto_1012_r0_cem=sto_1012_r0_cem,
+                        sto_1012_r1_cem=sto_1012_r1_cem,
+                        sto_1017_r0_cem=sto_1017_r0_cem),
+                   name_1 = "Untreated", 
+                   name_2 = "Cemiplimab")
 ```
 
 ### Volcano
 
 ```{r}
-cmp_volcano(st_comp, text_x_lim = 2, text_y_lim=100, text_size = 4, max.overlaps = 30)
+cmp_volcano(st_comp, text_x_lim = 2, 
+            text_y_lim=100, text_size = 4, 
+            max.overlaps = 30)
 ```
 
 ### Look at DGE (img + barplot)

@@ -13,7 +13,7 @@
 )
 }
 \arguments{
-\item{object}{A STGrid object.}
+\item{object}{A STCompR object.}
 
 \item{features}{The list of features (NULL for all of them).}
 

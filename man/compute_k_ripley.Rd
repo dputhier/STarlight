@@ -6,8 +6,8 @@
 \usage{
 compute_k_ripley(
   object,
-  rmax = 200,
-  nlarge = 1e+06,
+  rmax = 125,
+  nlarge = 2e+06,
   var.approx = FALSE,
   ratio = FALSE,
   sampling_rate = 0.25,

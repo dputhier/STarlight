@@ -56,7 +56,7 @@ slotNames(st_obj)
 ```
 
 ```{r show_st_methods, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
-stcompr::show_methods()
+stcompr::show_st_methods()
 ```
 
 ## Subsetting

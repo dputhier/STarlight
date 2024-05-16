@@ -6,13 +6,12 @@
 \usage{
 cmp_volcano(
   object,
-  x_axis = c("log2_ratio", "log2_odds"),
-  y_axis = c("p_values", "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr"),
+  y_axis = c("p_values", "padj"),
   x_lim = c(-2.5, 2.5),
-  colors = RColorBrewer::brewer.pal(7, "Spectral"),
+  colors = rev(RColorBrewer::brewer.pal(7, "Spectral")),
   text_y_lim = 100,
-  text_x_lim = 2,
-  text_size = 5,
+  text_x_lim = 1,
+  text_size = 4,
   title = NULL,
   max.overlaps = 10
 )
@@ -20,19 +19,16 @@ cmp_volcano(
 \arguments{
 \item{object}{A STCompR object.}
 
-\item{x_axis}{Character vector specifying the x-axis variable.
-Options are "log2_ratio" or "log2_odds".}
-
 \item{y_axis}{Character vector specifying the y-axis variable.
-Options are "p_values", "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", or "fdr".}
+Options are "p_values" or "padj".}
 
 \item{x_lim}{Numeric vector specifying the x-axis limits. Default is c(-2.5, 2.5).}
 
 \item{colors}{Color palette for the plot. Default is RColorBrewer::brewer.pal(7, "Spectral").}
 
-\item{text_y_lim}{Numeric value specifying the threshold for feature labels on the y-axis. Features with -log10(p-value) less than this threshold won't be labeled. Default is 100.}
+\item{text_y_lim}{Numeric value specifying the threshold for feature labels on the y-axis. Genes with -log10(p-value) less than this threshold will not be labeled. Default is 100.}
 
-\item{text_x_lim}{Numeric value specifying the threshold for feature labels on the x-axis. Features with absolute x-values less than this threshold won't not be labeled. Default is 2.}
+\item{text_x_lim}{Numeric value specifying the threshold for feature labels on the x-axis. Genes with absolute x-values less than this threshold will not be labeled. Default is 2.}
 
 \item{text_size}{Numeric value specifying the size of text labels in the plot. Default is 5.}
 
@@ -47,6 +43,5 @@ Create a boxplot/jitter plot to show molecule counts distribution.
 example_dataset("10819270/files/cmp_xen")
 cmp_xen
 cmp_volcano(cmp_xen)
-
 }
 \keyword{internal}

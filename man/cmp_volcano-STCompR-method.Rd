@@ -6,8 +6,7 @@
 \usage{
 \S4method{cmp_volcano}{STCompR}(
   object,
-  x_axis = c("log2_ratio", "log2_odds"),
-  y_axis = c("p_values", "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr"),
+  y_axis = c("p_values", "padj"),
   x_lim = c(-2.5, 2.5),
   colors = rev(RColorBrewer::brewer.pal(7, "Spectral")),
   text_y_lim = 100,
@@ -20,11 +19,8 @@
 \arguments{
 \item{object}{A STCompR object.}
 
-\item{x_axis}{Character vector specifying the x-axis variable.
-Options are "log2_ratio" or "log2_odds".}
-
 \item{y_axis}{Character vector specifying the y-axis variable.
-Options are "p_values", "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", or "fdr".}
+Options are "p_values" or "padj".}
 
 \item{x_lim}{Numeric vector specifying the x-axis limits. Default is c(-2.5, 2.5).}
 

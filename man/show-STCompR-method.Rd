@@ -13,6 +13,13 @@
 The show method of a STCompR object displays information about the object,
 including conditions, memory usage, and the number of features
 }
+\section{-------------------------------------------------------------------------}{
+\subsection{Generate a heatmap comparison for an 'STCompR' object}{
+}
+
+
+}
+
 \examples{
 example_dataset("10819270/files/cmp_xen")
 show(cmp_xen)
