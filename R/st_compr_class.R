@@ -69,7 +69,7 @@ setClass("STCompR",
 #' @param p_adj_method The pvalue correction method. See stats::p.adjust.
 #' @param pseudo_count A pseudo-count value to be stored in the object.
 #' @return An object of class 'STCompR'.
-#'
+#' @importFrom DESeq2 DESeqDataSetFromMatrix estimateSizeFactors counts estimateDispersions nbinomWaldTest results sizeFactors
 #' @examples
 #' # Example usage:
 #' example_dataset()
