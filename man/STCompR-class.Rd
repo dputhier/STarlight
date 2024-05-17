@@ -18,6 +18,8 @@ scaling factors, and statistical test results.
 
 \item{\code{raw_counts}}{A data.frame storing raw count data for each condition.}
 
+\item{\code{norm_counts}}{A data.frame storing normalized counts for each condition.}
+
 \item{\code{scaling_factor}}{A numeric vector representing the scaling factors used during normalization (to be divided).}
 
 \item{\code{stat_test}}{A data frame containing statistical test results, including log2 ratios,
@@ -25,14 +27,14 @@ odds ratios, and p-values for each feature.}
 
 \item{\code{pseudo_count}}{The value for the pseudo_count.}
 
-\item{\code{neighborhood}}{a list of feature-feature neighborhood for the two conditions to be compared.}
+\item{\code{neighborhood}}{a list of feature-feature neighborhood for the two conditions to be compared (not functional at the moment).}
 
-\item{\code{neighborhood_changes}}{A feature-feature matrix indicative of neighborhood changes.}
+\item{\code{neighborhood_changes}}{A feature-feature matrix indicative of neighborhood changes (not functional at the moment).}
 }}
 
 \examples{
 # Example usage:
-example_dataset("10819270/files/cmp_xen")
+example_dataset("11210787/files/cmp_xen")
 cmp_xen
 
 }

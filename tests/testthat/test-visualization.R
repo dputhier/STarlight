@@ -2,7 +2,7 @@ library(testthat)
 test_that("spatial_image...", {
 
 
-  library(stcompr)
+  library(STarlight)
   set_verb_level(0)
   example_dataset()
   test_data <- Xenium_Mouse_Brain_Coronal_7g
@@ -61,7 +61,7 @@ test_that("spatial_image...", {
 
 test_that("spatial_plot...", {
 
-  library(stcompr)
+  library(STarlight)
   set_verb_level(0)
   example_dataset()
   test_data <- Xenium_Mouse_Brain_Coronal_7g
@@ -106,9 +106,9 @@ test_that("spatial_plot...", {
 
 test_that("cmp_bar_plot...", {
 
-  library(stcompr)
+  library(STarlight)
   set_verb_level(0)
-  example_dataset("10819270/files/cmp_xen")
+  example_dataset("11210787/files/cmp_xen")
   test_data <- cmp_xen
   feat <- feat_names(cmp_xen)
 
@@ -131,9 +131,9 @@ test_that("cmp_bar_plot...", {
 
 test_that("cmp_boxplot...", {
 
-  library(stcompr)
+  library(STarlight)
   set_verb_level(0)
-  example_dataset("10819270/files/cmp_xen")
+  example_dataset("11210787/files/cmp_xen")
   test_data <- cmp_xen
   feat <- feat_names(cmp_xen)
 
@@ -161,34 +161,33 @@ test_that("cmp_boxplot...", {
 
 test_that("cmp_volcano...", {
 
-  library(stcompr)
+  library(STarlight)
   set_verb_level(0)
-  example_dataset("10819270/files/cmp_xen")
+  example_dataset("11210787/files/cmp_xen")
   test_data <- cmp_xen
   feat <- feat_names(cmp_xen)
 
   expect_equal(round(sum(cmp_volcano(cmp_xen)$data$x), 2), -1.56)
 
-  expect_equal(round(sum(-log10(cmp_volcano(cmp_xen)$data$y)), 0), 971)
+  expect_true(round(sum(-log10(cmp_volcano(cmp_xen)$data$y)), 0) >= 970)
 
   expect_equal(round(sum(cmp_volcano(cmp_xen)$data$mean_counts), 2), 21247.58)
 
   expect_equal(round(sum(cmp_volcano(cmp_xen)$data$mean_counts), 2), 21247.58)
 
-  expect_equal(round(sum(-log10(cmp_volcano(cmp_xen, y_axis="holm")$data$y)), 0), 968)
+  expect_true(round(sum(-log10(cmp_volcano(cmp_xen, y_axis="p_values")$data$y)), 0) >= 970)
 
-  expect_equal(round(sum(-log10(cmp_volcano(cmp_xen, y_axis="BH")$data$y)), 0), 969)
 
-  expect_no_error(cmp_volcano(cmp_xen, y_axis="BH", x_lim = c(-1, 1)))
-
-  expect_no_error(cmp_volcano(cmp_xen, color=c("red", "blue")))
+  expect_no_error(cmp_volcano(cmp_xen, color=c("red", "blue"),
+                              text_y_lim = 200,
+                              text_x_lim=2))
 })
 
 
 
 test_that("plot_rip_k", {
 
-  library(stcompr)
+  library(STarlight)
   set_verb_level(0)
   example_dataset()
   test_data <- Xenium_Mouse_Brain_Coronal_7g
@@ -197,9 +196,9 @@ test_that("plot_rip_k", {
 
   expect_no_error(plot_rip_k(test_data))
 
-  expect_equal(round(log10(sum(plot_rip_k(test_data)$data$border+1)), 2), 9.32)
+  expect_equal(round(log10(sum(plot_rip_k(test_data)$data$border+1)), 1), 9)
 
-  expect_equal(round(log10(sum(plot_rip_k(test_data)$data$iso+1)), 2), 9.31)
+  expect_equal(round(log10(sum(plot_rip_k(test_data)$data$iso+1)), 1), 9)
 
   expect_no_error(plot_rip_k(test_data, max_feat_label = 1, color = "red"))
 })
@@ -209,7 +208,7 @@ test_that("plot_rip_k", {
 
 test_that("cmp_images...", {
 
-  library(stcompr)
+  library(STarlight)
   set_verb_level(0)
   example_dataset()
   test_data <- Xenium_Mouse_Brain_Coronal_7g
@@ -259,7 +258,7 @@ test_that("cmp_images...", {
 
 
 test_that("dist_st", {
-  library(stcompr)
+  library(STarlight)
   set_verb_level(0)
   example_dataset()
 

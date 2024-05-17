@@ -31,6 +31,8 @@
 
 \item{class_nb}{An integer indicating the desired number of groups.}
 
+\item{class_name}{A set of names for the classes.}
+
 \item{size}{The size of the labels.}
 
 \item{colors}{A set of colors for the classes.}

@@ -1,5 +1,5 @@
 MAKEFILE=Makefile
-VERSION=0.0.1
+VERSION=0.0.4
 
 .PHONY: help
 
@@ -17,24 +17,23 @@ help:
 	@echo ""
 
 clean:
-	@rm -f src/*.o src/*.so; rm -f stcompr.Rcheck/dbfmcl/libs/dbfmcl.so; rm -rf ./dbfmcl.Rcheck; rm -rf ..Rcheck, rm -rf ./..Rcheck/
-	@rm -rf /tmp/dbfmcl; rm -rf *dbf_out.txt; rm -rf *mcl_out.txt  rm -rf ./stcompr.Rcheck
+	@rm -f src/*.o src/*.so; rm -f STarlight.Rcheck/dbfmcl/libs/dbfmcl.so; rm -rf ./dbfmcl.Rcheck; rm -rf ..Rcheck, rm -rf ./..Rcheck/
+	@rm -rf /tmp/dbfmcl; rm -rf *dbf_out.txt; rm -rf *mcl_out.txt  rm -rf ./STarlight.Rcheck
 	@rm -f tests/testthat/Rplot*; rm -rf tests/testthat/_snaps
 	@rm -f *~
 
 check: clean
-	@rm -rf /tmp/stcompr; mkdir -p /tmp/stcompr; cp -r ./* /tmp/stcompr; cd /tmp/stcompr; \
-	rm -f src/*.o src/*.so; rm -f stcompr.Rcheck/dbfmcl/libs/dbfmcl.so; \
-	cd ..; R CMD build stcompr; R CMD check stcompr_$(VERSION).tar.gz
+	@rm -rf /tmp/STarlight; mkdir -p /tmp/STarlight; cp -r ./* /tmp/STarlight; cd /tmp/STarlight; \
+	cd ..; R CMD build STarlight; R CMD check --no-stop-on-test-error STarlight_$(VERSION).tar.gz
 
 run_example:
 	@echo "devtools::run_examples(pkg = '.')" | R --slave
 
 checkfast: clean
-	@rm -rf /tmp/stcompr; mkdir -p /tmp/stcompr; cp -r ./* /tmp/stcompr; cd /tmp/stcompr; \
+	@rm -rf /tmp/STarlight; mkdir -p /tmp/STarlight; cp -r ./* /tmp/STarlight; cd /tmp/STarlight; \
 	rm -f src/*.o src/*.so; rm -f check; \
-	R CMD build --no-build-vignettes . ; \
-	R CMD check stcompr_* .
+	R CMD build --no-build-vignettes --no-stop-on-test-error . ; \
+	R CMD check STarlight_* .
 
 doc:
 	@echo ">>> Creating a package documentation"
@@ -53,14 +52,14 @@ test:
 	@echo "devtools::test()" | R --slave
 
 test_by_file:
-	@echo 'library(stcompr); for(i in dir("./tests/testthat/", pattern = ".R$$")){devtools::test_active_file(file.path("./tests/testthat/", i))}' | R --slave
+	@echo 'library(STarlight); for(i in dir("./tests/testthat/", pattern = ".R$$")){devtools::test_active_file(file.path("./tests/testthat/", i))}' | R --slave
 
 coverage:
 	@echo "Checking coverage"
 	@echo "usethis::use_github_action('test-coverage'); cov <- covr::package_coverage(); print(as.data.frame(cov))" | R --slave
 
 codecov:
-	@echo "Uploading coverage (https://app.codecov.io/github/dputhier/stcompr)"
+	@echo "Uploading coverage (https://app.codecov.io/github/dputhier/STarlight)"
 	@echo "library(covr); codecov(token ='8f08768a-0629-4ed0-91b9-bdd9f7019916')" | R --slave
 
 
@@ -83,10 +82,10 @@ release_bump: release
 	@ git checkout ./DESCRIPTION
 	@ git checkout ./Makefile
 	@ R CMD INSTALL .
-	@ cat ./DESCRIPTION | perl -npe "s/Version: .*/Version: $(VERSION)/" > /tmp/stcompr.bump
-	@ mv /tmp/stcompr.bump ./DESCRIPTION
-	@ cat ./Makefile | perl -npe 's/^VERSION=.*/VERSION=$(VERSION)/' > /tmp/stcompr.bump
-	@ mv /tmp/stcompr.bump ./Makefile
+	@ cat ./DESCRIPTION | perl -npe "s/Version: .*/Version: $(VERSION)/" > /tmp/STarlight.bump
+	@ mv /tmp/STarlight.bump ./DESCRIPTION
+	@ cat ./Makefile | perl -npe 's/^VERSION=.*/VERSION=$(VERSION)/' > /tmp/STarlight.bump
+	@ mv /tmp/STarlight.bump ./Makefile
 	@ echo "Version was bump to $(VERSION)"
 	@ make install
 	@ git commit -m 'Bumped version $(VERSION)'

@@ -454,7 +454,7 @@ setMethod("cmp_bar_plot", signature("STCompR"),
                                       levels = features,
                                       ordered = TRUE)
 
-            Features <- Counts <- Conditions <- NULL
+            Samples <- Counts <- Conditions <- NULL
 
             ggplot2::ggplot(data = counts,
                             mapping = ggplot2::aes(x = Samples,
@@ -517,7 +517,7 @@ setMethod("cmp_bar_plot", signature("STCompR"),
 #' cmp_counts_st(xen, xen_r1, xen_r2,
 #'              features = c("Chat", "Ano1"),
 #'               normalized = TRUE, fill_color=rainbow(3))
-#'
+#' @importFrom DESeq2 DESeqDataSetFromMatrix estimateSizeFactors counts
 #' @export
 cmp_counts_st <- function(...,
          features = NULL,
@@ -594,8 +594,16 @@ cmp_counts_st <- function(...,
   st_list <- do.call("cbind", st_list)
 
   if(normalized){
-    scaling_factor <- estimSf(st_list)
-    st_list <- sweep(st_list, MARGIN = 2, STATS =  scaling_factor, FUN="/")
+    exp_design <- data.frame(condition=as.factor(rep("condition_1", ncol(st_list))),
+                             row.names = colnames(st_list))
+
+    dds0 <- DESeq2::DESeqDataSetFromMatrix(countData = st_list,
+                                           colData = exp_design,
+                                           design = ~1)
+
+    dds.norm <-  DESeq2::estimateSizeFactors(dds0)
+    st_list <- DESeq2::counts(dds.norm, normalized=TRUE)
+
   }
 
   st_list <- st_list[features, , drop=FALSE]
@@ -628,6 +636,8 @@ cmp_counts_st <- function(...,
   }else{
     y_label <- "Counts"
   }
+
+  Gene <- value <- Conditions <- NULL
 
   if(type=="barplot"){
 
@@ -681,7 +691,7 @@ cmp_counts_st <- function(...,
 #' @param border_color The color of the border for plot elements. Defaults to "#333333".
 #' @param fill_color A character vector specifying the fill colors for the plot. If NULL, default palette is used. Defaults to NULL.
 #' @param ncol Number of columns for facet wrap. Defaults to 2.
-#' @importFrom ggplot2 aes facet_wrap geom_boxplot geom_density geom_histogram scale_fill_manual theme_bw theme element_text element_blank
+#' @importFrom ggplot2 scale_fill_manual aes facet_wrap geom_boxplot geom_density geom_histogram scale_fill_manual theme_bw theme element_text element_blank
 #' @importFrom ggpol geom_boxjitter
 #' @examples
 #' example_dataset()
@@ -765,8 +775,16 @@ dist_st <- function(...,
   if(normalized){
     if(ncol(st_list) > 1){
       print_this_msg("Normalizing...")
-      scaling_factor <- estimSf(st_list)
-      st_list <- as.matrix(sweep(st_list, MARGIN = 2, STATS =  scaling_factor, FUN="/"))
+      exp_design <- data.frame(condition=as.factor(rep("condition_1", ncol(st_list))),
+                               row.names = colnames(st_list))
+
+      dds0 <- DESeq2::DESeqDataSetFromMatrix(countData = st_list,
+                                             colData = exp_design,
+                                             design = ~1)
+
+      dds.norm <-  DESeq2::estimateSizeFactors(dds0)
+      st_list <- DESeq2::counts(dds.norm, normalized=TRUE)
+
     }
 
   }
@@ -815,16 +833,18 @@ dist_st <- function(...,
       ggplot2::geom_density(color = border_color)
 
 
+  Conditions <- value <- NULL
+
   }else if(type=="boxjitter"){
     p <- ggplot2::ggplot(data = count_per_gene,
                          mapping = ggplot2::aes(x = Conditions,
-                                                y=value,
-                                                fill=Conditions)) +
+                                                y = value,
+                                                fill = Conditions)) +
       ggpol::geom_boxjitter(color = border_color)
   }
 
   if(!is.null(fill_color))
-    p <- p + scale_fill_manual(values=fill_color)
+    p <- p + ggplot2::scale_fill_manual(values=fill_color)
 
   p <- p + ggplot2::theme_bw() +
        ggplot2::theme(
@@ -871,7 +891,7 @@ dist_st <- function(...,
 #'
 #' @return A ggplot object displaying the molecule counts distribution.
 #' @examples
-#' example_dataset("10819270/files/cmp_xen")
+#' example_dataset("11210787/files/cmp_xen")
 #' cmp_xen
 #' cmp_boxplot(cmp_xen, normalized = TRUE, transform = "log2", colors = c("blue", "red"))
 #'
@@ -898,7 +918,7 @@ setGeneric("cmp_boxplot",
 #' @return A ggplot object displaying the molecule counts distribution.
 #' @export cmp_boxplot
 #' @examples
-#' example_dataset("10819270/files/cmp_xen")
+#' example_dataset("11210787/files/cmp_xen")
 #' cmp_xen
 #' cmp_boxplot(cmp_xen, normalized = TRUE, transform = "log2", colors = c("blue", "red"))
 #' @importFrom ggplot2 ggplot aes theme_bw ylab scale_fill_manual
@@ -970,7 +990,7 @@ setMethod("cmp_boxplot", signature("STCompR"),
 #' @param max.overlaps The maximum number of label overlaps.
 #' @keywords internal
 #' @examples
-#' example_dataset("10819270/files/cmp_xen")
+#' example_dataset("11210787/files/cmp_xen")
 #' cmp_xen
 #' cmp_volcano(cmp_xen)
 #' @keywords internal
@@ -1002,7 +1022,7 @@ setGeneric("cmp_volcano",
 #' @param max.overlaps The maximum number of label overlaps.
 #' @keywords internal
 #' @examples
-#' example_dataset("10819270/files/cmp_xen")
+#' example_dataset("11210787/files/cmp_xen")
 #' cmp_xen
 #' cmp_volcano(cmp_xen)
 #' @importFrom ggplot2 aes geom_vline geom_hline geom_point theme_bw xlab ylab expand_limits scale_fill_gradientn ggtitle
@@ -1316,13 +1336,13 @@ cmp_images <- function(...,
   # Lot of manipulation to try to fix a weird bug...
   for (i in 1:length(st_list)) {
     st_list[[i]]$bin_x <- factor(st_list[[i]]$bin_x,
-                                 level=bin_x(st_list_grid[[i]]),
+                                 levels=bin_x(st_list_grid[[i]]),
                                  ordered = TRUE)
     st_list[[i]]$bin_x <- as.numeric(st_list[[i]]$bin_x)
     st_list[[i]]$bin_x <- as.factor(st_list[[i]]$bin_x)
 
     st_list[[i]]$bin_y <- factor(st_list[[i]]$bin_y,
-                                 level=bin_y(st_list_grid[[i]]),
+                                 levels=bin_y(st_list_grid[[i]]),
                                  ordered = TRUE)
     st_list[[i]]$bin_y <- as.numeric(st_list[[i]]$bin_y)
     st_list[[i]]$bin_y <- as.factor(st_list[[i]]$bin_y)

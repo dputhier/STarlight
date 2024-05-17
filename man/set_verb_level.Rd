@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{set_verb_level}
 \alias{set_verb_level}
-\title{Set the verbosity level for the stcompr package}
+\title{Set the verbosity level for the STarlight package}
 \usage{
 set_verb_level(verbosity_value)
 }
@@ -10,7 +10,7 @@ set_verb_level(verbosity_value)
 \item{verbosity_value}{A non-negative integer indicating the verbosity level to be set.}
 }
 \description{
-This function sets the verbosity level for the stcompr package,
+This function sets the verbosity level for the STarlight package,
 which controls the amount of information that is printed to the console by
 the \code{\link{print_this_msg}} function. The verbosity level can be set to
 any non-negative integer, with higher values indicating more detailed output.

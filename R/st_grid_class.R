@@ -24,7 +24,7 @@
 #' @examples
 #' example_dataset()
 #' Xenium_Mouse_Brain_Coronal_7g
-#' show_methods(class = "STGrid")
+#' show_st_methods(class = "STGrid")
 #' @export
 setClass(
   "STGrid",
@@ -965,6 +965,7 @@ setMethod ("$", "STGrid",
 #' xen <- Xenium_Mouse_Brain_Coronal_7g
 #' xen$bla <- "foo"
 #' head(xen@meta)
+#' @importFrom utils .DollarNames
 #' @export
 .DollarNames.STGrid <- function (x, pattern = '') {
   grep(pattern,
@@ -982,7 +983,7 @@ setMethod ("$", "STGrid",
 #' @keywords internal
 #' @examples
 #' example_dataset()
-#' Xenium_Mouse_Brain_Coronal_7g$count_sum <- Xenium_Mouse_Brain_Coronal_7g$count_sum
+#' Xenium_Mouse_Brain_Coronal_7g$count_sums <- Xenium_Mouse_Brain_Coronal_7g@meta$count_sums + 1
 #' @export
 setMethod ("$<-", "STGrid",
            function (x, name, value) {
@@ -1198,7 +1199,7 @@ setMethod("compute_k_ripley", signature("STGrid"),
 # -------------------------------------------------------------------------
 #' @title Create a Spatial Transcriptomic Grid class (STGrid)
 #' @description
-#' The load_spatial() function is the entry point of the stcompr package.
+#' The load_spatial() function is the entry point of the STarlight package.
 #' It will load the molecule coordinates and create a 2D binned grid with default size 25µm.
 #'
 #' @param path Either a file (if method is set to "coordinates") or a directory (if method
@@ -1224,7 +1225,7 @@ setMethod("compute_k_ripley", signature("STGrid"),
 #' path is passed to the 'data.dir' argument of Seurat::ReadXenium and Seurat::ReadVizgen respectively (see corresponding docs).
 #'
 #' @examples
-#'   fp <- file.path(system.file("extdata", package = "stcompr"), "tyni_xenium.txt")
+#'   fp <- file.path(system.file("extdata", package = "STarlight"), "tyni_xenium.txt")
 #'   st <- load_spatial(fp, method = "coordinates")
 #'
 #' @export load_spatial
@@ -1738,6 +1739,7 @@ setMethod("get_coord", "STGrid",
 #' @param dist_method The method for distance computation. See stats::cor().
 #' @param branch_length A variable for scaling branch, if 'none' draw cladogram. See ggtree::ggtree().
 #' @param class_nb An integer indicating the desired number of groups.
+#' @param class_name A set of names for the classes.
 #' @param size The size of the labels.
 #' @param colors A set of colors for the classes.
 #' @examples
@@ -1768,6 +1770,7 @@ setGeneric("hc_tree",
 #' @param dist_method The method for distance computation. See stats::cor().
 #' @param branch_length A variable for scaling branch, if 'none' draw cladogram. See ggtree::ggtree().
 #' @param class_nb An integer indicating the desired number of groups.
+#' @param class_name A set of names for the classes.
 #' @param size The size of the labels.
 #' @param colors A set of colors for the classes.
 #' @importFrom ggtree ggtree geom_hilight geom_tippoint geom_tiplab MRCA
@@ -2008,6 +2011,7 @@ check_st_list <- function(st_list,
 #' d <- data.frame(foo=runif(1000, 0, 1000), bar=runif(1000, 0, 1000), bla=sample(letters, 1000, replace=TRUE))
 #' st <- stgrid_from_data_frame(d, mapping=c("x"="foo", "y"="bar", "feature"="bla"))
 #' st
+#' @importFrom utils write.table
 #' @export
 stgrid_from_data_frame <- function(this_df=NULL,
                                    mapping=NULL,
@@ -2033,7 +2037,7 @@ stgrid_from_data_frame <- function(this_df=NULL,
   colnames(this_df) <- names(mapping)
 
   tmp_file <- tempfile()
-  write.table(file=tmp_file, x = this_df, sep="\t", quote = FALSE, col.names = NA)
+  utils::write.table(file=tmp_file, x = this_df, sep="\t", quote = FALSE, col.names = NA)
 
   STGrid_obj <- load_spatial(path=tmp_file, method = "coordinates", bin_size = bin_size)
 

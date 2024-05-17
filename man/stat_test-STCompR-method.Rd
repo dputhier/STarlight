@@ -20,7 +20,7 @@
 
 \item{count_only}{Returns only counts.}
 
-\item{melted_count}{Returns a melted table with counts.}
+\item{melted_count}{Returns a melted table when count_only is TRUE.}
 
 \item{normalized}{Counts are normalized.}
 
@@ -30,6 +30,6 @@
 The normalized counts and test results of a STCompR object.
 }
 \examples{
-example_dataset("10819270/files/cmp_xen")
+example_dataset("11210787/files/cmp_xen")
 stat_test(cmp_xen)
 }

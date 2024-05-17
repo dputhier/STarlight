@@ -14,7 +14,7 @@
 #'         Selected features and configurations can be exported directly from the application interface.
 #'
 #' @examples
-#' #' \dontrun{
+#' \dontrun{
 #' example_dataset()
 #' xen <- Xenium_Mouse_Brain_Coronal_7g
 #' fov_selection(coord(xen))
@@ -22,13 +22,16 @@
 #' fov_selection(data_set)
 #' }
 #' @importFrom shiny reactiveValues shinyApp selectInput actionButton renderUI
-#'              uiOutput selectizeInput renderPlot observeEvent downloadHandler fluidRow
+#'              uiOutput selectizeInput renderPlot observeEvent downloadHandler fluidRow column brushedPoints
 #' @importFrom shinydashboard dashboardPage dashboardHeader dashboardSidebar
 #'              dashboardBody sidebarMenu menuItem box
 #' @importFrom ggplot2 ggplot aes geom_point theme_bw scale_color_manual theme
 #'              element_text element_blank guide_legend geom_abline geom_segment
 #' @importFrom colourpicker colourInput
 #' @importFrom secr pointsInPolygon
+#' @importFrom utils write.table
+#' @importFrom stats na.omit
+#' @importFrom htmltools tags tagList h4
 #' @export
 #'
 
@@ -83,6 +86,8 @@ fov_selection <- function(object=NULL) {
     sample_pts <- sample(1:nrow(data_gg),
                          size = round(nrow(data_gg) * as.double(input$sampling_ratio), 0),
                          replace = FALSE)
+
+    x <- y <- color <- NULL
     ggprep <-
       ggplot2::ggplot(data_gg[sample_pts, ],
                       ggplot2::aes(x = x, y = y, color = color)) +
@@ -280,7 +285,7 @@ fov_selection <- function(object=NULL) {
         "Nearest Points" = {
           htmltools::tagList(
             htmltools::h4("Click to select the Nearest Points."),
-            shiny::fluidRow(column(
+            shiny::fluidRow(shiny::column(
               4,
               shiny::checkboxInput(
                 "circular_unselect",
@@ -288,10 +293,10 @@ fov_selection <- function(object=NULL) {
                 TRUE
               )
             )),
-            shiny::fluidRow(column(
+            shiny::fluidRow(shiny::column(
               2, shiny::textInput("radius", "Circle radius:", value = "500")
             ),
-            column(
+            shiny::column(
               2, shiny::textInput("threshold", "Max distance:", value = "5")
             ))
           )
@@ -416,7 +421,9 @@ fov_selection <- function(object=NULL) {
 
           my_val$polygon <- seg_pts
 
-          seg_pts <- na.omit(seg_pts)
+          seg_pts <- stats::na.omit(seg_pts)
+
+          x <- y <- xend <- yend <- NULL
 
           ggseg <- ggplot2::geom_segment(
             data = seg_pts,
@@ -450,7 +457,7 @@ fov_selection <- function(object=NULL) {
       if (input$tool == "Areas") {
         print_this_msg("Inside input$brush_select -> Areas", msg_type = "DEBUG")
 
-        brushedPoints(my_val$DT,
+        shiny::brushedPoints(my_val$DT,
                       input$brush_select,
                       xvar = "x",
                       yvar = "y")
@@ -635,7 +642,7 @@ fov_selection <- function(object=NULL) {
           towrite <- "unselected"
         }
 
-        write.table(
+        utils::write.table(
           my_val$DT[my_val$DT$color == towrite, ],
           file = file,
           sep = "\t",

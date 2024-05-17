@@ -1,1 +1,1 @@
-# The stcompr library 
+# The STarlight library 

@@ -43,5 +43,5 @@ This class stores transcript molecules or cell coordinates as a grid.
 \examples{
 example_dataset()
 Xenium_Mouse_Brain_Coronal_7g
-show_methods(class = "STGrid")
+show_st_methods(class = "STGrid")
 }

@@ -18,6 +18,6 @@ Subsetting operator "$" of a STGrid object. Extract metadata.
 }
 \examples{
 example_dataset()
-Xenium_Mouse_Brain_Coronal_7g$count_sum <- Xenium_Mouse_Brain_Coronal_7g$count_sum
+Xenium_Mouse_Brain_Coronal_7g$count_sums <- Xenium_Mouse_Brain_Coronal_7g@meta$count_sums + 1
 }
 \keyword{internal}

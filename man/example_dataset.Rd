@@ -5,7 +5,7 @@
 \title{Load/download a Seurat or ClusterSet example dataset.}
 \usage{
 example_dataset(
-  dataset = c("10818896/files/Xenium_Mouse_Brain_Coronal_7g", "10819270/files/cmp_xen"),
+  dataset = c("10818896/files/Xenium_Mouse_Brain_Coronal_7g", "11210787/files/cmp_xen"),
   timeout = NULL,
   force = FALSE
 )
@@ -25,5 +25,5 @@ Load/download a Seurat or ClusterSet example dataset.
 }
 \examples{
 example_dataset()
-example_dataset("10819270/files/cmp_xen")
+example_dataset("11210787/files/cmp_xen")
 }

@@ -23,7 +23,7 @@ select features based on various criteria and visualization tools such as tangen
 areas, nearest points, and polygons.
 }
 \examples{
-#' \dontrun{
+\dontrun{
 example_dataset()
 xen <- Xenium_Mouse_Brain_Coronal_7g
 fov_selection(coord(xen))

@@ -10,7 +10,7 @@ get_verb_level()
 A vector
 }
 \description{
-This function get the verbosity level of the stcompr package which
+This function get the verbosity level of the STarlight package which
 controls the amount of information that is printed to the console by
 the \code{\link{print_this_msg}} function.
 }

@@ -1,7 +1,7 @@
 library(testthat)
 test_that("check_this_var function works correctly", {
 
-  library(stcompr)
+  library(STarlight)
   set_verb_level(0)
 
   # Test NULL input
@@ -60,7 +60,7 @@ test_that("check_this_var function works correctly", {
 
 test_that("check_this_file function works correctly", {
 
-  library(stcompr)
+  library(STarlight)
   library(testthat)
   set_verb_level(0)
 

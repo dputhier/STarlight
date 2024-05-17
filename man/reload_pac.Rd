@@ -2,12 +2,12 @@
 % Please edit documentation in R/utils.R
 \name{reload_pac}
 \alias{reload_pac}
-\title{Reload stcompr (used for development).}
+\title{Reload STarlight (used for development).}
 \usage{
 reload_pac()
 }
 \description{
-Reload stcompr (used for development).
+Reload STarlight (used for development).
 }
 \examples{
 reload_pac()

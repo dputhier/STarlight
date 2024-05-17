@@ -17,8 +17,8 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r loadlib}
 library(magrittr)
 library(Seurat)
-library(stcompr)
-stcompr::set_verb_level(1)
+library(STarlight)
+STarlight::set_verb_level(1)
 library(patchwork)
 library(ggplot2)
 library(dplyr)
@@ -28,7 +28,7 @@ library(dplyr)
 
 ## Loading data
 
-Spatial transcriptomics enables the spatially resolved measurement of gene expression within tissue sections, providing valuable insights into the spatial organization of biological processes. Assigning RNA molecules to cells using a segmentation process is generally the first step in the analysis. This approach can be tricky for a number of reasons, including high cell density, the absence or poor quality of surface labelling, etc. The `stcompr` package is intended to perform analysis of RNA molecules using a grid-based approach (sometimes referred as 'rasterization'). The `load_spatial()`is the entry point of the `stcompr` package It will load the molecule coordinates and create a 2D binned grid with default size 25µm.
+Spatial transcriptomics enables the spatially resolved measurement of gene expression within tissue sections, providing valuable insights into the spatial organization of biological processes. Assigning RNA molecules to cells using a segmentation process is generally the first step in the analysis. This approach can be tricky for a number of reasons, including high cell density, the absence or poor quality of surface labelling, etc. The `STarlight` package is intended to perform analysis of RNA molecules using a grid-based approach (sometimes referred as 'rasterization'). The `load_spatial()`is the entry point of the `STarlight` package It will load the molecule coordinates and create a 2D binned grid with default size 25µm.
 
 
 ```{r loadfile}
@@ -56,7 +56,7 @@ slotNames(st_obj)
 ```
 
 ```{r show_st_methods, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
-stcompr::show_st_methods()
+STarlight::show_st_methods()
 ```
 
 ## Subsetting
@@ -160,7 +160,7 @@ spatial_plot(st_obj[x_bins, y_bins], feat_list = c("Ano1",
 
 The hc_tree() allow to organize genes into subclusters.
 
-```{r spatial_plot}
+```{r spatial_plot_2}
 hc_st <- hc_tree(st_obj, method = "ward.D", 
                  layout = "circular", dist_method = "pearson",
                  class_nb = 20)
@@ -214,7 +214,7 @@ The stcompr() function allows to compare two datasets or regions of the organ. H
 
 First we prepare an stgrid object containing another region of the tissue. We will compare the two subregions (but two datasets/experiments could be also compared).
 
-```{r stcompr}
+```{r STarlight}
 x_bins <-  bin_x(st_obj)[61:101]
 y_bins <-  bin_y(st_obj)[101:nbin_y(st_obj)]
 st_obj_r2 <- st_obj[x_bins, y_bins]
@@ -228,7 +228,7 @@ spatial_image(st_obj_r2, feature="count_sum")
 ```
 Now we can create an STCompR object using the stcompr() function. 
 
-```{r stcompr_create}
+```{r STarlight_create}
 cmp <- stcompr(st_obj_r2, st_obj_r1, name_1="region_1", name_2="region_2")
 ```
 

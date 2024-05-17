@@ -42,7 +42,7 @@ counts, this will allow to delete these blanks/controls for computation.}
 An object of class STGrid.
 }
 \description{
-The load_spatial() function is the entry point of the stcompr package.
+The load_spatial() function is the entry point of the STarlight package.
 It will load the molecule coordinates and create a 2D binned grid with default size 25µm.
 }
 \details{
@@ -52,7 +52,7 @@ as path (contains 'global_x', 'global_y' and 'gene' column). If method is set to
 path is passed to the 'data.dir' argument of Seurat::ReadXenium and Seurat::ReadVizgen respectively (see corresponding docs).
 }
 \examples{
-  fp <- file.path(system.file("extdata", package = "stcompr"), "tyni_xenium.txt")
+  fp <- file.path(system.file("extdata", package = "STarlight"), "tyni_xenium.txt")
   st <- load_spatial(fp, method = "coordinates")
 
 }

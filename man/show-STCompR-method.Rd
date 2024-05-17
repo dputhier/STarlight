@@ -2,26 +2,61 @@
 % Please edit documentation in R/st_compr_class.R
 \name{show,STCompR-method}
 \alias{show,STCompR-method}
-\title{The show method of a STCompR object}
+\title{Generate a heatmap comparison for an 'STCompR' object}
 \usage{
 \S4method{show}{STCompR}(object)
 }
 \arguments{
 \item{object}{A STCompR object.}
+
+\item{filter_method}{If 'cv', select row/col by checking whether the variation coefficient of absolute changes is greater than 'filter'.
+If 'diff' select a row/col if at least one absolute value greater than 'filter' is observed.}
+
+\item{what}{A character string specifying what to plot: "changes" (the difference in pairwise Manhattan distances between conditions 2 and 1),
+"changes_2" (the difference in pairwise Manhattan distances between conditions 1 and 2), "c1" (the pairwise Manhattan distances of features in condition 1), or "c2"
+(the pairwise Manhattan distances of features in condition 2).}
+
+\item{hclust_method}{A character string specifying the agglomerative criteria for hierarchical clustering ("ward.D", "ward.D2",
+"single", "complete", "average", "mcquitty", "median", "centroid").}
+
+\item{dist_method}{A character string specifying the distance method to be used ("euclidean",
+"maximum", "manhattan", "canberra", "binary","minkowski").}
+
+\item{del_feat}{A character vector specifying feature to be excluded from the heatmap.}
+
+\item{only_feat}{A character vector specifying features to be included in the heatmap.}
+
+\item{filter}{A numeric value specifying the threshold for filtering out low absolute values in the heatmap.}
+
+\item{size}{A numeric value specifying the size of text in the heatmap.}
+
+\item{title}{A title for the diagram.}
+}
+\value{
+A heatmap plot comparing conditions in the 'STCompR' object.
+
+A heatmap plot comparing conditions in the 'STCompR' object.
 }
 \description{
+Generate a heatmap to visualize neighborhood changes between conditions.
+The changes are computed as the difference in manhattan distances between the two conditions
+stored in the object.
+
+Generate a heatmap to visualize neighborhood changes between conditions.
+The changes are computed as the difference in manhattan distances between the two conditions
+stored in the object.
+
 The show method of a STCompR object displays information about the object,
 including conditions, memory usage, and the number of features
 }
-\section{-------------------------------------------------------------------------}{
-\subsection{Generate a heatmap comparison for an 'STCompR' object}{
-}
-
-
-}
-
 \examples{
-example_dataset("10819270/files/cmp_xen")
+# Example usage:
+example_dataset("11210787/files/cmp_xen")
+heatmap_cmp(object = cmp_xen, hclust_method = "ward.D", dist_method = "euclidean")
+# Example usage:
+example_dataset("11210787/files/cmp_xen")
+heatmap_cmp(object = cmp_xen, hclust_method = "ward.D", dist_method = "euclidean")
+example_dataset("11210787/files/cmp_xen")
 show(cmp_xen)
 }
 \keyword{internal}

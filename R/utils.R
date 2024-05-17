@@ -1,9 +1,9 @@
 #################################################################
 ##    set_verb_level
 #################################################################
-#' Set the verbosity level for the stcompr package
+#' Set the verbosity level for the STarlight package
 #'
-#' This function sets the verbosity level for the stcompr package,
+#' This function sets the verbosity level for the STarlight package,
 #' which controls the amount of information that is printed to the console by
 #' the \code{\link{print_this_msg}} function. The verbosity level can be set to
 #'  any non-negative integer, with higher values indicating more detailed output.
@@ -28,7 +28,7 @@
 set_verb_level <- function(verbosity_value) {
   if (!is.null(verbosity_value) &
       verbosity_value >= 0 & is.numeric(verbosity_value)) {
-    options(stcompr_verbosity = verbosity_value)
+    options(STarlight_verbosity = verbosity_value)
   }
 }
 
@@ -37,7 +37,7 @@ set_verb_level <- function(verbosity_value) {
 #################################################################
 #' Get the current verbosity level.
 #'
-#' This function get the verbosity level of the stcompr package which
+#' This function get the verbosity level of the STarlight package which
 #' controls the amount of information that is printed to the console by
 #' the \code{\link{print_this_msg}} function.
 #'
@@ -49,10 +49,10 @@ set_verb_level <- function(verbosity_value) {
 #' get_verb_level()
 #' @export
 get_verb_level <- function() {
-  if (is.null(unlist(options()["stcompr_verbosity"]))) {
-    options(stcompr_verbosity = 1)
+  if (is.null(unlist(options()["STarlight_verbosity"]))) {
+    options(STarlight_verbosity = 1)
   }
-  return(options()$stcompr_verbosity)
+  return(options()$STarlight_verbosity)
 }
 
 #################################################################
@@ -93,12 +93,12 @@ print_this_msg <-
     msg <- list(...)
     msg <- paste0(msg, collapse = " ")
 
-    if (is.null(unlist(options()["stcompr_verbosity"]))) {
-      options(stcompr_verbosity = 1)
+    if (is.null(unlist(options()["STarlight_verbosity"]))) {
+      options(STarlight_verbosity = 1)
     }
 
     if (msg_type == "DEBUG"){
-      if (unname(unlist(options()["stcompr_verbosity"]) > 1))
+      if (unname(unlist(options()["STarlight_verbosity"]) > 1))
         cat(paste("|-- DEBUG : ", msg, "\n"))
 
     }else if (msg_type == "WARNING"){
@@ -108,7 +108,7 @@ print_this_msg <-
       stop(paste0("|-- STOP : ", msg), call. = FALSE)
 
     }else{
-      if (unname(unlist(options()["stcompr_verbosity"]) > 0))
+      if (unname(unlist(options()["STarlight_verbosity"]) > 0))
         cat(paste("|-- INFO : ", msg, "\n"))
     }
   }
@@ -348,10 +348,10 @@ check_this_var <- function(x,
 #' @importFrom methods showMethods
 #' @importFrom utils capture.output
 #' @examples
-#' show_methods()
-#' @export show_methods
-show_methods <- function(class="STGrid",
-                         where="stcompr"){
+#' show_st_methods()
+#' @export show_st_methods
+show_st_methods <- function(class="STGrid",
+                         where="STarlight"){
   class_method <- utils::capture.output(methods::showMethods(class=class,
                                                              where = paste0("package:", where)))
 
@@ -364,16 +364,16 @@ show_methods <- function(class="STGrid",
 # -------------------------------------------------------------------------
 # Reload the package     --------------------------------------------------
 # -------------------------------------------------------------------------
-#' @title Reload stcompr (used for development).
+#' @title Reload STarlight (used for development).
 #' @description
-#' Reload stcompr (used for development).
+#' Reload STarlight (used for development).
 #' @returns NULL
 #' @examples
 #' reload_pac()
 #' @export reload_pac
 reload_pac <- function(){
-  tryCatch(detach("package:stcompr", unload = TRUE))
- library(stcompr)
+  tryCatch(detach("package:STarlight", unload = TRUE))
+ library(STarlight)
 }
 
 # -------------------------------------------------------------------------
@@ -388,10 +388,10 @@ reload_pac <- function(){
 #' @returns Load the dataset.
 #' @examples
 #' example_dataset()
-#' example_dataset("10819270/files/cmp_xen")
+#' example_dataset("11210787/files/cmp_xen")
 #' @export
 example_dataset <- function(dataset=c("10818896/files/Xenium_Mouse_Brain_Coronal_7g",
-                                      "10819270/files/cmp_xen"),
+                                      "11210787/files/cmp_xen"),
                                  timeout=NULL,
                                  force=FALSE){
 
@@ -401,7 +401,7 @@ example_dataset <- function(dataset=c("10818896/files/Xenium_Mouse_Brain_Coronal
     options(timeout=timeout)
 
   file_data <- gsub(".*\\/", "", dataset)
-  dir_path <- file.path(path.expand('~'), ".stcompr", "datasets")
+  dir_path <- file.path(path.expand('~'), ".STarlight", "datasets")
 
   if(!dir.exists(dir_path)){
     print_this_msg(paste0("Creating a path for dataset installation: ",

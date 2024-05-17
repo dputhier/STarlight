@@ -1,7 +1,7 @@
 library(testthat)
 test_that("STGrid...", {
 
-  library(stcompr)
+  library(STarlight)
   set_verb_level(0)
 
 
@@ -32,7 +32,7 @@ test_that("STGrid...", {
   expect_equal(feat_names(test_data)[7], "Nwd2")
   expect_equal(bin_size(test_data), 25)
   t_2 <- compute_k_ripley(test_data[c("Ano1", "Ebf3"),])
-  expect_equal(sum(round(ripley_k_function(t_2)$border),0), 248528293)
+  expect_equal(sum(round(ripley_k_function(t_2)$border),0), 136801197)
   expect_equal(nrow(coord(test_data)), 152958)
 
   ## coord
@@ -53,11 +53,11 @@ test_that("STGrid...", {
 
   ## compute_k_ripley
 
-  expect_equal(sum(round(compute_k_ripley(xen_1["Ano1",], verbose = FALSE)@ripley_k_function$border, 0)), 57780387)
-  expect_equal(sum(round(compute_k_ripley(xen_1["Ano1",], verbose = FALSE)@ripley_k_function$iso, 0)), 51996873)
+  expect_equal(sum(round(compute_k_ripley(xen_1["Ano1",], verbose = FALSE)@ripley_k_function$border, 0)), 22505301)
+  expect_equal(sum(round(compute_k_ripley(xen_1["Ano1",], verbose = FALSE)@ripley_k_function$iso, 0)), 23562884)
 
   ## load_spatial
-  fp <- file.path(system.file("extdata", package = "stcompr"), "tyni_xenium.txt")
+  fp <- file.path(system.file("extdata", package = "STarlight"), "tyni_xenium.txt")
   expect_no_error(load_spatial(fp, method = "coordinates"))
 
 })

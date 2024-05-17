@@ -31,7 +31,7 @@ A ggplot object displaying the molecule counts distribution.
 Create a boxplot/jitter plot to show molecule counts distribution.
 }
 \examples{
-example_dataset("10819270/files/cmp_xen")
+example_dataset("11210787/files/cmp_xen")
 cmp_xen
 cmp_boxplot(cmp_xen, normalized = TRUE, transform = "log2", colors = c("blue", "red"))
 

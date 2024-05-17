@@ -52,5 +52,4 @@ cmp_counts_st(xen, xen_r1, xen_r2, features = c("Chat", "Ano1"), normalized = FA
 cmp_counts_st(xen, xen_r1, xen_r2,
              features = c("Chat", "Ano1"),
               normalized = TRUE, fill_color=rainbow(3))
-
 }

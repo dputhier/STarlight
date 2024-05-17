@@ -23,7 +23,7 @@ Here we focus on two samples (122_r1, untreated;  1012_r0, cemiplimab).
 # Tested:
 # 1012_r0; 1012_r0
 
-library(stcompr)
+library(STarlight)
 set_verb_level(3)
 wdir <- "/Users/puthier/Documents/ST_data/dendritic_cells/data"
 
@@ -146,17 +146,18 @@ st_comp <- stcompr(list(sto_122_r0_unt=sto_122_r0_unt,
 ### Volcano
 
 ```{r}
-cmp_volcano(st_comp, text_x_lim = 2, 
-            text_y_lim=100, text_size = 4, 
-            max.overlaps = 30)
+cmp_volcano(st_comp, text_x_lim = 1.2, 
+            text_y_lim=5, 
+            text_size = 3.5, 
+            max.overlaps = 150)
 ```
 
 ### Look at DGE (img + barplot)
 
 ```{r}
 feat <-  stat_test(st_comp) %>% 
-            dplyr::filter(abs(log2_ratio) >3.5) %>% 
-            dplyr::filter(-log10(p_values) > 300) %>% 
+            dplyr::filter(abs(log2_ratio) > 2) %>% 
+            dplyr::filter(-log10(p_values) > 20) %>% 
             dplyr::arrange(log2_ratio, p_values) %>% 
             rownames()
 
@@ -202,27 +203,16 @@ cmp_images(sto_122_r1_unt,
                    names= c("sto_122_r0_unt", "sto_1012_r0_cem"), feat_list= hc_1012_r0_cem$tree_classes$MOD13)
 ```
 
+
 ### Visualize the gene module/program
 
 ```{r}
 sto_1012_r0_cem <- compute_module_score(sto_1012_r0_cem, 
                                        modules = hc_1012_r0_cem$tree_classes)
 spatial_image(sto_1012_r0_cem, features = meta_names(sto_1012_r0_cem)[-1], ncol = 6)
-
 ```
 
-### Identification of cell pops
 
-```{r}
-library(clustermole)
-markers_list <- 
-my_overlaps <- clustermole_overlaps(genes = markers_list, species = "hs")
-markers_list <- list()
-for(i in 2:length(markers_list)){ 
-  try(markers_list[[i]] <- clustermole_overlaps(genes = hc_1012_r0_cem$tree_classes[[i]], 
-                             species = "hs"))
-}
-```
 
 
 
