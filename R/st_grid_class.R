@@ -651,7 +651,7 @@ setMethod("rm_controls", "STGrid",
             if (is.null(regexp)) {
               regexp <- object@control
             }
-            pos <- -grep(regexp, feat_names(object))
+            pos <- -grep(regexp, feat_names(object), perl = TRUE)
             if(length(pos) > 0){
               return(object[pos, ])
             }else{
@@ -1057,7 +1057,7 @@ setMethod (f = '[[<-',
 #' @export compute_k_ripley
 setGeneric("compute_k_ripley",
            function(object,
-                    rmax = 125,
+                    rmax = 80,
                     nlarge = 2e6,
                     var.approx = FALSE,
                     ratio = FALSE,
@@ -1089,7 +1089,7 @@ setGeneric("compute_k_ripley",
 #' @export compute_k_ripley
 setMethod("compute_k_ripley", signature("STGrid"),
           function(object,
-                   rmax = 125,
+                   rmax = 80,
                    nlarge = 2e6,
                    var.approx = FALSE,
                    ratio = FALSE,
