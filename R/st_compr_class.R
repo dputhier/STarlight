@@ -84,8 +84,8 @@ setClass("STCompR",
 #' xen_r2 <- xen[x_bins, y_bins]
 #' cmp <- stcompr(list(xen_r1=xen_r1), list(xen_r2=xen_r2))
 #'
-#' @export STarlight
-STarlight <- function(object_1,
+#' @export stcompr
+stcompr <- function(object_1,
                     object_2,
                     name_1="Condition_1",
                     name_2="Condition_2",
