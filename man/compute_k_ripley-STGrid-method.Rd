@@ -6,7 +6,7 @@
 \usage{
 \S4method{compute_k_ripley}{STGrid}(
   object,
-  rmax = 125,
+  rmax = 80,
   nlarge = 2e+06,
   var.approx = FALSE,
   ratio = FALSE,

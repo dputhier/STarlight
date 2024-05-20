@@ -7,9 +7,9 @@
 fov_selection(object = NULL)
 }
 \arguments{
-\item{object}{A dataframe or a matrix that contains the coordinates (x, y) and
-the feature classification. It should have at least three columns:
-x (x-coordinates), y (y-coordinates), and feature (feature labels).
+\item{object}{An STGrid object. Alternatively, a dataframe or a matrix that contains
+the coordinates (x, y) and the feature label. It thus should have at least three
+columns x (x-coordinates), y (y-coordinates), and feature (feature labels).
 Additional columns are supported.}
 }
 \value{
