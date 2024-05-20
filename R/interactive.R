@@ -5,10 +5,10 @@
 #' select features based on various criteria and visualization tools such as tangents,
 #' areas, nearest points, and polygons.
 #'
-#' @param object A dataframe or a matrix that contains the coordinates (x, y) and
-#'               the feature classification. It should have at least three columns:
-#'               x (x-coordinates), y (y-coordinates), and feature (feature labels).
-#'               Additional columns are supported.
+#' @param object An STGrid object. Alternatively, a dataframe or a matrix that contains
+#' the coordinates (x, y) and the feature label. It thus should have at least three
+#' columns x (x-coordinates), y (y-coordinates), and feature (feature labels).
+#' Additional columns are supported.
 #'
 #' @return Launches a Shiny application which does not return a value to the R environment.
 #'         Selected features and configurations can be exported directly from the application interface.
@@ -39,6 +39,9 @@ fov_selection <- function(object=NULL) {
 
   if(is.null(object))
     print_this_msg("Need an input object.")
+
+  if(inherits(object, "STGrid"))
+    object <- coord(object)
 
   initialize_data <- function() {
     print_this_msg("Initializing data", msg_type = "DEBUG")
