@@ -13,6 +13,10 @@ cmp_images(
   coord_fixed = TRUE,
   scale = TRUE,
   logb = 10,
+  color_x_strip = NULL,
+  color_y_strip = NULL,
+  color_strip_text_x = "white",
+  color_strip_text_y = "white",
   pseudo_count = 1,
   condition_vs_feat = TRUE
 )
@@ -33,6 +37,14 @@ cmp_images(
 \item{scale}{Logical value indicating whether to scale the feature expression values. Defaults to TRUE.}
 
 \item{logb}{The basis for the log transformation. Default to 10. If NULL, no log transformation.}
+
+\item{color_x_strip}{Strip colors (x axis). If not Null must also set  color_y_strip.}
+
+\item{color_y_strip}{Strip colors (y axis). If not Null must also set  color_x_strip.}
+
+\item{color_strip_text_x}{Strip text colors (x axis).}
+
+\item{color_strip_text_y}{Strip text colors (y axis).}
 
 \item{pseudo_count}{A value for the pseudo count used for log transformation (default to 1).}
 

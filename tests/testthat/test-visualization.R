@@ -252,6 +252,27 @@ test_that("cmp_images...", {
   expect_equal(max(round(max(cmp_images(test_data, feat_list=feat_names(test_data), logb = NULL,  scale = F)$data$value), 2)), 182)
 
   expect_no_error(cmp_images(t_1, t_2, feat_list = feat_names(t_1)))
+  expect_no_error(cmp_images(t_1, t_2,
+                             feat_list = feat_names(t_1),
+                             color_x_strip = rainbow(length(feat_names(t_1))),
+                             color_y_strip = rainbow(2),
+                             color_strip_text_x="black",
+                             color_strip_text_y="white")
+                             )
+
+  expect_error(cmp_images(t_1, t_2,
+                             feat_list = feat_names(t_1),
+                             color_x_strip = rainbow(2),
+                             color_y_strip = rainbow(2),
+                             color_strip_text_x="black",
+                             color_strip_text_y="white"))
+
+  expect_error(cmp_images(t_1, t_2,
+                             feat_list = feat_names(t_1),
+                             color_x_strip = rainbow(length(feat_names(t_1))),
+                             color_y_strip = rainbow(3),
+                             color_strip_text_x="black",
+                             color_strip_text_y="white"))
 
 })
 
