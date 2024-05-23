@@ -63,4 +63,6 @@ x_bins <-  bin_x(xen)[61:101]
 y_bins <-  bin_y(xen)[101:nbin_y(xen)]
 xen_2 <- xen[x_bins, y_bins]
 cmp_images(xen_1, xen_2, feat_list = c("Nwd2", "Kctd8", "Necab2", "Nrp2"))
+cmp_images(xen_1, xen_2, feat_list = c("Nwd2", "Kctd8"), color_x_strip=c("blue", "red"),
+color_y_strip=c("yellow", "brown"), color_strip_text_x="black", color_strip_text_y="white")
 }
