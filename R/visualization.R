@@ -839,7 +839,7 @@ dist_st <- function(...,
 #'
 #' @return A ggplot object displaying the molecule counts distribution.
 #' @examples
-#' example_dataset("11210787/files/cmp_xen")
+#' example_dataset("11284296/files/cmp_xen")
 #' cmp_xen
 #' cmp_boxplot(cmp_xen, normalized = TRUE, transform = "log2", colors = c("blue", "red"))
 #'
@@ -865,7 +865,7 @@ setGeneric("cmp_boxplot", function(object,
 #' @return A ggplot object displaying the molecule counts distribution.
 #' @export cmp_boxplot
 #' @examples
-#' example_dataset("11210787/files/cmp_xen")
+#' example_dataset("11284296/files/cmp_xen")
 #' cmp_xen
 #' cmp_boxplot(cmp_xen, normalized = TRUE, transform = "log2", colors = c("blue", "red"))
 #' @importFrom ggplot2 ggplot aes theme_bw ylab scale_fill_manual
@@ -936,7 +936,7 @@ setMethod("cmp_boxplot", signature("STCompR"), function(object,
 #' @param max.overlaps The maximum number of label overlaps.
 #' @keywords internal
 #' @examples
-#' example_dataset("11210787/files/cmp_xen")
+#' example_dataset("11284296/files/cmp_xen")
 #' cmp_xen
 #' cmp_volcano(cmp_xen)
 #' @keywords internal
@@ -966,7 +966,7 @@ setGeneric("cmp_volcano", function(object,
 #' @param max.overlaps The maximum number of label overlaps.
 #' @keywords internal
 #' @examples
-#' example_dataset("11210787/files/cmp_xen")
+#' example_dataset("11284296/files/cmp_xen")
 #' cmp_xen
 #' cmp_volcano(cmp_xen)
 #' @importFrom ggplot2 aes geom_vline geom_hline geom_point theme_bw xlab ylab expand_limits scale_fill_gradientn ggtitle

@@ -38,11 +38,11 @@ test_that("spatial_image...", {
 
   expect_equal(max(round(max(spatial_image(test_data, feat=feat_names(test_data), logb = 2, scale = F)$data$value), 2)), 7.52)
 
-  expect_equal(max(round(max(spatial_image(test_data, feat=feat_names(test_data), logb = 2, saturation = 0.8, scale = F)$data$value), 2)), 2.81)
+  expect_equal(max(round(max(spatial_image(test_data, feat=feat_names(test_data), logb = 2, saturation = 0.8, scale = F)$data$value), 2)), 3)
 
   expect_equal(max(round(max(spatial_image(test_data, feat=feat_names(test_data), logb = 10,  scale = F)$data$value), 2)), 2.26)
 
-  expect_equal(max(round(max(spatial_image(test_data, feat=feat_names(test_data), logb = 10, saturation = 0.8, scale = F)$data$value), 2)), 0.85)
+  expect_equal(max(round(max(spatial_image(test_data, feat=feat_names(test_data), logb = 10, saturation = 0.8, scale = F)$data$value), 2)), 0.9)
 
   expect_equal(max(round(max(spatial_image(test_data, feat=feat_names(test_data), logb = 10, saturation = 0.8, scale = T)$data$value), 2)), 1)
 
@@ -108,7 +108,7 @@ test_that("cmp_bar_plot...", {
 
   library(STarlight)
   set_verb_level(0)
-  example_dataset("11210787/files/cmp_xen")
+  example_dataset("11284296/files/cmp_xen")
   test_data <- cmp_xen
   feat <- feat_names(cmp_xen)
 
@@ -133,7 +133,7 @@ test_that("cmp_boxplot...", {
 
   library(STarlight)
   set_verb_level(0)
-  example_dataset("11210787/files/cmp_xen")
+  example_dataset("11284296/files/cmp_xen")
   test_data <- cmp_xen
   feat <- feat_names(cmp_xen)
 
@@ -163,7 +163,7 @@ test_that("cmp_volcano...", {
 
   library(STarlight)
   set_verb_level(0)
-  example_dataset("11210787/files/cmp_xen")
+  example_dataset("11284296/files/cmp_xen")
   test_data <- cmp_xen
   feat <- feat_names(cmp_xen)
 
@@ -196,9 +196,9 @@ test_that("plot_rip_k", {
 
   expect_no_error(plot_rip_k(test_data))
 
-  expect_equal(round(log10(sum(plot_rip_k(test_data)$data$border+1)), 1), 9)
+  expect_equal(round(log10(sum(plot_rip_k(test_data)$data$border+1)), 1), 8.7 )
 
-  expect_equal(round(log10(sum(plot_rip_k(test_data)$data$iso+1)), 1), 9)
+  expect_equal(round(log10(sum(plot_rip_k(test_data)$data$iso+1)), 1), 8.6)
 
   expect_no_error(plot_rip_k(test_data, max_feat_label = 1, color = "red"))
 })
@@ -212,8 +212,8 @@ test_that("cmp_images...", {
   set_verb_level(0)
   example_dataset()
   test_data <- Xenium_Mouse_Brain_Coronal_7g
-  t_1 <- test_data[bin_x(test_data)[180:200], bin_x(test_data)[100:140],]
-  t_2 <- test_data[bin_x(test_data)[101:141], bin_x(test_data)[61:101],]
+  t_1 <- test_data[bin_x(test_data)[180:200], bin_y(test_data)[100:140]]
+  t_2 <- test_data[bin_x(test_data)[101:141], bin_y(test_data)[61:101]]
   feat <- feat_names(test_data)
 
   expect_no_error(cmp_images(test_data, feat_list = feat[1:2]))
@@ -235,11 +235,11 @@ test_that("cmp_images...", {
 
   expect_equal(max(round(max(cmp_images(test_data, feat_list=feat_names(test_data), logb = 2, scale = F)$data$value), 2)), 7.52)
 
-  expect_equal(max(round(max(cmp_images(test_data, feat_list=feat_names(test_data), logb = 2, saturation = 0.8, scale = F)$data$value), 2)), 2.81)
+  expect_equal(max(round(max(cmp_images(test_data, feat_list=feat_names(test_data), logb = 2, saturation = 0.8, scale = F)$data$value), 2)), 3)
 
   expect_equal(max(round(max(cmp_images(test_data, feat_list=feat_names(test_data), logb = 10,  scale = F)$data$value), 2)), 2.26)
 
-  expect_equal(max(round(max(cmp_images(test_data, feat_list=feat_names(test_data), logb = 10, saturation = 0.8, scale = F)$data$value), 2)), 0.85)
+  expect_equal(max(round(max(cmp_images(test_data, feat_list=feat_names(test_data), logb = 10, saturation = 0.8, scale = F)$data$value), 2)), 0.9)
 
   expect_equal(max(round(max(cmp_images(test_data, feat_list=feat_names(test_data), logb = 10, saturation = 0.8, scale = T)$data$value), 2)), 1)
 
@@ -249,7 +249,7 @@ test_that("cmp_images...", {
 
   expect_equal(max(round(max(cmp_images(test_data, feat_list=feat_names(test_data), logb = 10,  scale = T)$data$value), 2)), 1)
 
-  expect_equal(max(round(max(cmp_images(test_data, feat_list=feat_names(test_data), logb = NULL,  scale = F)$data$value), 2)), 182)
+  expect_equal(max(round(max(cmp_images(test_data, feat_list=feat_names(test_data), logb = NULL,  scale = F)$data$value), 2)), 183)
 
   expect_no_error(cmp_images(t_1, t_2, feat_list = feat_names(t_1)))
   expect_no_error(cmp_images(t_1, t_2,

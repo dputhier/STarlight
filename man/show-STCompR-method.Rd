@@ -51,12 +51,12 @@ including conditions, memory usage, and the number of features
 }
 \examples{
 # Example usage:
-example_dataset("11210787/files/cmp_xen")
+example_dataset("11284296/files/cmp_xen")
 heatmap_cmp(object = cmp_xen, hclust_method = "ward.D", dist_method = "euclidean")
 # Example usage:
-example_dataset("11210787/files/cmp_xen")
+example_dataset("11284296/files/cmp_xen")
 heatmap_cmp(object = cmp_xen, hclust_method = "ward.D", dist_method = "euclidean")
-example_dataset("11210787/files/cmp_xen")
+example_dataset("11284296/files/cmp_xen")
 show(cmp_xen)
 }
 \keyword{internal}

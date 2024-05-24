@@ -23,7 +23,7 @@
 #'
 #' @examples
 #' # Example usage:
-#' example_dataset("11210787/files/cmp_xen")
+#' example_dataset("11284296/files/cmp_xen")
 #' cmp_xen
 #'
 setClass("STCompR",
@@ -333,7 +333,7 @@ stcompr <- function(object_1,
 #'
 #' @examples
 #' # Example usage:
-#' example_dataset("11210787/files/cmp_xen")
+#' example_dataset("11284296/files/cmp_xen")
 #' heatmap_cmp(object = cmp_xen, hclust_method = "ward.D", dist_method = "euclidean")
 #' @keywords internal
 #' @export
@@ -384,7 +384,7 @@ stcompr <- function(object_1,
 #'
 #' @examples
 #' # Example usage:
-#' example_dataset("11210787/files/cmp_xen")
+#' example_dataset("11284296/files/cmp_xen")
 #' heatmap_cmp(object = cmp_xen, hclust_method = "ward.D", dist_method = "euclidean")
 #' @importFrom ggheatmap ggheatmap ggheatmap_theme
 #' @importFrom RColorBrewer brewer.pal
@@ -544,7 +544,7 @@ stcompr <- function(object_1,
 #' @param object A STCompR object.
 #' @keywords internal
 #' @examples
-#' example_dataset("11210787/files/cmp_xen")
+#' example_dataset("11284296/files/cmp_xen")
 #' show(cmp_xen)
 #' @import methods
 #' @export
@@ -569,7 +569,7 @@ setMethod("show", signature("STCompR"),
 #' The number of features stored in a STCompR object
 #' @param object The STCompR object
 #' @examples
-#' example_dataset("11210787/files/cmp_xen")
+#' example_dataset("11284296/files/cmp_xen")
 #' nb_feat(cmp_xen)
 #' @export
 setMethod("nb_feat", signature(object = "STCompR"),
@@ -583,7 +583,7 @@ setMethod("nb_feat", signature(object = "STCompR"),
 #' @param object The STCompR object
 #' @keywords internal
 #' @examples
-#' example_dataset("11210787/files/cmp_xen")
+#' example_dataset("11284296/files/cmp_xen")
 #' feat_names(cmp_xen)
 #' @export
 #' @name feat_names
@@ -599,7 +599,7 @@ if(!isGeneric("feat_names")){
 #' The features stored in a STCompR object
 #' @param object The STCompR object
 #' @examples
-#' example_dataset("11210787/files/cmp_xen")
+#' example_dataset("11284296/files/cmp_xen")
 #' feat_names(cmp_xen)
 #' @export
 setMethod("feat_names", signature(object="STCompR"),
@@ -621,7 +621,7 @@ setMethod("feat_names", signature(object="STCompR"),
 #' @param normalized Counts are normalized.
 #' @param features The features that should be returned. Default to all (NULL).
 #' @examples
-#' example_dataset("11210787/files/cmp_xen")
+#' example_dataset("11284296/files/cmp_xen")
 #' stat_test(cmp_xen)
 #' @keywords internal
 setGeneric("stat_test",
@@ -644,7 +644,7 @@ setGeneric("stat_test",
 #' @param normalized Counts are normalized.
 #' @param features The features that should be returned. Default to all (NULL).
 #' @examples
-#' example_dataset("11210787/files/cmp_xen")
+#' example_dataset("11284296/files/cmp_xen")
 #' stat_test(cmp_xen)
 #' @export stat_test
 setMethod(f="stat_test",

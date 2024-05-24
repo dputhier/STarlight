@@ -1117,7 +1117,7 @@ setMethod("compute_k_ripley", signature("STGrid"),
             if(sampling_rate != 1){
               print_this_msg("Subsetting...", msg_type = "DEBUG")
               print_this_msg("Nb items before:", nrow(molecules), msg_type = "DEBUG")
-
+              set.seed(123)
               subset <- sample(1:nrow(molecules),
                                round(sampling_rate*nrow(molecules), 0),
                                replace = FALSE)

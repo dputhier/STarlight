@@ -4,7 +4,7 @@ test_that("STCompR...", {
 
   library(STarlight)
   set_verb_level(0)
-  example_dataset("11210787/files/cmp_xen")
+  example_dataset("11284296/files/cmp_xen")
   test_data <- cmp_xen
   set.seed(123)
   m <- matrix(sample(1:50, 100, rep=TRUE), nc=4)
@@ -75,7 +75,7 @@ test_that("STCompR...", {
   xen_r2.2 <- xen[x_bins, y_bins]
 
   expect_no_error(stcompr(list(xen_r1.1=xen_r1.1), list(xen_r2.1=xen_r2.1)))
-  expect_equal(round(sum(-log10(stat_test(stcompr(list(xen_r1.1=xen_r1.1), list(xen_r2.1=xen_r2.1)))$padj))), 970)
+  expect_equal(round(sum(-log10(stat_test(stcompr(list(xen_r1.1=xen_r1.1), list(xen_r2.1=xen_r2.1)))$padj))), 979)
   expect_no_error(stcompr(list(xen_r1.1=xen_r1.1), list(xen_r2.1=xen_r2.1, xen_r2.2=xen_r2.2), fit_type="mean"))
   expect_no_error(stcompr(list(xen_r1.1=xen_r1.1), list(xen_r2.1=xen_r2.1, xen_r2.2=xen_r2.2), fit_type="mean", p_adj_method = "holm"))
 

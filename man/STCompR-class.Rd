@@ -34,7 +34,7 @@ odds ratios, and p-values for each feature.}
 
 \examples{
 # Example usage:
-example_dataset("11210787/files/cmp_xen")
+example_dataset("11284296/files/cmp_xen")
 cmp_xen
 
 }

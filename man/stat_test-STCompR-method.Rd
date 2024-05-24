@@ -30,6 +30,6 @@
 The normalized counts and test results of a STCompR object.
 }
 \examples{
-example_dataset("11210787/files/cmp_xen")
+example_dataset("11284296/files/cmp_xen")
 stat_test(cmp_xen)
 }

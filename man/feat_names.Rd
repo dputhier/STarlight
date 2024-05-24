@@ -19,7 +19,7 @@ The features stored in a STCompR object
 \examples{
 example_dataset()
 feat_names(Xenium_Mouse_Brain_Coronal_7g)
-example_dataset("11210787/files/cmp_xen")
+example_dataset("11284296/files/cmp_xen")
 feat_names(cmp_xen)
 }
 \keyword{internal}

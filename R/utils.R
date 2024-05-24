@@ -388,10 +388,10 @@ reload_pac <- function(){
 #' @returns Load the dataset.
 #' @examples
 #' example_dataset()
-#' example_dataset("11210787/files/cmp_xen")
+#' example_dataset("11284296/files/cmp_xen")
 #' @export
-example_dataset <- function(dataset=c("10818896/files/Xenium_Mouse_Brain_Coronal_7g",
-                                      "11210787/files/cmp_xen"),
+example_dataset <- function(dataset=c("11284233/files/Xenium_Mouse_Brain_Coronal_7g",
+                                      "11284296/files/cmp_xen"),
                                  timeout=NULL,
                                  force=FALSE){
 

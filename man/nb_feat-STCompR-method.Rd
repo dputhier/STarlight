@@ -13,6 +13,6 @@
 The number of features stored in a STCompR object
 }
 \examples{
-example_dataset("11210787/files/cmp_xen")
+example_dataset("11284296/files/cmp_xen")
 nb_feat(cmp_xen)
 }
