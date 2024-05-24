@@ -15,7 +15,14 @@
   class_nb = 1,
   class_name = NULL,
   size = 2.25,
-  colors = NULL
+  colors = NULL,
+  class_label = TRUE,
+  offset = 5,
+  offset.text = 1.5,
+  lab_fontsize = 3.88,
+  lab_barsize = 2,
+  geom_label = c("text", "label", "shadowtext"),
+  no_legend = FALSE
 )
 }
 \arguments{
@@ -36,6 +43,20 @@
 \item{size}{The size of the labels.}
 
 \item{colors}{A set of colors for the classes.}
+
+\item{class_label}{Whether to add class labels.}
+
+\item{offset}{Offset of labels from the clade}
+
+\item{offset.text}{Offset of text labels from the bar.}
+
+\item{lab_fontsize}{Label font size.}
+
+\item{lab_barsize}{Bar label size.}
+
+\item{geom_label}{Label fomat.}
+
+\item{no_legend}{Whether to discard legend.}
 }
 \description{
 Create a tree from an STGrid object

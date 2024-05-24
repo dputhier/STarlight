@@ -1740,6 +1740,13 @@ setMethod("get_coord", "STGrid",
 #' @param branch_length A variable for scaling branch, if 'none' draw cladogram. See ggtree::ggtree().
 #' @param class_nb An integer indicating the desired number of groups.
 #' @param class_name A set of names for the classes.
+#' @param class_label Whether to add class labels.
+#' @param offset Offset of labels from the clade
+#' @param offset.text Offset of text labels from the bar.
+#' @param lab_fontsize Label font size.
+#' @param lab_barsize Bar label size.
+#' @param geom_label Label fomat.
+#' @param no_legend Whether to discard legend.
 #' @param size The size of the labels.
 #' @param colors A set of colors for the classes.
 #' @examples
@@ -1759,7 +1766,14 @@ setGeneric("hc_tree",
                     class_nb = 1,
                     class_name = NULL,
                     size = 2.25,
-                    colors=NULL)
+                    colors=NULL,
+                    class_label=TRUE,
+                    offset=5,
+                    offset.text=1.5,
+                    lab_fontsize=3.88,
+                    lab_barsize=2,
+                    geom_label=c('text', 'label', 'shadowtext'),
+                    no_legend=FALSE)
              standardGeneric("hc_tree"))
 
 #' @title Create a tree from an STGrid object
@@ -1773,6 +1787,13 @@ setGeneric("hc_tree",
 #' @param class_name A set of names for the classes.
 #' @param size The size of the labels.
 #' @param colors A set of colors for the classes.
+#' @param class_label Whether to add class labels.
+#' @param offset Offset of labels from the clade
+#' @param offset.text Offset of text labels from the bar.
+#' @param lab_fontsize Label font size.
+#' @param lab_barsize Bar label size.
+#' @param geom_label Label fomat.
+#' @param no_legend Whether to discard legend.
 #' @importFrom ggtree ggtree geom_hilight geom_tippoint geom_tiplab MRCA
 #' @importFrom ggnewscale new_scale_fill
 #' @importFrom ggplot2 aes scale_color_viridis_d scale_fill_manual
@@ -1799,10 +1820,19 @@ setMethod("hc_tree", "STGrid",
                    class_nb = 1,
                    class_name = NULL,
                    size = 2.25,
-                   colors=NULL) {
+                   colors=NULL,
+                   class_label=TRUE,
+                   offset=5,
+                   offset.text=1.5,
+                   lab_fontsize=3.88,
+                   lab_barsize=2,
+                   geom_label=c('text', 'label', 'shadowtext'),
+                   no_legend=FALSE
+                   ) {
 
             method <- match.arg(method)
             layout <- match.arg(layout)
+            geom_label <- match.arg(geom_label)
 
             print_this_msg("Using", method ,"method", msg_type="INFO")
             print_this_msg("Using", layout, "layout", msg_type="INFO")
@@ -1896,21 +1926,41 @@ setMethod("hc_tree", "STGrid",
               p <- p + ggplot2::scale_fill_manual(values=colors)
 
 
-            # ggtree::geom_tippoint(
-            # ggplot2::aes(color = cell_type),
-            # size = 1,
-            # inherit.aes = TRUE,
-            #show.legend = FALSE
-            #) +
-            nm <- names(tree_classes)
-            tree_classes <- paste0("MOD", stringr::str_pad(tree_classes,
-                                                           nchar(as.character(class_nb)),
-                                                           pad = "0"))
-            names(tree_classes) <- nm
-            p[["tree_classes"]] <- split(names(tree_classes), tree_classes)
+              # ggtree::geom_tippoint(
+              # ggplot2::aes(color = cell_type),
+              # size = 1,
+              # inherit.aes = TRUE,
+              #show.legend = FALSE
+              #) +
+              nm <- names(tree_classes)
+              tree_classes <- paste0("MOD", stringr::str_pad(tree_classes,
+                                                             nchar(as.character(class_nb)),
+                                                             pad = "0"))
+              names(tree_classes) <- nm
+
+              p[["tree_classes"]] <- split(names(tree_classes), tree_classes)
+
             }else{
               p[["tree_classes"]] <- list()
             }
+
+            if(class_label){
+              p <- p + geom_cladelab(data=annotation,
+                                     mapping = aes(node=id,
+                                                   label=Class,
+                                                   color=Class),
+                                     geom=geom_label,
+                                     offset=offset,
+                                     offset.text=offset.text,
+                                     angle='auto',
+                                     barsize=lab_barsize,
+                                     fontsize=lab_fontsize)
+              p <- p + scale_color_manual(values=colors)
+            }
+
+            if(no_legend)
+              p <- p + theme(legend.position="none")
+
             return(p)
 
           })
