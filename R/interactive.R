@@ -96,17 +96,10 @@ fov_selection <- function(object=NULL) {
                       ggplot2::aes(x = x, y = y, color = color)) +
       ggplot2::geom_point(size = as.double(input$pts_size))  +
       ggplot2::theme_bw() +
-      scale_prep +
-      ggplot2::theme(
-        legend.text = ggplot2::element_text(size = 12),
-        legend.title = ggplot2::element_blank(),
-        legend.position = "bottom"
-      ) +
-      ggplot2::guides(colour = ggplot2::guide_legend(override.aes = list(size =
-                                                                           4,
-                                                                         shape =
-                                                                           15))) +
+      scale_prep  +
       ggplot2::coord_fixed()
+
+
 
 
     if (input$tool == "Tangents") {
@@ -122,7 +115,6 @@ fov_selection <- function(object=NULL) {
       } else{
         gpoint <- my_val$gpoint
       }
-
 
       gg <- ggprep +
         gline +
@@ -142,6 +134,19 @@ fov_selection <- function(object=NULL) {
     }
 
     print_this_msg("Returning ggplot", msg_type = "DEBUG")
+
+
+    gg <- gg +
+      ggplot2::theme(legend.title = element_text(size=30,
+                                                 color="red",
+                                                 family = "bold"),
+            legend.text = element_text(size=30),
+            legend.position="top") +
+      ggplot2::guides(colour = ggplot2::guide_legend(title="Color code:",
+                                                     override.aes = list(size =
+                                                                           10,
+                                                                         shape =
+                                                                           15)))
 
     return(gg)
 
@@ -306,7 +311,7 @@ fov_selection <- function(object=NULL) {
         },
         "Polygons" = {
           htmltools::tagList(
-            htmltools::h4("Select point one by one and click on 'Close the path'."),
+            htmltools::h4("Select point one by one (be patient...) and click on 'Close the path'."),
             shiny::actionButton("close_the_path", "Close the path", class = "btn-primary")
           )
         }
@@ -325,9 +330,15 @@ fov_selection <- function(object=NULL) {
     ## Observe event (click)
     shiny::observeEvent(input$click, {
       if (input$tool == "Tangents") {
+
         print_this_msg("Inside input$click -> Tangents",
                        msg_type = "DEBUG")
-        if (nrow(my_val$DT[my_val$DT$feature == "POINT_COORDS", ]) < 2) {
+
+        if (length(my_val$DT$feature[my_val$DT$feature == "POINT_COORDS"]) < 2) {
+
+          print_this_msg("Creating a row (POINT_COORDS)",
+                         msg_type = "DEBUG")
+
           add_row <- data.frame(
             x = input$click$x,
             y = input$click$y,
@@ -336,9 +347,15 @@ fov_selection <- function(object=NULL) {
             to_be_checked = 0
           )
 
+          print_this_msg("Adding a row (POINT_COORDS)",
+                         msg_type = "DEBUG")
+
           my_val$DT <- rbind(my_val$DT, add_row)
 
-          l_pts <- my_val$DT[my_val$DT$feature == "POINT_COORDS",]
+          l_pts <- my_val$DT[my_val$DT$feature == "POINT_COORDS"]
+
+          print_this_msg("Preparing ggplot...",
+                         msg_type = "DEBUG")
 
           gpoint <- ggplot2::geom_point(data = l_pts,
                                         size = 4,
@@ -349,17 +366,25 @@ fov_selection <- function(object=NULL) {
             # calculating the slope
             a <-
               (l_pts[1, 2] - l_pts[2, 2]) / (l_pts[1, 1] - l_pts[2, 1])
+
             # calculating intersect
             b <- l_pts[1, 2] - l_pts[1, 1] * a
             df <- data.frame(cbind(a, b))
+            names(df) <- c("a", "b")
+            print_this_msg("Adding a line...",
+                           msg_type = "DEBUG")
+
+
             gline <- ggplot2::geom_abline(data = df,
                                           ggplot2::aes(slope = a,
                                                        intercept = b))
+
             if (input$un_select_below) {
-              my_val$DT[a * my_val$DT$x + b > my_val$DT$y, "color"] <-
+              my_val$DT$color[df$a * my_val$DT$x + df$b > my_val$DT$y] <-
                 "unselected"
             } else{
-              my_val$DT[a * my_val$DT$x + b < my_val$DT$y, "color"] <-
+
+              my_val$DT$color[df$a * my_val$DT$x + df$b < my_val$DT$y] <-
                 "unselected"
             }
 
@@ -395,7 +420,6 @@ fov_selection <- function(object=NULL) {
           my_val$DT$color[inside] <- "selected"
         }
 
-
       } else if (input$tool == "Polygons") {
         print_this_msg("Inside input$click -> Polygons",
                        msg_type = "DEBUG")
@@ -410,10 +434,15 @@ fov_selection <- function(object=NULL) {
 
         my_val$DT <- rbind(my_val$DT, add_row)
 
+        print_this_msg("Selecting polygons points.",
+                       msg_type = "DEBUG")
         seg_pts <-
           my_val$DT[my_val$DT$feature == "POLYGON_COORD",]
 
+
         if (nrow(seg_pts) >= 2) {
+          seg_pts$xend <- 0.0
+          seg_pts$yend <- 0.0
           seg_pts$xend <- NA
           seg_pts$yend <- NA
 
@@ -427,6 +456,9 @@ fov_selection <- function(object=NULL) {
           seg_pts <- stats::na.omit(seg_pts)
 
           x <- y <- xend <- yend <- NULL
+
+          print_this_msg("Creating segments for ggplot2.",
+                         msg_type = "DEBUG")
 
           ggseg <- ggplot2::geom_segment(
             data = seg_pts,
@@ -511,7 +543,7 @@ fov_selection <- function(object=NULL) {
 
         ggseg <- ggplot2::geom_segment(
           data = polygons,
-          size = 2,
+          linewidth = 2,
           color = "blue",
           ggplot2::aes(
             x = x,
@@ -536,6 +568,9 @@ fov_selection <- function(object=NULL) {
           my_val$DT$color == "selected" &
           my_val$DT$y > y_min & my_val$DT$y < y_max
         my_val$DT[test_1 & test_2,]$to_be_checked <- 1
+
+        print_this_msg("Checking whether points are inside the Polygon", msg_type = "DEBUG")
+        print_this_msg("Wait this can be long...")
 
         inside_poly <-
           secr::pointsInPolygon(my_val$DT[my_val$DT$to_be_checked == 1, c("x", "y")],
@@ -581,24 +616,12 @@ fov_selection <- function(object=NULL) {
     ## Observe event (swap_points)
     shiny::observeEvent(input$swap_points, {
       print_this_msg("Swapping points", msg_type = "DEBUG")
-      if (input$tool == "Tangents") {
-        print_this_msg("Tools: Tangents", msg_type = "DEBUG")
+
+        print_this_msg("Tools:",input$tool, msg_type = "DEBUG")
         tmp <- my_val$DT$color == "selected"
         my_val$DT$color <- "selected"
         my_val$DT$color[tmp] <- "unselected"
 
-      } else if (input$tool == "Areas") {
-        print_this_msg("Tools: Areass", msg_type = "DEBUG")
-        tmp <- my_val$DT$color == "selected"
-        my_val$DT$color <- "selected"
-        my_val$DT$color[tmp] <- "unselected"
-
-      } else if (input$tool == "Nearest Points") {
-        print_this_msg("Tools: Nearest Points", msg_type = "DEBUG")
-        tmp <- my_val$DT$color == "selected"
-        my_val$DT$color <- "selected"
-        my_val$DT$color[tmp] <- "unselected"
-      }
 
       output$main_plot <- shiny::renderPlot({
         draw_plot(input, my_val)
@@ -619,10 +642,7 @@ fov_selection <- function(object=NULL) {
         my_val$polygon <- NULL
 
 
-      } else if (input$tool == "Areas") {
-        my_val$DT$color <- "selected"
-
-      } else if (input$tool == "Nearest Points") {
+      } else {
         my_val$DT$color <- "selected"
       }
 
