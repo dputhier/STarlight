@@ -9,10 +9,13 @@ vignette: >
   %\usepackage[UTF-8]{inputenc}
 ---
 
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
 ```
+
 
 ```{r loadlib}
 library(magrittr)
@@ -49,11 +52,11 @@ download.file(url_data, destfile = dest_file)
 
 ## Loading data
 
-
+Here we load the data considering that the Xenium dataset is a simple csv flat file. If the full result directory is available you may use method="xenium" and provide the path to the directory as argument to 'path'.
 
 ```{r loadfile}
 
-st_obj <- load_spatial(dest_file, 
+st_obj <- load_spatial(path = dest_file, 
              method = "coordinates", 
              sep=",", 
              mapping = c(feature="feature_name", 
@@ -63,15 +66,6 @@ st_obj <- load_spatial(dest_file,
             control = "(NegControl)|(^BLANK)")
 
 ##
-
-
-st_obj <- load_spatial(dest_file, 
-                         method = "xenium",
-                         verbose = FALSE, 
-                         bin_size = 25, 
-                       control = "(NegControl)|(^BLANK)")
-
-
 ```
 
 
