@@ -26,16 +26,51 @@ library(dplyr)
 
 ```
 
-## Loading data
-
 Spatial transcriptomics enables the spatially resolved measurement of gene expression within tissue sections, providing valuable insights into the spatial organization of biological processes. Assigning RNA molecules to cells using a segmentation process is generally the first step in the analysis. This approach can be tricky for a number of reasons, including high cell density, the absence or poor quality of surface labelling, etc. The `STarlight` package is intended to perform analysis of RNA molecules using a grid-based approach (sometimes referred as 'rasterization'). The `load_spatial()`is the entry point of the `STarlight` package It will load the molecule coordinates and create a 2D binned grid with default size 25µm.
 
 
+## Retrieving the dataset
+
+Here, for demonstration purpose, we are using a subset (64 genes) of a 10x Genomics dataset tiny dataset used for Xenium Explorer Demo. The analyzed region corresponds to a fresh frozen section of the mouse Brain. The original dataset can be downloaded from [here](https://www.10xgenomics.com/resources/datasets/fresh-frozen-mouse-brain-for-xenium-explorer-demo-1-standard). 
+
+
+```{r}
+## create a temporary folder
+tmpdir <- tempdir()
+dir.create(tmpdir, showWarnings = FALSE)
+remote_file <- "Xenium_Mouse_Brain_Coronal_tiny.csv.gz"
+## Download and unzip the file
+url_data <- paste0("https://zenodo.org/records/11371819/files/",
+                   remote_file)
+dest_file <- file.path(tmpdir, remote_file)
+download.file(url_data, destfile = dest_file)
+
+```
+
+## Loading data
+
+
+
 ```{r loadfile}
-st_obj <- load_spatial("~/Downloads/Xenium_V1_FF_Mouse_Brain_Coronal_Subset_CTX_HP_outs/", 
+
+st_obj <- load_spatial(dest_file, 
+             method = "coordinates", 
+             sep=",", 
+             mapping = c(feature="feature_name", 
+                         x="x_location", 
+                         y="y_location"), 
+                         bin_size = 25, 
+            control = "(NegControl)|(^BLANK)")
+
+##
+
+
+st_obj <- load_spatial(dest_file, 
                          method = "xenium",
                          verbose = FALSE, 
-                         bin_size = 25)
+                         bin_size = 25, 
+                       control = "(NegControl)|(^BLANK)")
+
 
 ```
 
@@ -90,7 +125,7 @@ This command retrieves data from the STGrid object `st_obj` corresponding to the
 We can retrieve spatial transcriptomic data associated with specific genes from our st_obj STGrid object using the subsetting operator. Here we extract data corresponding to the "Rag1" and "Cd3e" genes:
 
 ```{r genes, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
-st_obj[c("Nrp2", "Rfx4"), ]
+st_obj[c("Chat", "Cbln4"), ]
 ```
 
 We may also remove all control probes from the STGrid object to focus our analysis on genes with meaningful expression levels.
@@ -111,7 +146,6 @@ Next, let's explore data for the 10th to 12th genes using numeric indices. To be
 
 ```{r numerics_2, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
 nb_feat(st_obj)
-st_obj[10:12, ]
 ```
 
 With this information, we can retrieve data for the 10th to 12th genes:
@@ -182,12 +216,9 @@ spatial_image(st_obj, features = meta_names(st_obj))
 ```
 
 ```{r}
-spatial_image(st_obj, features = hc_st$tree_classes[["MOD18"]])
+spatial_image(st_obj, features = hc_st$tree_classes[["MOD07"]])
 ```
 
-```{r}
-spatial_image(st_obj, features = hc_st$tree_classes[["MOD06"]])
-```
 
 # Molecule clustering
 
@@ -195,49 +226,90 @@ spatial_image(st_obj, features = hc_st$tree_classes[["MOD06"]])
 
 We may use the K-Ripley's function to assess the level of clustering of each molecules in the two regions. Not that this step is rather long as the density of molecule increases. For the tutorial will thus concentrate on few genes.
 
-
 ```{r compute_k_ripley}
 gene_list <- c("Chat", "Spag16", "Tacr1", "Sncg", feat_names(st_obj)[1:10])
-plot_rip_k(compute_k_ripley(st_obj[gene_list, ], rmax = 200, verbose = FALSE))
+plot_rip_k(compute_k_ripley(st_obj, rmax = 80, verbose = FALSE))
 ```
 
 
 ```{r}
-spatial_image(st_obj, features = c("Chat", "Spag16", "Tacr1", "Sncg"))
+spatial_image(st_obj, features = c("Chat", "Spag16", "Tacr1", "Nwd2"))
 ```
 
 # Comparing counts
 
-The stcompr() function allows to compare two datasets or regions of the organ. Here we will use it two compare two regions of the organ.
+The stcompr() function is used to compare two sets of data. By way of illustration, and to limit the calculation time required for this vignette, we will use this function to compare two regions of the organ, which will be considered here as two conditions. Still for illustration purpose, we will generate two replicates per conditions/regions (in fact two close regions)
+
+
+```{r STarlight}
+## "Conditions 1"
+# "replicate 1"
+x_bins <-  bin_x(st_obj)[180:nbin_x(st_obj)]
+y_bins <-  bin_y(st_obj)[100:nbin_y(st_obj)]
+st_obj_r1_1 <- st_obj[x_bins, y_bins]
+
+# "replicate 2"
+x_bins <-  bin_x(st_obj)[170:200]
+y_bins <-  bin_y(st_obj)[90:130]
+st_obj_r1_2 <- st_obj[x_bins, y_bins]
+
+
+## "Conditions 2"
+# "replicate 1"
+x_bins <-  bin_x(st_obj)[60:100]
+y_bins <-  bin_y(st_obj)[100:nbin_y(st_obj)]
+st_obj_r2_1 <- st_obj[x_bins, y_bins]
+
+# "replicate 2"
+x_bins <-  bin_x(st_obj)[50:90]
+y_bins <-  bin_y(st_obj)[80:130]
+st_obj_r2_2 <- st_obj[x_bins, y_bins]
+```
+
+Here is our illustrative dataset visualized using the *cmp_images()* function:
+
+```{r}
+cmp_images(st_obj_r1_1,
+           st_obj_r1_2,
+           st_obj_r2_1, 
+           st_obj_r2_2,
+           feat_list="count_sum",
+           names=c("region_1_1", "region_1_2", "region_2_1", "region_2_2"),
+           color_y_strip=c("pink", "pink", "lightblue", "lightblue"),
+           color_strip_text_y = "black",
+           color_x_strip="#333333",
+           colors = viridis::magma(10)
+           )
+```
+And the count distribution for each replicate:
+
+```{r}
+dist_st(st_obj_r1_1,
+           st_obj_r1_2,
+           st_obj_r2_1, 
+           st_obj_r2_2,
+           transform = "log10")
+```
+
 
 ## Creating an STCompR object
 
-First we prepare an stgrid object containing another region of the tissue. We will compare the two subregions (but two datasets/experiments could be also compared).
-
-```{r STarlight}
-x_bins <-  bin_x(st_obj)[61:101]
-y_bins <-  bin_y(st_obj)[101:nbin_y(st_obj)]
-st_obj_r2 <- st_obj[x_bins, y_bins]
-```
-
-Below is the density of molecules counts in this regions:
-·
-```{r all_genes}
-spatial_image(st_obj_r1, feature="count_sum") + Seurat::NoLegend() + 
-spatial_image(st_obj_r2, feature="count_sum") 
-```
 Now we can create an STCompR object using the stcompr() function. 
 
 ```{r STarlight_create}
-cmp <- stcompr(st_obj_r2, st_obj_r1, name_1="region_1", name_2="region_2")
+cmp <- stcompr(list(st_obj_r1_1,
+                    st_obj_r1_2),
+                list(st_obj_r2_1, 
+                    st_obj_r2_2), 
+               name_1="region_1", name_2="region_2")
 ```
 
 ## Count distributions
 
-Here are the distribution of the counts:
+Here are the normalized counts:
 
 ```{r cmp_boxplot}
-cmp_boxplot(cmp, transform = "log10", normalized = F, colors = ggsci::pal_d3()(2))
+cmp_boxplot(cmp, transform = "log10", normalized = TRUE)
 ```
 
 ## Count comparison
@@ -245,143 +317,30 @@ cmp_boxplot(cmp, transform = "log10", normalized = F, colors = ggsci::pal_d3()(2
 As we can see below the two regions differ in the expression levels of several genes.
 
 ```{r cmp_volcano}
-cmp_volcano(cmp, text_y_lim = 200, text_size = 2, text_x_lim = 4)
+cmp_volcano(cmp, text_y_lim = 20, text_size = 2, text_x_lim = 2.5)
 ```
-We may check these molecules using the `cmp_images()` function:
+
+We may check the differential expression of these genes using the `cmp_images()` function:
 
 ```{r}
 markers <- cmp@stat_test %>% 
-              dplyr::filter(abs(log2_ratio) > 5) %>% 
-              dplyr::filter(-log10(p_values) > 200) %>% rownames()
+              dplyr::filter(abs(log2_ratio) > 2.5) %>% 
+              dplyr::arrange(log2_ratio) %>%  
+              dplyr::filter(-log10(p_values) > 20) %>% rownames()
 
-cmp_images(st_obj_r1,
-           st_obj_r2,
-           feat_list = markers)
-```
-
-
-## Neighborhood dynamics
-
-The `stcompr()`function also asseses whether the molecule neighborhood tends to change. This method aims to determine whether RNA molecules from genes A and B tend to aggregate within the same cells of the grid, indicating potential functional relationships or regulatory interactions between the two genes. Furthermore, the approach allows for the comparison of colocalization patterns between different conditions or tissues, enabling the investigation of spatial dynamics in gene expression across diverse biological contexts. 
-To this aim, the number of RNA molecules for a gene per bin is converted into a fraction of the total count for that gene. A Manhattan distance between each gene is computed to quantify the spatial concordance or discordance in their expression patterns across cells. Finally, the function assesses whether the manhattan distance tend to increase or decrease between conditions/regions. An increase is indicative of molecules co-clustering while a decrease is indicative of a repulsion. As the matrix contains `r length(feat_names(cmp))` we will focus n genes with the highest changes in neighborhood by setting the filter argument to 1
-
-```{r heatmap_cmp}
-heatmap_cmp(cmp, filter = 1.2, size = 6)
-```
-
-As an example we can clearly see that  Kctd8, Necab2, Nrp2 or Chat molecules relocate toward Nwd2. indeed, a negative value indictae 
-
-```{r heatmap_cmp_img}
-markers <- c("Nwd2",
-  "Kctd8",
-  "Ccn2",
-  "Cplx3")
-cmp_images(re_bin(st_obj_r2[markers,], 10), 
-           re_bin(st_obj_r1[markers,], 10), feat_list = c("Nwd2",
-                                               "Kctd8",
-                                               "Ccn2",
-                                               "Cplx3"), 
-           names=c("Region_1", "Region_2"))
-```
-
-### Calling UMAP
-
-```{r}
-p <- umap(as.matrix(cmp@neighborhood_changes))
-u <- p$layout
-colnames(u) <- c("x", "y")
-u$class <- unlist(hc_st$tree_classes)
-ggplot(as.data.frame(u), aes(x=x, y=y, label=rownames(u))) + geom_point() + ggrepel::geom_text_repel(size=3)
+cmp_images(st_obj_r1_1,
+           st_obj_r1_2,
+           st_obj_r2_1, 
+           st_obj_r2_2,
+           feat_list=markers,
+           names=c("region_1_1", "region_1_2", "region_2_1", "region_2_2"),
+           color_y_strip=c("pink", "pink", "lightblue", "lightblue"),
+           color_strip_text_y = "black",
+           color_x_strip= c("darkgreen", "darkgreen", "darkred", "darkred", "darkred"),
+           colors = viridis::magma(10))
 ```
 
 
 
-## Using cell as input:
-
-```{r}
-library(Seurat)
-# https://nanostring.com/products/cosmx-spatial-molecular-imager/ffpe-dataset/nsclc-ffpe-dataset/
-
-data.dir <- "~/Downloads/Lung5/Lung5_Rep1/Lung5_Rep1-Flat_files_and_images/"
-data <- ReadNanostring(data.dir = data.dir, type = "centroids")
-cents <- CreateCentroids(data$centroids)
-coords <- CreateFOV(coords = list("centroids" = cents), type = "centroids")
-nano.obj <- CreateSeuratObject(counts = data$matrix, assay = "Nanostring")
-nano.obj[["fov"]]<-subset(coords, cell=Cells(nano.obj))
-```
-
-```{r}
-azimuth.data <- readRDS("~/Downloads/Lung5/nanostring_data.Rds")
-nano.obj <- AddMetaData(nano.obj, metadata = azimuth.data$annotations)
-nano.obj[["proj.umap"]] <- azimuth.data$umap
-Idents(nano.obj) <- nano.obj$predicted.annotation.l1
-options(future.globals.maxSize = 8000 * 1024^2)
-nano.obj <- SCTransform(nano.obj, assay = "Nanostring", clip.range = c(-10, 10), verbose = FALSE)
-head(slot(object = nano.obj, name = "meta.data")[2:5])
-```
-```{r}
-DimPlot(nano.obj)
-ImageDimPlot(nano.obj, fov = "lung5.rep1", axes = TRUE, cols = "glasbey")
-```
-
-```{r}
-cell_coord <- data.frame(GetTissueCoordinates(nano.obj)[,1:2],
-                         stats::setNames(nano.obj$predicted.annotation.l1, NULL))
-colnames(cell_coord) <- c("x", "y", "cell")
-cell_coord$x <- round(cell_coord$x, 2)
-cell_coord$y <- round(cell_coord$y, 2)
-write.table(cell_coord, file = "../Lung5_Rep1_nanostring.txt", sep="\t", quote = F, 
-            row.names = F)
-```
-
-```{r}
-cell_1 <- load_spatial("/Users/puthier/Downloads/Lung5_Rep1_nanostring.txt", 
-                         method = "coordinates",
-                         verbose = FALSE, 
-                         control = NULL, 
-                       bin_size = 100)
-cell_1 <- compute_k_ripley(cell_1, rmax = 200, verbose = FALSE)
-plot_rip_k(cell_1, max_feat_label = 3)
-```
-
-```{r}
-spatial_image(cell_1, features = "Club")
-spatial_image(cell_1, features = "Plasmacytoid Dendritic")
-spatial_image(cell_1, features = "B")
-spatial_image(cell_1, features = "CD4 T")
-```
-
-```{r}
-foi_1 <- cell_1[bin_x(cell_1)[30:90], bin_y(cell_1)[30:90]]
-foi_2 <- cell_1[bin_x(cell_1)[60:120], bin_y(cell_1)[150:210]]
-```
-
-```{r}
-feat <- c(unique(foi_2@coord$feature), unique(foi_1@coord$feature))
-feat <- feat[duplicated(feat)]
-cmp <- stcompr(foi_1[feat, ], foi_2[feat, ], name_1 = "foi_1",  name_2 = "foi_2")
-cmp_volcano(cmp, text_y_lim = 15)
-heatmap_cmp(cmp, filter = 0)
-spatial_image(re_bin(foi_1, bin_size=10), feat=c("CD4 T", "B"))
-spatial_image(re_bin(foi_2, bin_size=10), feat=c("CD4 T", "B"))
-
-```
-```{r}
-feat <- c(unique(foi_2@coord$feature), unique(foi_1@coord$feature))
-feat <- feat[duplicated(feat)]
-feat <- setdiff(feat, c("B", "CD4 T"))
-cmp <- stcompr(foi_1[feat, ], 
-               foi_2[feat, ], 
-               name_1 = "foi_1",  
-               name_2 = "foi_2")
-cmp_volcano(cmp, text_y_lim = 15)
-heatmap_cmp(cmp, filter = 0)
-# Error
-#spatial_image(re_bin(foi_1, bin_size=20), feat=c("Myofibroblast", "Fibroblast", "CD8 T"))
-#spatial_image(re_bin(foi_2, bin_size=20), feat=c("Myofibroblast", "Fibroblast", "CD8 T"))
-
-cmp_images(foi_1, foi_2, feat_list=c("Myofibroblast", "Fibroblast", "CD8 T"), names = c("foi_1", "foi_2"))
-
-```
 
 

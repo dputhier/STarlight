@@ -8,7 +8,7 @@
   object,
   normalized = TRUE,
   transform = c("None", "log2", "log10", "log"),
-  colors = c("#3074BB", "#BE5B52"),
+  colors = NULL,
   ...
 )
 }

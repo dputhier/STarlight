@@ -983,7 +983,7 @@ setMethod ("$", "STGrid",
 #' @keywords internal
 #' @examples
 #' example_dataset()
-#' Xenium_Mouse_Brain_Coronal_7g$count_sums <- Xenium_Mouse_Brain_Coronal_7g@meta$count_sums + 1
+#' Xenium_Mouse_Brain_Coronal_7g$count_sum <- Xenium_Mouse_Brain_Coronal_7g@meta$count_sum + 1
 #' @export
 setMethod ("$<-", "STGrid",
            function (x, name, value) {
@@ -1794,7 +1794,7 @@ setGeneric("hc_tree",
 #' @param lab_barsize Bar label size.
 #' @param geom_label Label fomat.
 #' @param no_legend Whether to discard legend.
-#' @importFrom ggtree ggtree geom_hilight geom_tippoint geom_tiplab MRCA
+#' @importFrom ggtree ggtree geom_hilight geom_tippoint geom_tiplab MRCA geom_cladelab
 #' @importFrom ggnewscale new_scale_fill
 #' @importFrom ggplot2 aes scale_color_viridis_d scale_fill_manual
 #' @importFrom stringr str_pad
@@ -1945,7 +1945,7 @@ setMethod("hc_tree", "STGrid",
             }
 
             if(class_label){
-              p <- p + geom_cladelab(data=annotation,
+              p <- p + ggtree::geom_cladelab(data=annotation,
                                      mapping = aes(node=id,
                                                    label=Class,
                                                    color=Class),

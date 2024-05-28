@@ -874,9 +874,11 @@ setGeneric("cmp_boxplot", function(object,
 setMethod("cmp_boxplot", signature("STCompR"), function(object,
                                                         normalized = TRUE,
                                                         transform = c("None", "log2", "log10", "log"),
-                                                        colors = c("#3074BB", "#BE5B52"),
+                                                        colors = NULL,
                                                         ...) {
   transform <- match.arg(transform)
+
+
 
   counts <- stat_test(
     object,
@@ -885,6 +887,14 @@ setMethod("cmp_boxplot", signature("STCompR"), function(object,
     melted_count = TRUE,
     transform = transform
   )
+
+  if(is.null(colors)){
+    gg_color_hue <- function(n) {
+      hues = seq(15, 375, length = n + 1)
+      grDevices::hcl(h = hues, l = 65, c = 100)[1:n]
+    }
+    colors <- gg_color_hue(length(table(counts$Samples)))
+  }
 
   ylabel <- ifelse(
     transform %in% c("log2", "log10", "log"),
@@ -896,7 +906,7 @@ setMethod("cmp_boxplot", signature("STCompR"), function(object,
 
   ggplot2::ggplot(
     data = counts,
-    mapping = ggplot2::aes(x = Conditions, y = Counts, fill = Conditions)
+    mapping = ggplot2::aes(x = Conditions, y = Counts, fill = Samples)
   ) +
     ggpol::geom_boxjitter(...) +
     ggplot2::theme_bw() +
