@@ -902,7 +902,7 @@ setMethod("cmp_boxplot", signature("STCompR"), function(object,
     "Molecule counts"
   )
 
-  Conditions <- Counts <- Conditions <- NULL
+  Conditions <- Counts <- Samples <- NULL
 
   ggplot2::ggplot(
     data = counts,
@@ -925,7 +925,7 @@ setMethod("cmp_boxplot", signature("STCompR"), function(object,
     ggplot2::ylab(ylabel) +
     ggplot2::scale_fill_manual(values = colors)
 
-})
+})R/visualization.R
 
 
 # -------------------------------------------------------------------------
