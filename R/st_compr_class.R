@@ -306,37 +306,37 @@ stcompr <- function(object_1,
 # -------------------------------------------------------------------------
 ##    Generate a heatmap comparison for an 'STCompR' object
 # -------------------------------------------------------------------------
-#' @title Generate a heatmap comparison for an 'STCompR' object
-#'
-#' @description
-#' Generate a heatmap to visualize neighborhood changes between conditions.
-#' The changes are computed as the difference in manhattan distances between the two conditions
-#' stored in the object.
-#'
-#' @param object An object of class 'STCompR'.
-#' @param what A character string specifying what to plot: "changes" (the difference in pairwise Manhattan distances between conditions 2 and 1),
-#' "changes_2" (the difference in pairwise Manhattan distances between conditions 1 and 2), "c1" (the pairwise Manhattan distances of features in condition 1), or "c2"
-#' (the pairwise Manhattan distances of features in condition 2).
-#' @param hclust_method A character string specifying the agglomerative criteria for hierarchical clustering ("ward.D", "ward.D2",
-#' "single", "complete", "average", "mcquitty", "median", "centroid").
-#' @param dist_method A character string specifying the distance method to be used ("euclidean",
-#' "maximum", "manhattan", "canberra", "binary","minkowski").
-#' @param del_feat A character vector specifying features to be excluded from the heatmap.
-#' @param only_feat A character vector specifying features to be included in the heatmap.
-#' @param filter_method If 'cv', select row/col by checking whether the variation coefficient of absolute changes is greater than 'filter'.
-#' If 'diff' select a row/col if at least one absolute value greater than 'filter' is observed.
-#' @param filter A numeric value as threshold.
-#' @param size A numeric value specifying the size of text in the heatmap.
-#' @param title A title for the diagram.
-#'
-#' @return A heatmap plot comparing conditions in the 'STCompR' object.
-#'
-#' @examples
-#' # Example usage:
-#' example_dataset("11284296/files/cmp_xen")
-#' heatmap_cmp(object = cmp_xen, hclust_method = "ward.D", dist_method = "euclidean")
-#' @keywords internal
-#' @export
+###' @title Generate a heatmap comparison for an 'STCompR' object
+###'
+###' @description
+###' Generate a heatmap to visualize neighborhood changes between conditions.
+###' The changes are computed as the difference in manhattan distances between the two conditions
+###' stored in the object.
+###'
+###' @param object An object of class 'STCompR'.
+###' @param what A character string specifying what to plot: "changes" (the difference in pairwise Manhattan distances between conditions 2 and 1),
+###' "changes_2" (the difference in pairwise Manhattan distances between conditions 1 and 2), "c1" (the pairwise Manhattan distances of features in condition 1), or "c2"
+###' (the pairwise Manhattan distances of features in condition 2).
+###' @param hclust_method A character string specifying the agglomerative criteria for hierarchical clustering ("ward.D", "ward.D2",
+###' "single", "complete", "average", "mcquitty", "median", "centroid").
+###' @param dist_method A character string specifying the distance method to be used ("euclidean",
+###' "maximum", "manhattan", "canberra", "binary","minkowski").
+###' @param del_feat A character vector specifying features to be excluded from the heatmap.
+###' @param only_feat A character vector specifying features to be included in the heatmap.
+###' @param filter_method If 'cv', select row/col by checking whether the variation coefficient of absolute changes is greater than 'filter'.
+###' If 'diff' select a row/col if at least one absolute value greater than 'filter' is observed.
+###' @param filter A numeric value as threshold.
+###' @param size A numeric value specifying the size of text in the heatmap.
+###' @param title A title for the diagram.
+###'
+###' @return A heatmap plot comparing conditions in the 'STCompR' object.
+###'
+###' @examples
+###' # Example usage:
+###' example_dataset("11284296/files/cmp_xen")
+###' heatmap_cmp(object = cmp_xen, hclust_method = "ward.D", dist_method = "euclidean")
+###' @keywords internal
+###' @export
 # setGeneric("heatmap_cmp",
 #            function(object,
 #                     what=c("changes", "changes_2",  "c1", "c2"),
@@ -359,37 +359,37 @@ stcompr <- function(object_1,
 # )
 
 
-#' @title Generate a heatmap comparison for an 'STCompR' object
-#'
-#' @description
-#' Generate a heatmap to visualize neighborhood changes between conditions.
-#' The changes are computed as the difference in manhattan distances between the two conditions
-#' stored in the object.
-#'
-#' @param object An object of class 'STCompR'.
-#' @param what A character string specifying what to plot: "changes" (the difference in pairwise Manhattan distances between conditions 2 and 1),
-#' "changes_2" (the difference in pairwise Manhattan distances between conditions 1 and 2), "c1" (the pairwise Manhattan distances of features in condition 1), or "c2"
-#' (the pairwise Manhattan distances of features in condition 2).
-#' @param hclust_method A character string specifying the agglomerative criteria for hierarchical clustering ("ward.D", "ward.D2",
-#' "single", "complete", "average", "mcquitty", "median", "centroid").
-#' @param dist_method A character string specifying the distance method to be used ("euclidean",
-#' "maximum", "manhattan", "canberra", "binary","minkowski").
-#' @param del_feat A character vector specifying feature to be excluded from the heatmap.
-#' @param only_feat A character vector specifying features to be included in the heatmap.
-#' @param filter A numeric value specifying the threshold for filtering out low absolute values in the heatmap.
-#' @param size A numeric value specifying the size of text in the heatmap.
-#' @param title A title for the diagram.
-#'
-#' @return A heatmap plot comparing conditions in the 'STCompR' object.
-#'
-#' @examples
-#' # Example usage:
-#' example_dataset("11284296/files/cmp_xen")
-#' heatmap_cmp(object = cmp_xen, hclust_method = "ward.D", dist_method = "euclidean")
-#' @importFrom ggheatmap ggheatmap ggheatmap_theme
-#' @importFrom RColorBrewer brewer.pal
-#' @import magrittr
-#' @export
+###' @title Generate a heatmap comparison for an 'STCompR' object
+###'
+###' @description
+###' Generate a heatmap to visualize neighborhood changes between conditions.
+###' The changes are computed as the difference in manhattan distances between the two conditions
+###' stored in the object.
+###'
+###' @param object An object of class 'STCompR'.
+###' @param what A character string specifying what to plot: "changes" (the difference in pairwise Manhattan distances between conditions 2 and 1),
+###' "changes_2" (the difference in pairwise Manhattan distances between conditions 1 and 2), "c1" (the pairwise Manhattan distances of features in condition 1), or "c2"
+###' (the pairwise Manhattan distances of features in condition 2).
+###' @param hclust_method A character string specifying the agglomerative criteria for hierarchical clustering ("ward.D", "ward.D2",
+###' "single", "complete", "average", "mcquitty", "median", "centroid").
+###' @param dist_method A character string specifying the distance method to be used ("euclidean",
+###' "maximum", "manhattan", "canberra", "binary","minkowski").
+###' @param del_feat A character vector specifying feature to be excluded from the heatmap.
+###' @param only_feat A character vector specifying features to be included in the heatmap.
+###' @param filter A numeric value specifying the threshold for filtering out low absolute values in the heatmap.
+###' @param size A numeric value specifying the size of text in the heatmap.
+###' @param title A title for the diagram.
+###'
+###' @return A heatmap plot comparing conditions in the 'STCompR' object.
+###'
+###' @examples
+###' # Example usage:
+###' example_dataset("11284296/files/cmp_xen")
+###' heatmap_cmp(object = cmp_xen, hclust_method = "ward.D", dist_method = "euclidean")
+###' @importFrom ggheatmap ggheatmap ggheatmap_theme
+###' @importFrom RColorBrewer brewer.pal
+###' @import magrittr
+###' @export
 # setMethod(
 #   "heatmap_cmp", signature("STCompR"),
 #   function(object,
