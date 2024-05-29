@@ -21,7 +21,7 @@ knitr::opts_chunk$set(
 library(magrittr)
 library(Seurat)
 library(STarlight)
-STarlight::set_verb_level(1)
+STarlight::set_verb_level(0)
 library(patchwork)
 library(ggplot2)
 library(dplyr)
@@ -29,10 +29,12 @@ library(dplyr)
 
 ```
 
+# About
+
 Spatial transcriptomics enables the spatially resolved measurement of gene expression within tissue sections, providing valuable insights into the spatial organization of biological processes. Assigning RNA molecules to cells using a segmentation process is generally the first step in the analysis. This approach can be tricky for a number of reasons, including high cell density, the absence or poor quality of surface labelling, etc. The `STarlight` package is intended to perform analysis of RNA molecules using a grid-based approach (sometimes referred as 'rasterization'). The `load_spatial()`is the entry point of the `STarlight` package It will load the molecule coordinates and create a 2D binned grid with default size 25µm.
 
 
-## Retrieving the dataset
+# Retrieving the dataset
 
 Here, for demonstration purpose, we are using a subset (64 genes) of a 10x Genomics dataset tiny dataset used for Xenium Explorer Demo. The analyzed region corresponds to a fresh frozen section of the mouse Brain. The original dataset can be downloaded from [here](https://www.10xgenomics.com/resources/datasets/fresh-frozen-mouse-brain-for-xenium-explorer-demo-1-standard). 
 
@@ -50,7 +52,7 @@ download.file(url_data, destfile = dest_file)
 
 ```
 
-## Loading data
+# Loading data
 
 Here we load the data considering that the Xenium dataset is a simple csv flat file. If the full result directory is available you may use method="xenium" and provide the path to the directory as argument to 'path'.
 
@@ -63,7 +65,7 @@ st_obj <- load_spatial(path = dest_file,
                          x="x_location", 
                          y="y_location"), 
                          bin_size = 25, 
-            control = "(NegControl)|(^BLANK)")
+            control = "(NegControl)|(^BLANK)", verbose = FALSE)
 
 ##
 ```
@@ -74,7 +76,9 @@ st_obj <- load_spatial(path = dest_file,
 The Spatial Transcriptomic Grid class (STGrid), serves as a fundamental structure for representing spatial transcriptomic analysis results. It provides a structured framework for managing and analyzing spatial transcriptomic data, facilitating comprehensive exploration and interpretation of spatial gene expression patterns within tissue sections.
 
 ```{r show, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
+STarlight::set_verb_level(1)
 st_obj
+STarlight::set_verb_level(0)
 ```
 ```{r summary}
 summary(st_obj)
