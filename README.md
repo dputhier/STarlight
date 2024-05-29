@@ -1,8 +1,6 @@
 <!-- README.md is generated from README.Rmd using devtools::build_readme(). Please edit that file -->
 <!-- <img src="https://raw.githubusercontent.com/dputhier/starlight/main/inst/sticker/starlight_logo.png" width="150"  align="right"/> -->
 
-    ## ✔ Setting active project to
-    ## '/Users/puthier/Documents/git/project_dev/STarlight'
 
 [![](https://img.shields.io/badge/lifecycle-stable-green.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 [![Project Status: Active - The project has reached a stable, usable
