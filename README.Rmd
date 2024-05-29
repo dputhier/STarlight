@@ -51,18 +51,6 @@ Then load the library from within R.
 
     library(STarlight)
 
-## Example
-
-The STarlight library contains several (tiny) example datasets.
-
-
-  	library(STarlight)
-  	set_verb_level(1)
-  
-  	# Load a dataset
-	example_dataset()
-
-	# 
 
 ## :book: Documentation
 
