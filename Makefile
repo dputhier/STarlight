@@ -90,7 +90,7 @@ release_bump: release
 	@ make install
 	@ git commit -m 'Bumped version $(VERSION)'
 
-readme:
+readme: clean
 	@ echo "- Rebuilting README.md from README.Rmd"
 	@ echo "devtools::build_readme()" | R --slave
 

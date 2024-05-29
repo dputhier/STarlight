@@ -1,0 +1,69 @@
+---
+output:
+  md_document:
+    variant: gfm
+html_preview: false
+---
+
+<!-- README.md is generated from README.Rmd using devtools::build_readme(). Please edit that file -->
+
+```{r echo=FALSE, results="hide", message=FALSE}
+library("badger")
+```
+
+<!-- <img src="https://raw.githubusercontent.com/dputhier/starlight/main/inst/sticker/starlight_logo.png" width="150"  align="right"/> -->
+
+
+```{r, echo = FALSE, results='asis'}
+cat(
+	badge_lifecycle(stage = "stable", color="green"),
+	badge_repostatus("Active"),
+	badge_license("MIT"),
+	badge_last_commit(ref="dputhier/STarlight"),
+	badge_codecov("dputhier/STarlight")
+)
+```
+
+# STarlight repository
+
+## :arrow_double_down: Installation
+
+### From R
+
+The STarlight library is currently not available in CRAN or Bioc. To install it  from github, use:
+
+
+    devtools::install_github("dputhier/STarlight")
+    library(STarlight)
+
+
+### From the terminal
+
+
+Download the *tar.gz* from github or clone the main branch. Uncompress and run the following command from within the uncompressed STarlight folder:
+
+
+    R CMD INSTALL .
+
+
+Then load the library from within R.
+
+
+    library(STarlight)
+
+## Example
+
+The STarlight library contains several (tiny) example datasets.
+
+
+  	library(STarlight)
+  	set_verb_level(1)
+  
+  	# Load a dataset
+	example_dataset()
+
+	# 
+
+## :book: Documentation
+
+Documentation (in progress) is available at [https://dputhier.github.io/STarlight/](https://dputhier.github.io/STarlight/).
