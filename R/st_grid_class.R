@@ -666,7 +666,7 @@ setMethod("rm_controls", "STGrid",
 #' @param x The STGrid object
 #' @examples
 #' example_dataset()
-#' table(Xenium_Mouse_Brain_Coronal_7g)
+#' table_st(Xenium_Mouse_Brain_Coronal_7g)
 #' @keywords internal
 #' @export
 setGeneric("table_st",
@@ -679,7 +679,7 @@ setGeneric("table_st",
 #' @param x The STGrid object
 #' @examples
 #' example_dataset()
-#' table(Xenium_Mouse_Brain_Coronal_7g)
+#' table_st(Xenium_Mouse_Brain_Coronal_7g)
 #' @export
 setMethod("table_st", signature("STGrid"),
           function(x){
@@ -1218,6 +1218,8 @@ setMethod("compute_k_ripley", signature("STGrid"),
 #' @return An object of class STGrid.
 #' @importFrom Seurat ReadVizgen
 #' @importFrom Seurat ReadXenium
+#' @importFrom R.utils isZero
+#' @importFrom data.table fread
 #' @details
 #' If method is set to 'coordinates' a flat file with ("x", "y", "gene"), ("x", "y", "feature") or ("x", "y", "cell")
 #' expected for path. If method is set to 'merscope_csv' the transcript csv file exported by Merscope should be provided
@@ -1245,6 +1247,9 @@ load_spatial <- function(path = "",
 
   print_this_msg("Technology is '", method, "'.")
   print_this_msg("Loading data from file:", path)
+
+  # Force the use of R.utils
+  out <- R.utils::isZero(0)
 
   if (method == "merscope") {
     spat_input <-
@@ -1946,7 +1951,7 @@ setMethod("hc_tree", "STGrid",
 
             if(class_label){
               p <- p + ggtree::geom_cladelab(data=annotation,
-                                     mapping = aes(node=id,
+                                     mapping = ggplot2::aes(node=id,
                                                    label=Class,
                                                    color=Class),
                                      geom=geom_label,
@@ -1961,7 +1966,7 @@ setMethod("hc_tree", "STGrid",
             if(no_legend)
               p <- p + theme(legend.position="none")
 
-            return(p)
+            return(list(p, annotation))
 
           })
 
