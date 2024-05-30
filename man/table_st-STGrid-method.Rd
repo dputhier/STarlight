@@ -14,5 +14,5 @@ Returns the number of items (e.g molecules) per feature of an STGrid object.
 }
 \examples{
 example_dataset()
-table(Xenium_Mouse_Brain_Coronal_7g)
+table_st(Xenium_Mouse_Brain_Coronal_7g)
 }
