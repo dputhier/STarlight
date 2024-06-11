@@ -1275,7 +1275,8 @@ load_spatial <- function(path = "",
     spat_input <- spat_input$pixels[, c("x", "y", "gene")]
 
     if (is.null(control))
-      control <-  "(NegControl)|(^BLANK)"
+      control <-  "^NegPrb"
+
   }else if(method == "merscope_csv"){
     check_this_file(path, mode = "read")
     spat_input <- as.data.frame(data.table::fread(path,
