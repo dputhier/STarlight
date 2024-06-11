@@ -6,7 +6,7 @@
 \usage{
 load_spatial(
   path = "",
-  method = c("coordinates", "merscope", "merscope_csv", "xenium"),
+  method = c("coordinates", "merscope", "merscope_csv", "xenium", "cosmx"),
   bin_size = 25,
   control = NULL,
   sep = "\\t",
@@ -23,7 +23,7 @@ is set to "merscope"). If method is set to "coordinates" the file should contain
 
 \item{method}{The type of technology/file/directory structure. See details.}
 
-\item{bin_size}{Numeric value representing the bin size (default to 25).}
+\item{bin_size}{Numeric value representing the bin size (default to 25). Unit is microns for Xenium and Merscope and pixel for CosMx.}
 
 \item{control}{A regular expression to identify controls. As the function computes the sum of
 counts, this will allow to delete these blanks/controls for computation.}
