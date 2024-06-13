@@ -666,7 +666,7 @@ setMethod("rm_controls", "STGrid",
 #' @param x The STGrid object
 #' @examples
 #' example_dataset()
-#' table(Xenium_Mouse_Brain_Coronal_7g)
+#' table_st(Xenium_Mouse_Brain_Coronal_7g)
 #' @keywords internal
 #' @export
 setGeneric("table_st",
@@ -679,7 +679,7 @@ setGeneric("table_st",
 #' @param x The STGrid object
 #' @examples
 #' example_dataset()
-#' table(Xenium_Mouse_Brain_Coronal_7g)
+#' table_st(Xenium_Mouse_Brain_Coronal_7g)
 #' @export
 setMethod("table_st", signature("STGrid"),
           function(x){
@@ -1206,7 +1206,7 @@ setMethod("compute_k_ripley", signature("STGrid"),
 #' is set to "merscope"). If method is set to "coordinates" the file should contain at least 3 columns
 #' ("x", "y", "gene"), ("x", "y", "feature") or ("x", "y", "cell").
 #' @param method The type of technology/file/directory structure. See details.
-#' @param bin_size Numeric value representing the bin size (default to 25).
+#' @param bin_size Numeric value representing the bin size (default to 25). Unit is microns for Xenium and Merscope and pixel for CosMx.
 #' @param control A regular expression to identify controls. As the function computes the sum of
 #' counts, this will allow to delete these blanks/controls for computation.
 #' @param sep The separator when method is set to "coordinates" (default "\\t").
@@ -1218,6 +1218,9 @@ setMethod("compute_k_ripley", signature("STGrid"),
 #' @return An object of class STGrid.
 #' @importFrom Seurat ReadVizgen
 #' @importFrom Seurat ReadXenium
+#' @importFrom Seurat ReadNanostring
+#' @importFrom R.utils isZero
+#' @importFrom data.table fread
 #' @details
 #' If method is set to 'coordinates' a flat file with ("x", "y", "gene"), ("x", "y", "feature") or ("x", "y", "cell")
 #' expected for path. If method is set to 'merscope_csv' the transcript csv file exported by Merscope should be provided
@@ -1233,7 +1236,8 @@ load_spatial <- function(path = "",
                          method = c("coordinates",
                                     "merscope",
                                     "merscope_csv",
-                                    "xenium"),
+                                    "xenium",
+                                    "cosmx"),
                          bin_size = 25,
                          control = NULL,
                          sep="\t",
@@ -1245,6 +1249,9 @@ load_spatial <- function(path = "",
 
   print_this_msg("Technology is '", method, "'.")
   print_this_msg("Loading data from file:", path)
+
+  # Force the use of R.utils
+  out <- R.utils::isZero(0)
 
   if (method == "merscope") {
     spat_input <-
@@ -1262,7 +1269,15 @@ load_spatial <- function(path = "",
     if (is.null(control))
       control <-  "(NegControl)|(^BLANK)"
 
-  } else if(method == "merscope_csv"){
+  }else if (method == "cosmx") {
+    spat_input <-
+      Seurat::ReadNanostring(data.dir = path, type = "centroids")
+    spat_input <- spat_input$pixels[, c("x", "y", "gene")]
+
+    if (is.null(control))
+      control <-  "^NegPrb"
+
+  }else if(method == "merscope_csv"){
     check_this_file(path, mode = "read")
     spat_input <- as.data.frame(data.table::fread(path,
                                     sep = sep,
@@ -1749,6 +1764,7 @@ setMethod("get_coord", "STGrid",
 #' @param no_legend Whether to discard legend.
 #' @param size The size of the labels.
 #' @param colors A set of colors for the classes.
+#' @param return_tree Logical. Whether to return the tree not the plot.
 #' @examples
 #' example_dataset()
 #' p <- hc_tree(Xenium_Mouse_Brain_Coronal_7g)
@@ -1773,7 +1789,8 @@ setGeneric("hc_tree",
                     lab_fontsize=3.88,
                     lab_barsize=2,
                     geom_label=c('text', 'label', 'shadowtext'),
-                    no_legend=FALSE)
+                    no_legend=FALSE,
+                    return_tree=FALSE)
              standardGeneric("hc_tree"))
 
 #' @title Create a tree from an STGrid object
@@ -1794,6 +1811,8 @@ setGeneric("hc_tree",
 #' @param lab_barsize Bar label size.
 #' @param geom_label Label fomat.
 #' @param no_legend Whether to discard legend.
+#' @param return_tree Logical. Whether to return the tree not the plot. In fact a list with the tree
+#' and associated clusters.
 #' @importFrom ggtree ggtree geom_hilight geom_tippoint geom_tiplab MRCA geom_cladelab
 #' @importFrom ggnewscale new_scale_fill
 #' @importFrom ggplot2 aes scale_color_viridis_d scale_fill_manual
@@ -1827,7 +1846,8 @@ setMethod("hc_tree", "STGrid",
                    lab_fontsize=3.88,
                    lab_barsize=2,
                    geom_label=c('text', 'label', 'shadowtext'),
-                   no_legend=FALSE
+                   no_legend=FALSE,
+                   return_tree=FALSE
                    ) {
 
             method <- match.arg(method)
@@ -1946,7 +1966,7 @@ setMethod("hc_tree", "STGrid",
 
             if(class_label){
               p <- p + ggtree::geom_cladelab(data=annotation,
-                                     mapping = aes(node=id,
+                                     mapping = ggplot2::aes(node=id,
                                                    label=Class,
                                                    color=Class),
                                      geom=geom_label,
@@ -1961,7 +1981,13 @@ setMethod("hc_tree", "STGrid",
             if(no_legend)
               p <- p + theme(legend.position="none")
 
-            return(p)
+            if(return_tree){
+              return(list(hc_clust, tree_classes, annotation, p))
+            }else{
+              return(p)
+            }
+
+
 
           })
 
