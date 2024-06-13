@@ -1,5 +1,6 @@
 MAKEFILE=Makefile
 VERSION=0.0.5
+PANDOC=/Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/x86_64
 
 .PHONY: help
 
@@ -17,8 +18,7 @@ help:
 	@echo ""
 
 clean:
-	@rm -f src/*.o src/*.so; rm -f STarlight.Rcheck/dbfmcl/libs/dbfmcl.so; rm -rf ./dbfmcl.Rcheck; rm -rf ..Rcheck, rm -rf ./..Rcheck/
-	@rm -rf /tmp/dbfmcl; rm -rf *dbf_out.txt; rm -rf *mcl_out.txt  rm -rf ./STarlight.Rcheck
+	@rm -rf ./STarlight.Rcheck
 	@rm -f tests/testthat/Rplot*; rm -rf tests/testthat/_snaps
 	@rm -f *~
 
@@ -32,14 +32,18 @@ run_example:
 checkfast: clean
 	@rm -rf /tmp/STarlight; mkdir -p /tmp/STarlight; cp -r ./* /tmp/STarlight; cd /tmp/STarlight; \
 	rm -f src/*.o src/*.so; rm -f check; \
-	R CMD build --no-build-vignettes --no-stop-on-test-error . ; \
-	R CMD check STarlight_* .
+	R CMD build --no-build-vignettes --no-stop-on-test-error . && R CMD check $${ls -t . | head -n1}
+
+build_and_check: doc
+	rm -f check; echo ">>>Building"; R CMD build . ;  echo ">>>Checking"; R CMD check `ls -t . | head -n1`
+
+all: build_and_check
 
 doc:
 	@echo ">>> Creating a package documentation"
 	@echo ">>> Deleting NAMESPACE and man"
-	@rm -Rf NAMESPACE man;
-	@echo "library(roxygen2); roxygen2::roxygenise()" | R --slave
+	rm -Rf NAMESPACE man;
+	echo "library(roxygen2); roxygen2::roxygenise()" | R --slave
 
 install:
 	@echo ">>> Installing..."
@@ -94,11 +98,15 @@ readme: clean
 	@ echo "- Rebuilting README.md from README.Rmd"
 	@ echo "devtools::build_readme()" | R --slave
 
+build_vignette_as_pdf: clean
+	@ echo "Sys.setenv(RSTUDIO_PANDOC='$(PANDOC)'); rmarkdown::render('vignettes/usage.Rmd', 'pdf_document')" | R --slave
+	@ mv vignettes/usage.pdf inst/doc
+
 doc_html:
 	@ echo "#-----------------------------------------------#"
 	@ echo "# Building doc                                  #"
 	@ echo "#-----------------------------------------------#"
-	@ echo "Sys.setenv(RSTUDIO_PANDOC='/Applications/RStudio.app/Contents/Resources/app/quarto/bin/toolslibrary'); library(knitr); pkgdown::build_site()" | R --slave
+	@ echo "Sys.setenv(RSTUDIO_PANDOC='$(PANDOC)'); library(knitr); pkgdown::build_site()" | R --slave
 	@ git add -u
 	@ git commit -m "Updated html doc to $(VERSION)."
 
