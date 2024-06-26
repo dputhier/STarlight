@@ -7,6 +7,12 @@ vignette: >
   %\VignetteEngine{knitr::knitr}
   %\VignetteIndexEntry{Guided tutorial}
   %\usepackage[UTF-8]{inputenc}
+  html_document:
+  fig_caption: yes
+  highlight: zenburn
+  theme: cerulean
+  toc: no
+  toc_depth: 3
 ---
 
 ```{r, include = FALSE}
@@ -17,7 +23,25 @@ knitr::opts_chunk$set(
 ```
 
 
-```{r loadlib}
+# About
+
+Spatial transcriptomics (ST) enables the spatially resolved measurement of gene expression within tissue sections, providing valuable insights into the spatial organization of biological processes. Assigning RNA molecules to cells using a segmentation process is generally the first step in the analysis. This approach can be tricky for a number of reasons, including high cell density, the absence or poor quality of surface labelling, etc. Thus cell-segmentation is frequently performed in selected and very sparse areas which impedes having a global view of the results at the tissue level.
+The `STarlight` package is intended to perform analysis of imaging-based ST (*e.g.* Merscope, Xenium or CosMx) and bypasses cell-segmentation by applying a grid-based approach. This complementary approach allows to get a global view of the whole experiment.
+The `load_spatial()`is the entry point of the `STarlight` package It will load the molecule coordinates and create a 2D binned grid with default size 25µm.
+
+# Loading libraries
+
+```{r loading1, echo=FALSE, eval=TRUE, warning=FALSE, results='hide'}
+suppressMessages(suppressWarnings(library(magrittr, quietly = TRUE)))
+suppressMessages(suppressWarnings(library(Seurat, quietly = TRUE)))
+suppressMessages(suppressWarnings(library(STarlight, quietly = TRUE)))
+STarlight::set_verb_level(0)
+suppressMessages(suppressWarnings(library(patchwork, quietly = TRUE)))
+suppressMessages(suppressWarnings(library(ggplot2, quietly = TRUE)))
+suppressMessages(suppressWarnings(library(dplyr, quietly = TRUE)))
+```
+
+```{r loading2, echo=TRUE, eval=FALSE}
 library(magrittr)
 library(Seurat)
 library(STarlight)
@@ -25,14 +49,7 @@ STarlight::set_verb_level(0)
 library(patchwork)
 library(ggplot2)
 library(dplyr)
-
-
 ```
-
-# About
-
-Spatial transcriptomics (ST) enables the spatially resolved measurement of gene expression within tissue sections, providing valuable insights into the spatial organization of biological processes. Assigning RNA molecules to cells using a segmentation process is generally the first step in the analysis. This approach can be tricky for a number of reasons, including high cell density, the absence or poor quality of surface labelling, etc. `STarlight` package is intended to propose an alternative to cell-segmentation based analysis of imaging-based ST (*e.g.* Merscope, Xenium or CosMx) for user working with gene-panel markers. To this aim, `STarlight` proposes an analysis based on fixed-size tiling (sometimes referred as 'rasterization'). The `load_spatial()`is the entry point of the `STarlight` package It will load the molecule coordinates and create a 2D binned grid with default size 25µm.
-
 
 # Retrieving the dataset
 
@@ -54,10 +71,9 @@ download.file(url_data, destfile = dest_file)
 
 # Loading data
 
-Here we load the data considering that the Xenium dataset is a simple csv flat file. If the full result directory is available you may use method="xenium" and provide the path to the directory as argument to 'path'.
+Here we load the data considering that the Xenium dataset is a simple csv flat file containing coordinates. If the full result directory is available you may use method="xenium" and provide the path to the directory as argument to 'path'.
 
 ```{r loadfile}
-
 st_obj <- load_spatial(path = dest_file, 
              method = "coordinates", 
              sep=",", 
@@ -66,8 +82,6 @@ st_obj <- load_spatial(path = dest_file,
                          y="y_location"), 
                          bin_size = 25, 
             control = "(NegControl)|(^BLANK)", verbose = FALSE)
-
-##
 ```
 
 
@@ -78,15 +92,13 @@ The Spatial Transcriptomic Grid class (STGrid), serves as a fundamental structur
 ```{r show, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
 STarlight::set_verb_level(1)
 st_obj
-STarlight::set_verb_level(0)
 ```
-```{r summary}
-summary(st_obj)
-```
+Here are the slots contained in the objects.
 
 ```{r slots, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
 slotNames(st_obj)
 ```
+As shown below, the STGrid object supports implements numerous methods. 
 
 ```{r show_st_methods, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
 STarlight::show_st_methods()
@@ -200,7 +212,8 @@ hc_st
 ```
 
 ```{r}
-hc_st$tree_classes
+# The first 3 modules
+hc_st$tree_classes[1:3]
 ```
 
 Computing average module score:
