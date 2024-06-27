@@ -18,16 +18,21 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>", 
+  fig.align = "center" 
 )
 ```
 
+<style>
+body {
+text-align: justify}
+</style>
 
-# About
+# Overview
 
-Spatial transcriptomics (ST) enables the spatially resolved measurement of gene expression within tissue sections, providing valuable insights into the spatial organization of biological processes. Assigning RNA molecules to cells using a segmentation process is generally the first step in the analysis. This approach can be tricky for a number of reasons, including high cell density, the absence or poor quality of surface labelling, etc. Thus cell-segmentation is frequently performed in selected and very sparse areas which impedes having a global view of the results at the tissue level.
-The `STarlight` package is intended to perform analysis of imaging-based ST (*e.g.* Merscope, Xenium or CosMx) and bypasses cell-segmentation by applying a grid-based approach. This complementary approach allows to get a global view of the whole experiment.
-The `load_spatial()`is the entry point of the `STarlight` package It will load the molecule coordinates and create a 2D binned grid with default size 25µm.
+Spatial transcriptomics (ST) enables researchers to spatially resolved gene expression within tissue sections, providing valuable insights into the spatial organization of cells and biological processes. Cell segmentation followed by transcript partitioning are generally the first steps performed when analyzing imaging-based ST data. This approach can be tricky for a number of reasons, including high cell density and oftentimes complex cell shapes as well as the absence or poor quality of surface labeling. Consequently, cell segmentation is often performed in sparse areas, but this prevents researchers from spatially resolving tissue architecture at the global scale
+
+The `STarlight` package is an R package for cell segmentation-free analysis of imaging-based spatial transcriptomics data (*e.g.* Merscope, Xenium or CosMx). It leverages a grid-based approach that bypasses cell-segmentation, facilitating exploratory analysis and multi-sample comparisons.  
 
 # Loading libraries
 
@@ -53,7 +58,7 @@ library(dplyr)
 
 # Retrieving the dataset
 
-Here, for demonstration purpose, we are using a subset (64 genes) of a 10x Genomics dataset tiny dataset used for Xenium Explorer Demo. The analyzed region corresponds to a fresh frozen section of the mouse Brain. The original dataset can be downloaded from [here](https://www.10xgenomics.com/resources/datasets/fresh-frozen-mouse-brain-for-xenium-explorer-demo-1-standard). 
+We are going to be using a subset (64 genes) of a 10x Genomics dataset taken from the Xenium Explorer Demo. The region corresponds to a fresh frozen mouse brain coronal section. The original dataset can be downloaded [here](https://www.10xgenomics.com/resources/datasets/fresh-frozen-mouse-brain-for-xenium-explorer-demo-1-standard). 
 
 
 ```{r}
@@ -69,9 +74,9 @@ download.file(url_data, destfile = dest_file)
 
 ```
 
-# Loading data
+# Loading the data
 
-Here we load the data considering that the Xenium dataset is a simple csv flat file containing coordinates. If the full result directory is available you may use method="xenium" and provide the path to the directory as argument to 'path'.
+The `load_spatial()` function is the entry point of the `STarlight` package. It will load molecule coordinates and create a 2D binned grid (default size of 25µm). Since we are working with a csv flat file containing x/y coordinates and gene names we do not need to specify the argument method. If you have access to the full Xenium directory, you can use the arguments method="xenium" and path="path/to/directory" to load the data. 
 
 ```{r loadfile}
 st_obj <- load_spatial(path = dest_file, 
@@ -87,7 +92,7 @@ st_obj <- load_spatial(path = dest_file,
 
 # The STGrid object
 
-The Spatial Transcriptomic Grid class (STGrid), serves as a fundamental structure for representing spatial transcriptomic analysis results. It provides a structured framework for managing and analyzing spatial transcriptomic data, facilitating comprehensive exploration and interpretation of spatial gene expression patterns within tissue sections.
+The Spatial Transcriptomic Grid class (STGrid) is a structured framework for managing and analyzing your data. It facilitates the exploration and interpretation of spatial gene expression patterns within tissue sections.
 
 ```{r show, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
 STarlight::set_verb_level(1)
