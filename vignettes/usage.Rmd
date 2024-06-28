@@ -76,7 +76,8 @@ download.file(url_data, destfile = dest_file)
 
 # Loading the data
 
-The `load_spatial()` function is the entry point of the `STarlight` package. It will load molecule coordinates and create a 2D binned grid (default size of 25µm). Since we are working with a csv flat file containing x/y coordinates and gene names we do not need to specify the argument method. If you have access to the full Xenium directory, you can use the arguments method="xenium" and path="path/to/directory" to load the data. 
+The `load_spatial()` function is the entry point of the `STarlight` package. It allows you to load molecule coordinates and create a 2D binned grid (default size of 25µm). Since we are working with a csv flat file containing x/y coordinates and gene names we do not need to specify the argument `method`. If you have access to the full Xenium directory, you can use the arguments `method="xenium"` and `path="path/to/directory"` to load the data.
+
 
 ```{r loadfile}
 st_obj <- load_spatial(path = dest_file, 
@@ -89,6 +90,13 @@ st_obj <- load_spatial(path = dest_file,
             control = "(NegControl)|(^BLANK)", verbose = FALSE)
 ```
 
+## Side note
+
+Using the argument `control` in the `load_spatial` function above allows users to directly remove the blank/control probes from their data before creating the binned grid. If users choose to keep this information, the probes can later be removed via the following. 
+
+```{r delete, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
+st_obj <- rm_controls(st_obj)
+```
 
 # The STGrid object
 
@@ -98,12 +106,12 @@ The Spatial Transcriptomic Grid class (STGrid) is a structured framework for man
 STarlight::set_verb_level(1)
 st_obj
 ```
-Here are the slots contained in the objects.
+Here are the slots contained in the object.
 
 ```{r slots, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
 slotNames(st_obj)
 ```
-As shown below, the STGrid object supports implements numerous methods. 
+Multiple methods are supported by the STGrid object. 
 
 ```{r show_st_methods, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
 STarlight::show_st_methods()
@@ -111,65 +119,55 @@ STarlight::show_st_methods()
 
 ## Subsetting
 
-The subsetting function, implemented as a method for the "[" operator in the STGrid class, provides a versatile means of extracting subsets of data from an STGrid object. This function is designed to facilitate the extraction of specific genes or regions within the spatial transcriptomic data, allowing users to focus their analysis on relevant subsets of the dataset.
+We've made it easy for users to subset data in their STGrid object using the "[" operator. This is designed to facilitate the extraction of specific genes or regions for a more focused analysis.
 
 ### Subsetting using bin_x / bin_y
 
-We can explore the binning information stored within our `st_obj` STGrid object using the `bin_x()` and `bin_y()` methods. Let's take a look at the first few entries of the bin_x and bin_y vectors:
+We can explore the binning information stored within our STGrid object using `bin_x()` and `bin_y()`. Let's take a look at the first few entries of the bin_x and bin_y vectors:
 
+This command retrieves the first few entries of the bin_x vector (bins along the x-axis).
 ```{r binx_1, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
 head(bin_x(st_obj))
 ```
 
-This command retrieves the first few entries of the bin_x vector, providing insights into the bins along the x-axis.
-
+Similarly, this command retrieves the first few entries of the `bin_y` vector (bins along the y-axis).
 ```{r binx_2, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
 head(bin_y(st_obj))
 ```
 
-Similarly, this command retrieves the first few entries of the `bin_y` vector, offering insights into the bins along the y-axis. Now, let's leverage the subsetting function to extract data corresponding to specific bins along the x-axis. Here, we retrieve data associated with bins ranging from the 50th to the 100th entry of the bin_x vector:
+We can leverage the subsetting function to extract data corresponding to specific bins along the x-axis (i.e. bins from the 50th to the 100th entry of the bin_x vector). The following command extracts a subset of the data and saves it to a new STGrid object.
 
 ```{r binx_3, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
-st_obj[bin_x(st_obj)[50:100], ]
+subset <- st_obj[bin_x(st_obj)[50:100], ]
 ```
-
-This command retrieves data from the STGrid object `st_obj` corresponding to the specified range of bins along the x-axis, providing a subset of spatial transcriptomic data for further analysis.
 
 ### Subsetting using genes
 
-We can retrieve spatial transcriptomic data associated with specific genes from our st_obj STGrid object using the subsetting operator. Here we extract data corresponding to the "Rag1" and "Cd3e" genes:
+We can also extract data associated to specific genes from our STGrid object using the subsetting operator. Here we extract data corresponding to the genes "Chat" and "Cbln4":
 
 ```{r genes, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
 st_obj[c("Chat", "Cbln4"), ]
 ```
 
-We may also remove all control probes from the STGrid object to focus our analysis on genes with meaningful expression levels.
+### Subsetting using numeric indices
 
-```{r delete, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
-st_obj <- rm_controls(st_obj)
-```
-
-### Subsetting using numeric
-
-We can retrieve spatial transcriptomic data based on the position of genes within the `feat_names()` vector of our `st_obj` STGrid object. Let's extract data for the first 10 genes according to their position in the feat_names() vector:
+We can retrieve data based on the position of genes within the `feat_names()` vector of our STGrid object. Let's extract data for the first 10 genes according to their position in the `feat_names()` vector:
 
 ```{r numerics_1, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
 st_obj[feat_names(st_obj)[1:10], ]
 ```
 
-Next, let's explore data for the 10th to 12th genes using numeric indices. To begin, let's determine the total number of genes in our STGrid object:
+Users can also explore data for the 10th to 12th genes using numeric indices. We first start by determining the total number of genes in our STGrid object:
 
 ```{r numerics_2, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
 nb_feat(st_obj)
 ```
 
-With this information, we can retrieve data for the 10th to 12th genes:
+We then retrieve data for genes positioned 10 through 12 in the `feat_names()` vector.
 
 ```{r index_10_12, echo = TRUE, eval=TRUE, warning=FALSE, results='hide'}
 st_obj[10:12, ]
 ```
-
-This command retrieves spatial transcriptomic data for genes positioned 10 through 12 in the `feat_names()` vector, facilitating targeted analysis of specific gene subsets.
 
 ## Image Visualization
 
