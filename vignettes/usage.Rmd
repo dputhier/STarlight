@@ -342,7 +342,7 @@ st_obj_r2_2 <- st_obj[x_bins, y_bins]
 
 Here are the datasets were are working with:
 
-```{r compare_count_distribution, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=3, fig.width=4}
+```{r compare_count_distribution, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=3, fig.width=3}
 cmp_images(st_obj_r1_1,
            st_obj_r1_2,
            st_obj_r2_1, 
@@ -399,7 +399,7 @@ cmp <- stcompr(list(st_obj_r1_1,
 
 Here are the normalized counts:
 
-```{r cmp_boxplot, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=3, fig.width=2}
+```{r cmp_boxplot, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=3, fig.width=5}
 cmp_boxplot(cmp, transform = "log10", normalized = TRUE) + theme(
   legend.key.width = unit(0.10, "in"),
   legend.key.height = unit(0.10, "in"),
