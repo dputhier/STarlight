@@ -13,6 +13,8 @@ MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://cran.r-project.
 
 # STarlight repository
 
+<img src="https://raw.githubusercontent.com/dputhier/STarlight/main/inst/sticker/STarlight_logo.png?token=GHSAT0AAAAAACOGV6VOXNYCR4T6Z5F5MG74ZUD7JIQ" width="150"  align="right"/>
+
 ## :arrow_double_down: Installation
 
 ### From R
