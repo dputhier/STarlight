@@ -239,7 +239,7 @@ spatial_plot(
 
 The `hc_tree()` function can used to organize genes into subclusters (modules), revealing which genes tend to colocalize and follow a similar spatial distribution across the tissue section. 
 
-```{r gene_colocalization, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=3, fig.width=4}
+```{r gene_colocalization, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=4, fig.width=5}
 hc_st <- hc_tree(
   st_obj,
   method = "ward.D",
