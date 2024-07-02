@@ -1,6 +1,6 @@
 Package: STarlight
 Title: Comparison of imaging-based spatial transcriptomic datasets using a grid-based approach
-Version: 0.0.5
+Version: 0.0.6
 Depends: R (>= 4.0.0), methods
 biocViews: Transcriptomics, ReportWriting
 Authors@R: c(
