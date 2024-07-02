@@ -80,7 +80,7 @@ download.file(url_data, destfile = dest_file)
 
 # Loading the data
 
-The `load_spatial()` function is the entry point of the `STarlight` package. It allows you to load molecule coordinates and create a 2D binned grid (default size of 25µm) that will be stored in an S4 object of class STGrid. Since we are working with a csv flat file containing x/y coordinates and gene names we do not need to specify the argument `method`. If you have access to the full Xenium directory, you can use the arguments `method="xenium"` and `path="path/to/directory"` to load the data.
+The `load_spatial()` function is the entry point of the `STarlight` package. It allows you to load molecule coordinates and create a 2D binned grid (default size of 25µm) that will be stored in an S4 object of class STGrid. Since we are working with a csv flat file containing x/y molecular coordinates and gene names we do not need to specify the argument `method`. If you have access to the full Xenium directory, you can use the arguments `method="xenium"` and `path="path/to/directory"` to load the data.
 
 
 ```{r create_STGrid_object}
@@ -126,7 +126,7 @@ We've made it easy for users to subset data in their STGrid object using the "["
 
 ### Subsetting using bin_x / bin_y
 
-We can explore the binning information stored within our STGrid object using `bin_x()` and `bin_y()`. Let's take a look at the first few entries of the bin_x and bin_y vectors:
+We can explore the binning information stored within the STGrid object using `bin_x()` and `bin_y()`.
 
 This command retrieves the first few entries of the bin_x vector (bins along the x-axis).
 ```{r binx_1, echo = TRUE, eval=FALSE, warning=FALSE, results='hide'}
@@ -154,7 +154,7 @@ st_obj[c("Chat", "Cbln4"), ]
 
 ### Subsetting using numeric indices
 
-We can retrieve data based on the position of genes within the `feat_names()` vector of our STGrid object. Let's extract data for the first 10 genes according to their position in the `feat_names()` vector:
+We can retrieve data based on the position of genes within the `feat_names()` vector of the STGrid object. Let's extract data for the first 10 genes according to their position in the `feat_names()` vector:
 
 ```{r numerics_1, echo = TRUE, eval=FALSE, warning=FALSE, results='hide'}
 st_obj[feat_names(st_obj)[1:10], ]
@@ -176,7 +176,7 @@ st_obj[10:12, ]
 
 ## The spatial_image() function
 
-The `spatial_image()` function allows users to visualize the spatial density of molecules across tissue sections. For example, users can do the following if they want to visualize a single gene. The `grid=TRUE` argument overlays a bin of a specified size, which eases the selection of particular regions.
+The `spatial_image()` function allows users to visualize the spatial density of molecules across tissue sections. Users can do the following if they want to visualize a single gene. The `grid=TRUE` argument overlays a bin of a specified size, which eases the selection of particular regions.
 
 ```{r single_gene, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=3, fig.width=4}
 spatial_image(
@@ -215,7 +215,7 @@ spatial_image(
 
 ## The spatial_plot() function
 
-The `spatial_plot()` function can be used to create scatter plots of molecule x/y coordinates. We can choose to highlight other molecules potentially located in the vicinity of *Ano1*.
+The `spatial_plot()` function can be used to create scatter plots of molecular x/y coordinates. We can choose to highlight other molecules potentially located in the vicinity of *Ano1*.
 
 ```{r spatial_plot, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=3, fig.width=4}
 spatial_plot(
@@ -237,21 +237,23 @@ spatial_plot(
 
 ## Identifying co-localizing genes 
 
-The `hc_tree()` function can used to organize genes into subclusters (modules), revealing which genes tend to colocalize and follow a similar spatial distribution across the tissue section. 
+The `hc_tree()` function can used to organize genes into subclusters (modules), revealing which genes tend to colocalize and follow a similar spatial distribution across the tissue.  
 
-```{r gene_colocalization, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=5, fig.width=6}
+```{r gene_colocalization, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=5, fig.width=5, fig.asp=0.80}
 hc_st <- hc_tree(
   st_obj,
   method = "ward.D",
   layout = "circular",
   dist_method = "pearson",
-  class_nb = 20
+  class_nb = 20, 
+  lab_fontsize = 2.5,
+  offset = 9
 ) + theme(
   legend.key.width = unit(0.10, "in"),
   legend.key.height = unit(0.10, "in"),
   legend.text = element_text(size = 8),
   legend.title = element_text(size = 8)
-)
+) 
 
 hc_st
 ```
@@ -286,7 +288,7 @@ spatial_image(st_obj, features = hc_st$tree_classes[["MOD07"]], ncol = 3) + them
 )
 ```
 
-## Molecule clustering using K Ripley's function
+## Molecule clustering using Ripley's K function
 
 We've implemented the use of Ripley’s K function to assess if genes tend to be more concentrated or dispersed across the tissue. Users can use the `compute_k_ripley` function to get a list of genes whose molecules are spatially concentrated. For this tutorial, we chose to compute Ripley's K function for a few genes because this step is rather time consuming as the molecule density increases. 
 
@@ -340,7 +342,7 @@ y_bins <-  bin_y(st_obj)[80:130]
 st_obj_r2_2 <- st_obj[x_bins, y_bins]
 ```
 
-Here are the datasets were are working with:
+These are the datasets were are working with:
 
 ```{r compare_count_distribution, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=3, fig.width=3}
 cmp_images(st_obj_r1_1,
@@ -349,7 +351,7 @@ cmp_images(st_obj_r1_1,
            st_obj_r2_2,
            feat_list="count_sum",
            names=c("region_1_1", "region_1_2", "region_2_1", "region_2_2"),
-           color_y_strip=c("#3FA0FF", "#3FA0FF", "#ABF8FF", "#ABF8FF"),
+           color_y_strip=c("#3FA0FF", "#ABF8FF", "#EF6C00", "#FFB74D"),
            color_strip_text_y = "black",
            color_x_strip="#333333",
            colors = viridis::magma(10)
@@ -362,15 +364,18 @@ cmp_images(st_obj_r1_1,
   strip.text.y = element_text(size = 7)
 )
 ```
-And the count distribution for each replicate:
+We can visualize the count distribution for each replicate:
 
 ```{r violin_plot, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=3, fig.width=4}
-dist_st(st_obj_r1_1,
-           st_obj_r1_2,
-           st_obj_r2_1, 
-           st_obj_r2_2,
-           transform = "log10", 
-           fill_color = c("#FF8000", "#1565C0", "#AB47BC", "#689F38")) + theme(
+dist_st(
+  st_obj_r1_1,
+  st_obj_r1_2,
+  st_obj_r2_1,
+  st_obj_r2_2,
+  transform = "log10",
+  fill_color = c("#3FA0FF", "#ABF8FF", "#EF6C00", "#FFB74D"),
+  names = c("region_1_1", "region_1_2", "region_2_1", "region_2_2")
+) + theme(
   legend.key.width = unit(0.10, "in"),
   legend.key.height = unit(0.10, "in"),
   legend.text = element_text(size = 8),
@@ -397,19 +402,25 @@ cmp <- stcompr(list(st_obj_r1_1,
 
 ## Count distribution
 
-Here are the normalized counts:
+We can visualize the normalized count distribution for each replicate:
 
-```{r cmp_boxplot, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=3, fig.width=5}
-cmp_boxplot(cmp, transform = "log10", normalized = TRUE) + theme(
-  legend.key.width = unit(0.10, "in"),
-  legend.key.height = unit(0.10, "in"),
-  legend.text = element_text(size = 8),
-  legend.title = element_text(size = 8),
-  axis.title.x = element_text(size = 7),
-  axis.title.y = element_text(size = 7),
-  axis.text.x = element_text(size = 7),
-  axis.text.y = element_text(size = 7)
-)
+```{r cmp_boxplot, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=3, fig.width=4}
+cmp_boxplot(cmp,
+            transform = "log10",
+            normalized = TRUE) + theme(
+              legend.key.width = unit(0.10, "in"),
+              legend.key.height = unit(0.10, "in"),
+              legend.text = element_text(size = 8),
+              legend.title = element_text(size = 8),
+              axis.title.x = element_text(size = 7),
+              axis.title.y = element_text(size = 7),
+              axis.text.x = element_text(size = 7),
+              axis.text.y = element_text(size = 7)
+            ) + scale_fill_manual(
+              name = "Conditions",
+              labels = c("region_1_1", "region_1_2", "region_2_1", "region_2_2"),
+              values = c("#3FA0FF", "#ABF8FF", "#EF6C00", "#FFB74D")
+            )
 ```
 
 ## Count comparison
@@ -435,7 +446,7 @@ cmp_volcano(
   title = element_text(size = 8)
 )
 ```
-Using the `cmp_images()` function, we can map these genes to see how they spatially differ across regions. 
+Using the `cmp_images()` function, we map these genes to see how they spatially differ across regions. 
 
 ```{r cmp_images, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=4, fig.width=4, fig.asp=1}
 genes <- cmp@stat_test %>%
@@ -450,7 +461,7 @@ cmp_images(
   st_obj_r2_2,
   feat_list = genes,
   names = c("region_1_1", "region_1_2", "region_2_1", "region_2_2"),
-  color_y_strip = c("#3FA0FF", "#3FA0FF", "#ABF8FF", "#ABF8FF"),
+  color_y_strip = c("#3FA0FF", "#ABF8FF", "#EF6C00", "#FFB74D"),
   color_strip_text_y = "black",
   color_x_strip = c("#558B2F", "#558B2F", "#C5E1A5", "#C5E1A5", "#C5E1A5"),
   color_strip_text_x = "black",
