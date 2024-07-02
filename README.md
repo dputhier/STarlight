@@ -12,7 +12,7 @@ MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://cran.r-project.
 [![](https://codecov.io/gh/dputhier/STarlight/branch/main/graph/badge.svg)](https://codecov.io/gh/dputhier/STarlight)
 
 
-<img src="https://raw.githubusercontent.com/dputhier/STarlight/main/inst/sticker/STarlight_logo.png?token=GHSAT0AAAAAACOGV6VOXNYCR4T6Z5F5MG74ZUD7JIQ" width="150"  align="right"/>
+<img src="https://raw.githubusercontent.com/dputhier/STarlight/main/inst/sticker/STarlight_logo.png?token=GHSAT0AAAAAACOGV6VPIYOYZT2G65MYY6KKZUD7S3A" width="150"  align="right"/>
 
 # STarlight repository
 
