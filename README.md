@@ -1,4 +1,4 @@
-lo<!-- README.md is generated from README.Rmd using devtools::build_readme(). Please edit that file -->
+<!-- README.md is generated from README.Rmd using devtools::build_readme(). Please edit that file -->
 <!-- <img src="https://raw.githubusercontent.com/dputhier/starlight/main/inst/sticker/starlight_logo.png" width="150"  align="right"/> -->
 
 
