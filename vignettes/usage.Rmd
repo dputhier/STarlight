@@ -435,8 +435,7 @@ cmp_volcano(
   title = element_text(size = 8)
 )
 ```
-
-We can map these genes to see how they differ across conditions using the `cmp_images()` function:
+Using the `cmp_images()` function, we can map these genes to see how they spatially differ across regions. 
 
 ```{r cmp_images, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=4, fig.width=4, fig.asp=1}
 genes <- cmp@stat_test %>%
