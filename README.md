@@ -36,5 +36,5 @@ Then load the library within R.
 
 ## :book: Documentation
 
-Documentation (in progress) is available at
+Documentation is available at
 <https://dputhier.github.io/STarlight/>.
