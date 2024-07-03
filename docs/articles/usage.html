@@ -151,9 +151,9 @@ downloaded <a href="https://www.10xgenomics.com/resources/datasets/fresh-frozen-
 <code>STarlight</code> package. It allows you to load molecule
 coordinates and create a 2D binned grid (default size of 25µm) that will
 be stored in an S4 object of class STGrid. Since we are working with a
-csv flat file containing x/y coordinates and gene names we do not need
-to specify the argument <code>method</code>. If you have access to the
-full Xenium directory, you can use the arguments
+csv flat file containing x/y molecular coordinates and gene names we do
+not need to specify the argument <code>method</code>. If you have access
+to the full Xenium directory, you can use the arguments
 <code>method="xenium"</code> and <code>path="path/to/directory"</code>
 to load the data.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
@@ -229,9 +229,8 @@ specific genes or regions for a more focused analysis.</p>
 <div class="section level4">
 <h4 id="subsetting-using-bin_x-bin_y">Subsetting using bin_x / bin_y<a class="anchor" aria-label="anchor" href="#subsetting-using-bin_x-bin_y"></a>
 </h4>
-<p>We can explore the binning information stored within our STGrid
-object using <code><a href="../reference/bin_x.html">bin_x()</a></code> and <code><a href="../reference/bin_y.html">bin_y()</a></code>. Let’s take a
-look at the first few entries of the bin_x and bin_y vectors:</p>
+<p>We can explore the binning information stored within the STGrid
+object using <code><a href="../reference/bin_x.html">bin_x()</a></code> and <code><a href="../reference/bin_y.html">bin_y()</a></code>.</p>
 <p>This command retrieves the first few entries of the bin_x vector
 (bins along the x-axis).</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
@@ -260,7 +259,7 @@ extract data corresponding to the genes <em>Chat</em> and
 <h4 id="subsetting-using-numeric-indices">Subsetting using numeric indices<a class="anchor" aria-label="anchor" href="#subsetting-using-numeric-indices"></a>
 </h4>
 <p>We can retrieve data based on the position of genes within the
-<code><a href="../reference/feat_names.html">feat_names()</a></code> vector of our STGrid object. Let’s extract
+<code><a href="../reference/feat_names.html">feat_names()</a></code> vector of the STGrid object. Let’s extract
 data for the first 10 genes according to their position in the
 <code><a href="../reference/feat_names.html">feat_names()</a></code> vector:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
@@ -284,8 +283,8 @@ STGrid object:</p>
 <h3 id="the-spatial_image-function">The spatial_image() function<a class="anchor" aria-label="anchor" href="#the-spatial_image-function"></a>
 </h3>
 <p>The <code><a href="../reference/spatial_image.html">spatial_image()</a></code> function allows users to visualize
-the spatial density of molecules across tissue sections. For example,
-users can do the following if they want to visualize a single gene. The
+the spatial density of molecules across tissue sections. Users can do
+the following if they want to visualize a single gene. The
 <code>grid=TRUE</code> argument overlays a bin of a specified size,
 which eases the selection of particular regions.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
@@ -330,7 +329,7 @@ region.</p>
 <h3 id="the-spatial_plot-function">The spatial_plot() function<a class="anchor" aria-label="anchor" href="#the-spatial_plot-function"></a>
 </h3>
 <p>The <code><a href="../reference/spatial_plot.html">spatial_plot()</a></code> function can be used to create
-scatter plots of molecule x/y coordinates. We can choose to highlight
+scatter plots of molecular x/y coordinates. We can choose to highlight
 other molecules potentially located in the vicinity of
 <em>Ano1</em>.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
@@ -358,23 +357,25 @@ other molecules potentially located in the vicinity of
 </h3>
 <p>The <code><a href="../reference/hc_tree.html">hc_tree()</a></code> function can used to organize genes into
 subclusters (modules), revealing which genes tend to colocalize and
-follow a similar spatial distribution across the tissue section.</p>
+follow a similar spatial distribution across the tissue.</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">hc_st</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/hc_tree.html">hc_tree</a></span><span class="op">(</span></span>
 <span>  <span class="va">st_obj</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"ward.D"</span>,</span>
 <span>  layout <span class="op">=</span> <span class="st">"circular"</span>,</span>
 <span>  dist_method <span class="op">=</span> <span class="st">"pearson"</span>,</span>
-<span>  class_nb <span class="op">=</span> <span class="fl">20</span></span>
+<span>  class_nb <span class="op">=</span> <span class="fl">20</span>, </span>
+<span>  lab_fontsize <span class="op">=</span> <span class="fl">2.5</span>,</span>
+<span>  offset <span class="op">=</span> <span class="fl">9</span></span>
 <span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span></span>
 <span>  legend.key.width <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grid/unit.html" class="external-link">unit</a></span><span class="op">(</span><span class="fl">0.10</span>, <span class="st">"in"</span><span class="op">)</span>,</span>
 <span>  legend.key.height <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grid/unit.html" class="external-link">unit</a></span><span class="op">(</span><span class="fl">0.10</span>, <span class="st">"in"</span><span class="op">)</span>,</span>
 <span>  legend.text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">8</span><span class="op">)</span>,</span>
 <span>  legend.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
+<span><span class="op">)</span> </span>
 <span></span>
 <span><span class="va">hc_st</span></span></code></pre></div>
-<p><img src="usage_files/figure-html/gene_colocalization-1.png" width="900" style="display: block; margin: auto;"></p>
+<p><img src="usage_files/figure-html/gene_colocalization-1.png" width="750" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># The first 3 modules</span></span>
 <span><span class="va">hc_st</span><span class="op">$</span><span class="va">tree_classes</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span>
@@ -418,7 +419,7 @@ We can also plot the genes belonging to a specific module.</p>
 <p><img src="usage_files/figure-html/map_genes_specific_module-1.png" width="600" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level3">
-<h3 id="molecule-clustering-using-k-ripleys-function">Molecule clustering using K Ripley’s function<a class="anchor" aria-label="anchor" href="#molecule-clustering-using-k-ripleys-function"></a>
+<h3 id="molecule-clustering-using-ripleys-k-function">Molecule clustering using Ripley’s K function<a class="anchor" aria-label="anchor" href="#molecule-clustering-using-ripleys-k-function"></a>
 </h3>
 <p>We’ve implemented the use of Ripley’s K function to assess if genes
 tend to be more concentrated or dispersed across the tissue. Users can
@@ -482,7 +483,7 @@ two close regions).</p>
 <span><span class="va">x_bins</span> <span class="op">&lt;-</span>  <span class="fu"><a href="../reference/bin_x.html">bin_x</a></span><span class="op">(</span><span class="va">st_obj</span><span class="op">)</span><span class="op">[</span><span class="fl">50</span><span class="op">:</span><span class="fl">90</span><span class="op">]</span></span>
 <span><span class="va">y_bins</span> <span class="op">&lt;-</span>  <span class="fu"><a href="../reference/bin_y.html">bin_y</a></span><span class="op">(</span><span class="va">st_obj</span><span class="op">)</span><span class="op">[</span><span class="fl">80</span><span class="op">:</span><span class="fl">130</span><span class="op">]</span></span>
 <span><span class="va">st_obj_r2_2</span> <span class="op">&lt;-</span> <span class="va">st_obj</span><span class="op">[</span><span class="va">x_bins</span>, <span class="va">y_bins</span><span class="op">]</span></span></code></pre></div>
-<p>Here are the datasets were are working with:</p>
+<p>These are the datasets were are working with:</p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/cmp_images.html">cmp_images</a></span><span class="op">(</span><span class="va">st_obj_r1_1</span>,</span>
 <span>           <span class="va">st_obj_r1_2</span>,</span>
@@ -490,7 +491,7 @@ two close regions).</p>
 <span>           <span class="va">st_obj_r2_2</span>,</span>
 <span>           feat_list<span class="op">=</span><span class="st">"count_sum"</span>,</span>
 <span>           names<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"region_1_1"</span>, <span class="st">"region_1_2"</span>, <span class="st">"region_2_1"</span>, <span class="st">"region_2_2"</span><span class="op">)</span>,</span>
-<span>           color_y_strip<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"#3FA0FF"</span>, <span class="st">"#3FA0FF"</span>, <span class="st">"#ABF8FF"</span>, <span class="st">"#ABF8FF"</span><span class="op">)</span>,</span>
+<span>           color_y_strip<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"#3FA0FF"</span>, <span class="st">"#ABF8FF"</span>, <span class="st">"#EF6C00"</span>, <span class="st">"#FFB74D"</span><span class="op">)</span>,</span>
 <span>           color_strip_text_y <span class="op">=</span> <span class="st">"black"</span>,</span>
 <span>           color_x_strip<span class="op">=</span><span class="st">"#333333"</span>,</span>
 <span>           colors <span class="op">=</span> <span class="fu">viridis</span><span class="fu">::</span><span class="fu"><a href="https://sjmgarnier.github.io/viridisLite/reference/viridis.html" class="external-link">magma</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span></span>
@@ -503,14 +504,17 @@ two close regions).</p>
 <span>  strip.text.y <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">7</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="usage_files/figure-html/compare_count_distribution-1.png" width="450" style="display: block; margin: auto;">
-And the count distribution for each replicate:</p>
+We can visualize the count distribution for each replicate:</p>
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/dist_st.html">dist_st</a></span><span class="op">(</span><span class="va">st_obj_r1_1</span>,</span>
-<span>           <span class="va">st_obj_r1_2</span>,</span>
-<span>           <span class="va">st_obj_r2_1</span>, </span>
-<span>           <span class="va">st_obj_r2_2</span>,</span>
-<span>           transform <span class="op">=</span> <span class="st">"log10"</span>, </span>
-<span>           fill_color <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"#FF8000"</span>, <span class="st">"#1565C0"</span>, <span class="st">"#AB47BC"</span>, <span class="st">"#689F38"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/dist_st.html">dist_st</a></span><span class="op">(</span></span>
+<span>  <span class="va">st_obj_r1_1</span>,</span>
+<span>  <span class="va">st_obj_r1_2</span>,</span>
+<span>  <span class="va">st_obj_r2_1</span>,</span>
+<span>  <span class="va">st_obj_r2_2</span>,</span>
+<span>  transform <span class="op">=</span> <span class="st">"log10"</span>,</span>
+<span>  fill_color <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"#3FA0FF"</span>, <span class="st">"#ABF8FF"</span>, <span class="st">"#EF6C00"</span>, <span class="st">"#FFB74D"</span><span class="op">)</span>,</span>
+<span>  names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"region_1_1"</span>, <span class="st">"region_1_2"</span>, <span class="st">"region_2_1"</span>, <span class="st">"region_2_2"</span><span class="op">)</span></span>
+<span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span></span>
 <span>  legend.key.width <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grid/unit.html" class="external-link">unit</a></span><span class="op">(</span><span class="fl">0.10</span>, <span class="st">"in"</span><span class="op">)</span>,</span>
 <span>  legend.key.height <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grid/unit.html" class="external-link">unit</a></span><span class="op">(</span><span class="fl">0.10</span>, <span class="st">"in"</span><span class="op">)</span>,</span>
 <span>  legend.text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">8</span><span class="op">)</span>,</span>
@@ -540,19 +544,28 @@ function.</p>
 <div class="section level3">
 <h3 id="count-distribution">Count distribution<a class="anchor" aria-label="anchor" href="#count-distribution"></a>
 </h3>
-<p>Here are the normalized counts:</p>
+<p>We can visualize the normalized count distribution for each
+replicate:</p>
 <div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/cmp_boxplot.html">cmp_boxplot</a></span><span class="op">(</span><span class="va">cmp</span>, transform <span class="op">=</span> <span class="st">"log10"</span>, normalized <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span></span>
-<span>  legend.key.width <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grid/unit.html" class="external-link">unit</a></span><span class="op">(</span><span class="fl">0.10</span>, <span class="st">"in"</span><span class="op">)</span>,</span>
-<span>  legend.key.height <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grid/unit.html" class="external-link">unit</a></span><span class="op">(</span><span class="fl">0.10</span>, <span class="st">"in"</span><span class="op">)</span>,</span>
-<span>  legend.text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">8</span><span class="op">)</span>,</span>
-<span>  legend.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">8</span><span class="op">)</span>,</span>
-<span>  axis.title.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">7</span><span class="op">)</span>,</span>
-<span>  axis.title.y <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">7</span><span class="op">)</span>,</span>
-<span>  axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">7</span><span class="op">)</span>,</span>
-<span>  axis.text.y <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">7</span><span class="op">)</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<p><img src="usage_files/figure-html/cmp_boxplot-1.png" width="750" style="display: block; margin: auto;"></p>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/cmp_boxplot.html">cmp_boxplot</a></span><span class="op">(</span><span class="va">cmp</span>,</span>
+<span>            transform <span class="op">=</span> <span class="st">"log10"</span>,</span>
+<span>            normalized <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span></span>
+<span>              legend.key.width <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grid/unit.html" class="external-link">unit</a></span><span class="op">(</span><span class="fl">0.10</span>, <span class="st">"in"</span><span class="op">)</span>,</span>
+<span>              legend.key.height <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grid/unit.html" class="external-link">unit</a></span><span class="op">(</span><span class="fl">0.10</span>, <span class="st">"in"</span><span class="op">)</span>,</span>
+<span>              legend.text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">8</span><span class="op">)</span>,</span>
+<span>              legend.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">8</span><span class="op">)</span>,</span>
+<span>              axis.title.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">7</span><span class="op">)</span>,</span>
+<span>              axis.title.y <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">7</span><span class="op">)</span>,</span>
+<span>              axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">7</span><span class="op">)</span>,</span>
+<span>              axis.text.y <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">7</span><span class="op">)</span></span>
+<span>            <span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_fill_manual</a></span><span class="op">(</span></span>
+<span>              name <span class="op">=</span> <span class="st">"Conditions"</span>,</span>
+<span>              labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"region_1_1"</span>, <span class="st">"region_1_2"</span>, <span class="st">"region_2_1"</span>, <span class="st">"region_2_2"</span><span class="op">)</span>,</span>
+<span>              values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"#3FA0FF"</span>, <span class="st">"#ABF8FF"</span>, <span class="st">"#EF6C00"</span>, <span class="st">"#FFB74D"</span><span class="op">)</span></span>
+<span>            <span class="op">)</span></span>
+<span><span class="co">#&gt; Scale for <span style="color: #00BB00;">fill</span> is already present.</span></span>
+<span><span class="co">#&gt; Adding another scale for <span style="color: #00BB00;">fill</span>, which will replace the existing scale.</span></span></code></pre></div>
+<p><img src="usage_files/figure-html/cmp_boxplot-1.png" width="600" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level3">
 <h3 id="count-comparison">Count comparison<a class="anchor" aria-label="anchor" href="#count-comparison"></a>
@@ -578,8 +591,8 @@ between both regions.</p>
 <span>  title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="usage_files/figure-html/cmp_volcano-1.png" width="600" style="display: block; margin: auto;">
-Using the <code><a href="../reference/cmp_images.html">cmp_images()</a></code> function, we can map these genes to
-see how they spatially differ across regions.</p>
+Using the <code><a href="../reference/cmp_images.html">cmp_images()</a></code> function, we map these genes to see
+how they spatially differ across regions.</p>
 <div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">genes</span> <span class="op">&lt;-</span> <span class="va">cmp</span><span class="op">@</span><span class="va">stat_test</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">log2_ratio</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">2.5</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
@@ -593,7 +606,7 @@ see how they spatially differ across regions.</p>
 <span>  <span class="va">st_obj_r2_2</span>,</span>
 <span>  feat_list <span class="op">=</span> <span class="va">genes</span>,</span>
 <span>  names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"region_1_1"</span>, <span class="st">"region_1_2"</span>, <span class="st">"region_2_1"</span>, <span class="st">"region_2_2"</span><span class="op">)</span>,</span>
-<span>  color_y_strip <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"#3FA0FF"</span>, <span class="st">"#3FA0FF"</span>, <span class="st">"#ABF8FF"</span>, <span class="st">"#ABF8FF"</span><span class="op">)</span>,</span>
+<span>  color_y_strip <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"#3FA0FF"</span>, <span class="st">"#ABF8FF"</span>, <span class="st">"#EF6C00"</span>, <span class="st">"#FFB74D"</span><span class="op">)</span>,</span>
 <span>  color_strip_text_y <span class="op">=</span> <span class="st">"black"</span>,</span>
 <span>  color_x_strip <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"#558B2F"</span>, <span class="st">"#558B2F"</span>, <span class="st">"#C5E1A5"</span>, <span class="st">"#C5E1A5"</span>, <span class="st">"#C5E1A5"</span><span class="op">)</span>,</span>
 <span>  color_strip_text_x <span class="op">=</span> <span class="st">"black"</span>,</span>
