@@ -13,15 +13,9 @@ MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://cran.r-project.
 
 STarlight leverages a grid-based strategy via a uniform binning of x/y molecular coordinates for cell segmentation-free analysis of imaging-based spatial transcriptomics data (*e.g.* Merscope, Xenium or CosMx)
 
-<style>
-.logo {
-width: 150px;
-}
-</style>
+<img src="https://github.com/dputhier/STarlight/assets/49205456/6b4da4b3-5be7-40de-95e3-80b851cce8db" style="float: center" class="logo" width="150">
 
-<img src="https://github.com/dputhier/STarlight/assets/49205456/6b4da4b3-5be7-40de-95e3-80b851cce8db" style="float: center" class="logo">
-
-## :arrow_double_down: Installation
+## Installation
 
 ### R
 
@@ -40,7 +34,11 @@ Then load the library within R.
 
     library(STarlight)
 
-## :book: Documentation
+## Documentation
 
 Documentation is available at
 <https://dputhier.github.io/STarlight/>.
+
+## Case study material
+Scripts used to produce the Merscope hepatocarcinoma case study figures are available at <https://github.com/dputhier/STarlight_article>. Merscope data used is from [Magen et al.](https://www.nature.com/articles/s41591-023-02345-0).
+
