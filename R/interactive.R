@@ -28,7 +28,7 @@
 #' @importFrom ggplot2 ggplot aes geom_point theme_bw scale_color_manual theme
 #'              element_text element_blank guide_legend geom_abline geom_segment
 #' @importFrom colourpicker colourInput
-#' @importFrom secr pointsInPolygon
+#' @importFrom sp point.in.polygon
 #' @importFrom utils write.table
 #' @importFrom stats na.omit
 #' @importFrom htmltools tags tagList h4
@@ -137,10 +137,10 @@ fov_selection <- function(object=NULL) {
 
 
     gg <- gg +
-      ggplot2::theme(legend.title = element_text(size=30,
+      ggplot2::theme(legend.title = ggplot2::element_text(size=30,
                                                  color="red",
                                                  family = "bold"),
-            legend.text = element_text(size=30),
+            legend.text = ggplot2::element_text(size=30),
             legend.position="top") +
       ggplot2::guides(colour = ggplot2::guide_legend(title="Color code:",
                                                      override.aes = list(size =
@@ -162,7 +162,7 @@ fov_selection <- function(object=NULL) {
         shiny::uiOutput("feature_select"),
         shiny::textInput(
           "sampling_ratio",
-          "Sampling ratio",
+          "Sampling ratio (for display)",
           value = "0.1"
         ),
         shiny::selectInput(
@@ -553,31 +553,19 @@ fov_selection <- function(object=NULL) {
           )
         )
 
-        # These points cound be inside the polygon:
-        x_min <- min(polygons$x)
-        x_max <- max(polygons$x)
-        y_min <- min(polygons$y)
-        y_max <- max(polygons$y)
-
-        my_val$DT$to_be_checked <- 0
-
-        test_1 <-
-          my_val$DT$color == "selected" &
-          my_val$DT$x > x_min & my_val$DT$x < x_max
-        test_2 <-
-          my_val$DT$color == "selected" &
-          my_val$DT$y > y_min & my_val$DT$y < y_max
-        my_val$DT[test_1 & test_2,]$to_be_checked <- 1
-
         print_this_msg("Checking whether points are inside the Polygon", msg_type = "DEBUG")
         print_this_msg("Wait this can be long...")
 
-        inside_poly <-
-          secr::pointsInPolygon(my_val$DT[my_val$DT$to_be_checked == 1, c("x", "y")],
-                                polygons[, c("x", "y")])
+        poi <- as.matrix(my_val$DT[ , c("x", "y")])
 
-        my_val$DT[my_val$DT$to_be_checked == 1,]$color[inside_poly] <-
-          "unselected"
+        inside_poly <-
+          sp::point.in.polygon(poi[, 1],
+                               poi[, 2],
+                               as.matrix(polygons)[, "x"],
+                               as.matrix(polygons)[, "y"])
+
+        inside_poly <- as.logical(inside_poly)
+        my_val$DT$color[inside_poly] <- "unselected"
 
         my_val$ggseg <- NULL
         my_val$polygon <- NULL
