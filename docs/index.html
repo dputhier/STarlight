@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">STarlight</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.0.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.0.7</span>
       </span>
     </div>
 
@@ -77,33 +77,38 @@
 
 
 <div class="section level1">
-<div class="page-header"><h1 id="starlight-repository">STarlight repository<a class="anchor" aria-label="anchor" href="#starlight-repository"></a>
+<div class="page-header"><h1 id="starlight">STarlight<a class="anchor" aria-label="anchor" href="#starlight"></a>
 </h1></div>
+<p>STarlight leverages a grid-based strategy via a uniform binning of x/y molecular coordinates for cell segmentation-free analysis of imaging-based spatial transcriptomics data (<em>e.g.</em> Merscope, Xenium or CosMx)</p>
+<p><img src="https://github.com/dputhier/STarlight/assets/49205456/6b4da4b3-5be7-40de-95e3-80b851cce8db" style="float: center" class="logo" width="150"></p>
 <div class="section level2">
-<h2 id="arrow_double_down-installation">
-<span class="emoji" data-emoji="arrow_double_down">⏬</span> Installation<a class="anchor" aria-label="anchor" href="#arrow_double_down-installation"></a>
+<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
 <div class="section level3">
-<h3 id="from-r">From R<a class="anchor" aria-label="anchor" href="#from-r"></a>
+<h3 id="r">R<a class="anchor" aria-label="anchor" href="#r"></a>
 </h3>
-<p>The STarlight library is currently not available in CRAN or Bioc. To install it from github, use:</p>
+<p>The STarlight library is currently not available in CRAN or Bioconductor. To install it from github, use:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>devtools<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">"dputhier/STarlight"</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(STarlight)</span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="from-the-terminal">From the terminal<a class="anchor" aria-label="anchor" href="#from-the-terminal"></a>
+<h3 id="terminal">Terminal<a class="anchor" aria-label="anchor" href="#terminal"></a>
 </h3>
-<p>Download the <em>tar.gz</em> from github or clone the main branch. Uncompress and run the following command from within the uncompressed STarlight folder:</p>
+<p>Download the <em>tar.gz</em> from github or clone the main branch. Uncompress and run the following command within STarlight folder:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>R CMD INSTALL .</span></code></pre></div>
-<p>Then load the library from within R.</p>
+<p>Then load the library within R.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">library</span>(STarlight)</span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
-<h2 id="book-documentation">
-<span class="emoji" data-emoji="book">📖</span> Documentation<a class="anchor" aria-label="anchor" href="#book-documentation"></a>
+<h2 id="documentation">Documentation<a class="anchor" aria-label="anchor" href="#documentation"></a>
 </h2>
-<p>Documentation (in progress) is available at <a href="https://dputhier.github.io/STarlight/" class="external-link uri">https://dputhier.github.io/STarlight/</a>.</p>
+<p>Documentation is available at <a href="https://dputhier.github.io/STarlight/" class="external-link uri">https://dputhier.github.io/STarlight/</a>.</p>
+</div>
+<div class="section level2">
+<h2 id="case-study-material">Case study material<a class="anchor" aria-label="anchor" href="#case-study-material"></a>
+</h2>
+<p>Scripts used to produce the Merscope hepatocarcinoma case study figures are available at <a href="https://github.com/dputhier/STarlight_article" class="external-link uri">https://github.com/dputhier/STarlight_article</a>. Merscope data used is from <a href="https://www.nature.com/articles/s41591-023-02345-0" class="external-link">Magen et al.</a>.</p>
 </div>
 </div>
 

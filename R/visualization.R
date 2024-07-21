@@ -491,7 +491,7 @@ setMethod("cmp_bar_plot", signature("STCompR"), function(object,
 #' cmp_counts_st(xen, xen_r1, xen_r2, features = c("Chat", "Ano1"), normalized = FALSE)
 #' cmp_counts_st(xen, xen_r1, xen_r2,
 #'              features = c("Chat", "Ano1"),
-#'               normalized = TRUE, fill_color=rainbow(3))
+#'               normalized = TRUE, fill_color=grDevices::rainbow(3))
 #' @importFrom DESeq2 DESeqDataSetFromMatrix estimateSizeFactors counts
 #' @export
 cmp_counts_st <- function(...,
@@ -1438,3 +1438,286 @@ cmp_images <- function(...,
   p
 }
 
+
+# -------------------------------------------------------------------------
+##    Contrast between two images
+# -------------------------------------------------------------------------
+
+
+#' @title Gene Contrast Analysis for an STgrid object.
+#' @description
+#' This function performs a contrast analysis between two features (genes) using an STgrid object as input. It calculates the log2 fold change between the two features and visualizes the results as a rasterized image.
+#' @param object An STGrid object representing the spatial transcriptomics data.
+#' @param feat_list_1 A list of features (genes) for the first condition.
+#' @param feat_list_2 A list of features (genes) for the second condition.
+#' @param low_color Colours for the low end of the gradient.
+#' @param mid_color Colours for the midpoint of the gradient.
+#' @param high_color Colours for the high end of the gradient.
+#' @param midpoint The midpoint (in data value) of the diverging scale. Defaults to 0.
+#' @param na_color Bin with 0 value for both features are set to NA. The color for NA values.
+#' @param pseudo_count A small value added to avoid log transformation issues. Default is 1.
+#' @param centered A boolean indicating whether to center the log2 ratio by subtracting the mean. Default is TRUE.
+#' @param trim_ratio A ratio for trimming extreme log2 ratio values. Default is 0.025.
+#' @return A ggplot2 object representing the heatmap of log2 fold changes between the two feature sets.
+#' @importFrom ggplot2 ggplot geom_tile xlab ylab theme element_blank element_rect element_text scale_fill_gradientn facet_wrap aes
+#' @importFrom stats quantile
+#' @examples
+#' example_dataset()
+#' xen <- Xenium_Mouse_Brain_Coronal_7g
+#' gene_contrast(xen, feat_list_1="Ano1", feat_list_2="Chat")
+#' gene_contrast(xen, feat_list_1=c("Ano1", "Necab2"), feat_list_2=c("Chat", "Nrp2"))
+#' @export
+#' @keywords internal
+setGeneric("gene_contrast",
+           function(object,
+                    feat_list_1=NULL,
+                    feat_list_2=NULL,
+                    low_color="green",
+                    mid_color = "yellow",
+                    high_color = "red",
+                    na_color = "black",
+                    midpoint=0,
+                    pseudo_count=1,
+                    centered=TRUE,
+                    trim_ratio=0.025) standardGeneric("gene_contrast"))
+
+#' @title Gene Contrast Analysis for an STgrid object.
+#' @description
+#' This function performs a contrast analysis between two features (genes) using an STgrid object as input. It calculates the log2 fold change between the two features and visualizes the results as a rasterized image.
+#' @param object An STGrid object representing the spatial transcriptomics data.
+#' @param feat_list_1 A list of features (genes) for the first condition.
+#' @param feat_list_2 A list of features (genes) for the second condition.
+#' @param low_color Colours for the low end of the gradient.
+#' @param mid_color Colours for the midpoint of the gradient.
+#' @param high_color Colours for the high end of the gradient.
+#' @param na_color Bin with 0 value for both features are set to NA. The color for NA values.
+#' @param midpoint The midpoint (in data value) of the diverging scale. Defaults to 0.
+#' @param pseudo_count A small value added to avoid log transformation issues. Default is 1.
+#' @param centered A boolean indicating whether to center the log2 ratio by subtracting the mean. Default is TRUE.
+#' @param trim_ratio A ratio for trimming extreme log2 ratio values. Default is 0.025.
+#' @return A ggplot2 object representing the heatmap of log2 fold changes between the two feature sets.
+#' @importFrom ggplot2 ggplot geom_tile xlab ylab theme element_blank element_rect element_text scale_fill_gradient2 aes facet_wrap
+#' @examples
+#' example_dataset()
+#' xen <- Xenium_Mouse_Brain_Coronal_7g
+#' gene_contrast(xen, feat_list_1="Ano1", feat_list_2="Chat")
+#' gene_contrast(xen, feat_list_1=c("Ano1", "Necab2"), feat_list_2=c("Chat", "Nrp2"))
+#' @export
+setMethod("gene_contrast",
+          "STGrid",
+          function(object,
+                   feat_list_1=NULL,
+                   feat_list_2=NULL,
+                   low_color="green",
+                   mid_color = "yellow",
+                   high_color = "red",
+                   na_color = "black",
+                   midpoint=0,
+                   pseudo_count=1,
+                   centered=TRUE,
+                   trim_ratio=0.025) {
+
+    if(is.null(feat_list_1) || is.null(feat_list_2) ){
+      print_this_msg("Please provide at least one feature",
+                     msg_type = "STOP")
+    }else{
+      if(any(!c(feat_list_1, feat_list_2) %in% feat_names(object))){
+        print_this_msg("Some features were not found in the object",
+                       msg_type = "STOP")
+      }
+    }
+
+    check_st_list(list(object),
+                  feat_list = c(feat_list_1, feat_list_2))
+
+
+    bin_mat_1 <- bin_mat(object,
+                         del_bin = FALSE,
+                         feat_list = feat_list_1,
+                         as_factor = TRUE,
+                         melt_tab = TRUE,
+                         transform = "None",
+                         pseudo_count=0)
+
+    bin_mat_2 <- bin_mat(object,
+                         del_bin = FALSE,
+                         feat_list = feat_list_2,
+                         as_factor = TRUE,
+                         melt_tab = TRUE,
+                         transform = "None",
+                         pseudo_count=0)
+
+    bin_mat <- bin_mat_1
+    bin_mat$ratio <- log2(bin_mat_1$value + pseudo_count) - log2(bin_mat_2$value + pseudo_count)
+
+    if(centered){
+      print_this_msg("Centering each set of ratios...", msg_type = "DEBUG")
+      tmp <- split(bin_mat$ratio, bin_mat$feature)
+      tmp <- lapply(tmp, function(x) x - mean(x))
+      tmp <- unlist(tmp)
+      bin_mat$ratio <- tmp
+    }
+
+
+    if(trim_ratio != 0){
+      min_ratio <- quantile(bin_mat$ratio, trim_ratio)
+      max_ratio <- quantile(bin_mat$ratio, 1-trim_ratio)
+      bin_mat$ratio[bin_mat$ratio > max_ratio] <- max_ratio
+      bin_mat$ratio[bin_mat$ratio < min_ratio] <- min_ratio
+    }
+
+
+    bin_mat$ratio[bin_mat_1$value == 0 & bin_mat_2$value == 0] <- NA
+
+    bin_mat$feature <- paste0("log2(", bin_mat_1$feature,
+                                       " - ",
+                              bin_mat_2$feature, ")")
+
+    bin_x <- bin_y <- ratio <- NULL
+
+    p <- ggplot2::ggplot(data=bin_mat,
+                mapping = ggplot2::aes(x=bin_x,
+                                       y=bin_y,
+                                       fill= ratio)) +
+      ggplot2::geom_tile() +
+      ggplot2::xlab("")  +
+      ggplot2::ylab("") +
+      ggplot2::theme(axis.ticks = ggplot2::element_blank(),
+                     axis.text = ggplot2::element_blank(),
+                     strip.background = ggplot2::element_rect(fill="gray30"),
+                     strip.text = ggplot2::element_text(color="white")) +
+      ggplot2::scale_fill_gradient2(low = low_color,
+                                      mid = mid_color,
+                                      high = high_color,
+                                      midpoint = midpoint,
+                                      na.value = na_color) +
+      ggplot2::facet_wrap(~feature)
+
+    return(p)
+
+  }
+)
+
+
+
+
+
+# -------------------------------------------------------------------------
+##    Contrast between n genes
+# -------------------------------------------------------------------------
+
+#' @title Multi-Gene contrast analysis for an STGrid object.
+#' @description
+#' This function performs a contrast analysis between multiple features (genes) using an STGrid as input. It binarizes the gene expression based on a user-defined threshold across x/y bins.
+#' For each bin a binary vector is computed and encoded as a color (e.g 000, not expressing 3 user defined genes; 100, expressing gene 1, 110, expressing gene 1 and 2...).
+#' @param object An STGrid object representing the spatial transcriptomics data.
+#' @param feat_list A list of features (genes) to be analyzed. Warning needs 2^(length(feat_list)) associated colors...
+#' A maximum of 4 genes (16 colors) is thus advised.
+#' @param threshold A numeric value specifying the expression threshold for binarization. Default is 5 counts for a feature (e.g gene) in a x/y bin.
+#' @param colors A vector of colors to associate with the bit code. Default is c("black", grDevices::rainbow(15)).
+#' @return A ggplot2 object representing the heatmap of different gene expression configurations.
+#' @importFrom ggplot2 ggplot geom_tile xlab ylab theme element_blank element_rect element_text scale_fill_manual aes
+#' @examples
+#' example_dataset()
+#' xen <- Xenium_Mouse_Brain_Coronal_7g
+#' multi_gene_contrast(re_bin(xen, 50), feat_list=feat_names(xen)[1:4], threshold=2)
+#' @export
+#' @keywords internal
+#'
+setGeneric("multi_gene_contrast",
+           function(object,
+                    feat_list=NULL,
+                    threshold=3,
+                    colors = c("black", grDevices::rainbow(15))) standardGeneric("multi_gene_contrast"))
+
+#' @title Multi-Gene contrast analysis for an STGrid object.
+#' @description
+#' This function performs a contrast analysis between multiple features (genes) using an STGrid as input. It binarizes the gene expression based on a user-defined threshold across x/y bins.
+#' For each bin a binary vector is computed and encoded as a color (e.g 000, not expressing 3 user defined genes; 100, expressing gene 1, 110, expressing gene 1 and 2...).
+#' @param object An STGrid object representing the spatial transcriptomics data.
+#' @param feat_list A list of features (genes) to be analyzed. Warning needs 2^(length(feat_list)) associated colors...
+#' A maximum of 4 genes (16 colors) is thus advised.
+#' @param threshold A numeric value specifying the expression threshold for binarization. Default is 5 counts for a feature (e.g gene) in a x/y bin.
+#' @param colors A vector of colors to associate with the bit code. Default is c("black", grDevices::rainbow(15)).
+#' @return A ggplot2 object representing the heatmap of different gene expression configurations.
+#' @importFrom ggplot2 ggplot geom_tile xlab ylab theme element_blank element_rect element_text scale_fill_manual aes
+#' @examples
+#' example_dataset()
+#' xen <- Xenium_Mouse_Brain_Coronal_7g
+#' multi_gene_contrast(re_bin(xen, 50), feat_list=feat_names(xen)[1:4], threshold=2)
+#' @export
+#'
+setMethod("multi_gene_contrast",
+          "STGrid",
+          function(object,
+                   feat_list=NULL,
+                   threshold=3,
+                   colors = c("black", grDevices::rainbow(15))) {
+
+  if(is.null(feat_list)){
+    print_this_msg("Please provide at least one feature",
+                   msg_type = "STOP")
+  }else{
+    if(any(!feat_list %in% feat_names(object))){
+      print_this_msg("Some features were not found in the object",
+                     msg_type = "STOP")
+    }
+  }
+
+  check_st_list(list(object),
+                feat_list = feat_list)
+
+
+  bin_mat <- bin_mat(object,
+                       del_bin = FALSE,
+                       feat_list = feat_list,
+                       as_factor = TRUE,
+                       melt_tab = FALSE,
+                       transform = "None",
+                       pseudo_count=0)
+  tmp <- bin_mat[,feat_list]
+  tmp[tmp < threshold] <- 0
+  tmp[tmp >= threshold] <- 1
+
+  bin_mat[,feat_list] <- tmp
+  bitwise_sum <- function(x){a <- 2^(x*1:length(x)); sum(a[a!=1])}
+  bin_mat$config <- as.factor(apply(bin_mat[,feat_list, drop=FALSE], 1, bitwise_sum))
+  name_config <- function(x,y){paste(y[x==1], collapse = " + ")}
+  bin_mat$name_config <- as.factor(apply(bin_mat[,feat_list, drop=FALSE],
+                                         1,
+                                         name_config,
+                                         colnames(bin_mat[,feat_list]))
+                                   )
+
+  bin_mat$Flag <- paste0(bin_mat$config, " : ", bin_mat$name_config)
+  levels <- unique(bin_mat$Flag)
+  levels_ordered <- levels[order(as.integer(gsub(":.*", "", levels, perl=TRUE)))]
+  bin_mat$Bitwise_flag <- factor(bin_mat$Flag,
+                         levels=levels_ordered)
+
+  if(length(colors) < length(levels_ordered)){
+    print_this_msg("Need", length(levels_ordered), "colors...", msg_type = "WARNING")
+    print_this_msg("Please provide more colors...", msg_type = "STOP")
+  }
+
+
+  colors <- colors[1:length(levels_ordered)]
+
+  bin_x <- bin_y <- Bitwise_flag <- NULL
+
+  p <- ggplot2::ggplot(data=bin_mat,
+                       mapping = ggplot2::aes(x=bin_x,
+                                              y=bin_y,
+                                              fill= Bitwise_flag)) +
+    ggplot2::geom_tile() +
+    ggplot2::xlab("")  +
+    ggplot2::ylab("") +
+    ggplot2::theme(axis.ticks = ggplot2::element_blank(),
+                   axis.text = ggplot2::element_blank(),
+                   strip.background = ggplot2::element_rect(fill="gray30"),
+                   strip.text = ggplot2::element_text(color="white")) +
+    ggplot2::scale_fill_manual(values = colors)
+
+  return(p)
+
+})

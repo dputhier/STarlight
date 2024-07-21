@@ -313,6 +313,8 @@ setMethod("coord", "STGrid",
 #' @param feat_list Whether to subset to some features.
 #' @param melt_tab Whether to melt.
 #' @param del_bin Whether to delete the bin_x, bin_y columns.
+#' @param pseudo_count Whether to add a pseudo_count.
+#' @param transform Whether the count should be transformed.
 #' @keywords internal
 #' @examples
 #' example_dataset()
@@ -323,7 +325,9 @@ setGeneric("bin_mat",
                     as_factor = FALSE,
                     feat_list = character(),
                     melt_tab = FALSE,
-                    del_bin = FALSE)
+                    del_bin = FALSE,
+                    pseudo_count=0,
+                    transform = c("None", "log2", "log10", "log"))
              standardGeneric("bin_mat"))
 
 #' @title The binned matrix stored in a STGrid object.
@@ -334,6 +338,8 @@ setGeneric("bin_mat",
 #' @param feat_list Whether to subset to some features.
 #' @param melt_tab Whether to melt.
 #' @param del_bin Whether to delete the bin_x, bin_y columns.
+#' @param pseudo_count Whether to add a pseudo_count.
+#' @param transform Whether the count should be transformed.
 #' @examples
 #' example_dataset()
 #' head(bin_mat(Xenium_Mouse_Brain_Coronal_7g))
@@ -343,7 +349,11 @@ setMethod("bin_mat", "STGrid",
                    as_factor = FALSE,
                    feat_list = character(),
                    melt_tab = FALSE,
-                   del_bin = FALSE) {
+                   del_bin = FALSE,
+                   pseudo_count=0,
+                   transform = c("None", "log2", "log10", "log")) {
+
+            transform <- match.arg(transform)
 
             if (length(feat_list) == 0) {
               feat_list <- feat_names(object)
@@ -374,6 +384,13 @@ setMethod("bin_mat", "STGrid",
                                            ordered = TRUE)
             }
 
+            if(transform == "log2"){
+              this_bin_mat[, feat_list] <- log2(this_bin_mat[, feat_list] + pseudo_count)
+            }else if(transform == "log10"){
+              this_bin_mat[, feat_list] <- log10(this_bin_mat[, feat_list] + pseudo_count)
+            }else if(transform == "log"){
+              this_bin_mat[, feat_list] <- log(this_bin_mat[, feat_list] + pseudo_count)
+            }
 
             if (melt_tab) {
               print_this_msg("Melting data.frame...", msg_type = "DEBUG")
@@ -390,8 +407,8 @@ setMethod("bin_mat", "STGrid",
                                             "value")
               }
 
-
             }
+
 
 
             return(this_bin_mat)
@@ -1299,7 +1316,9 @@ load_spatial <- function(path = "",
     if(!is.null(constrain)){
       if(!is.list(constrain))
         print_this_msg("Argument 'contrain' should be a list", msg_type = "STOP")
+
       print_this_msg('Evaluating provided contrain.')
+
       for(this_contrain in constrain){
         print_this_msg("Checking column ('", this_contrain, "').", msg_type = "DEBUG")
         if(!gsub("^(\\w+)\\s?[!=><].*","\\1", this_contrain) %in% colnames(spat_input))

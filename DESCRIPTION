@@ -1,6 +1,6 @@
 Package: STarlight
 Title: Comparison of imaging-based spatial transcriptomic datasets using a grid-based approach
-Version: 0.0.5
+Version: 0.0.7
 Depends: R (>= 4.0.0), methods
 biocViews: Transcriptomics, ReportWriting
 Authors@R: c(
@@ -10,8 +10,8 @@ Authors@R: c(
 Description: This package is intended to compare imaging-based spatial transcriptomic datasets using a grid-based approach.
 Collate: st_grid_class.R st_compr_class.R utils.R visualization.R interactive.R
 Encoding: UTF-8
-Imports: reshape2, DESeq2, ggplot2, dplyr, magrittr, data.table, ggpol, ggrepel, ggsci, spatstat.explore, spatstat.geom, ggh4x, ggnewscale, ggtree, RColorBrewer, viridis, Seurat, stringr, tidytree, R.utils, envnames, shinydashboard, shiny, colourpicker, htmltools, secr
-Suggests: knitr, rmarkdown, tidyr, testthat (>= 3.0.0)
+Imports: reshape2, DESeq2, ggplot2, dplyr, magrittr, data.table, ggpol, ggrepel, ggsci, spatstat.explore, spatstat.geom, ggh4x, ggnewscale, ggtree, RColorBrewer, viridis, Seurat, stringr, tidytree, R.utils, envnames, shinydashboard, shiny, colourpicker, htmltools, sp
+Suggests: knitr, rmarkdown, patchwork, tidyr, testthat (>= 3.0.0)
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.1
 License: GPL (>= 3)

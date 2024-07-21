@@ -1,9 +1,13 @@
 # Changelog
 
+## v0.0.7
+
+* "Added function gene_contrast and multi_gene_contrast".
+
 ## v0.0.4
 
 * Added new filtering method (cv) for heatmap_cmp(). This is the default now.
-* 
+
 
 ## v0.0.3
 

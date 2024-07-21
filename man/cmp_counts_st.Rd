@@ -51,5 +51,5 @@ xen_r2 <- xen[x_bins, y_bins]
 cmp_counts_st(xen, xen_r1, xen_r2, features = c("Chat", "Ano1"), normalized = FALSE)
 cmp_counts_st(xen, xen_r1, xen_r2,
              features = c("Chat", "Ano1"),
-              normalized = TRUE, fill_color=rainbow(3))
+              normalized = TRUE, fill_color=grDevices::rainbow(3))
 }
