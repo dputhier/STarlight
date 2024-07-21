@@ -9,7 +9,9 @@
   as_factor = FALSE,
   feat_list = character(),
   melt_tab = FALSE,
-  del_bin = FALSE
+  del_bin = FALSE,
+  pseudo_count = 0,
+  transform = c("None", "log2", "log10", "log")
 )
 }
 \arguments{
@@ -22,6 +24,10 @@
 \item{melt_tab}{Whether to melt.}
 
 \item{del_bin}{Whether to delete the bin_x, bin_y columns.}
+
+\item{pseudo_count}{Whether to add a pseudo_count.}
+
+\item{transform}{Whether the count should be transformed.}
 }
 \description{
 The binned matrix stored in a STGrid object.

@@ -179,19 +179,23 @@ st_obj[10:12, ]
 The `spatial_image()` function allows users to visualize the spatial density of molecules across tissue sections. Users can do the following if they want to visualize a single gene. The `grid=TRUE` argument overlays a bin of a specified size, which eases the selection of particular regions.
 
 ```{r single_gene, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=3, fig.width=4}
-spatial_image(
+ p <- spatial_image(
   st_obj,
   feat = "Ano1",
   grid = 20,
   logb = 10,
   scale = TRUE,
   saturation = 0.9
-) + theme(
+) 
+
+lgd_theme <- theme(
   legend.key.width = unit(0.10, "in"),
   legend.key.height = unit(0.10, "in"),
   legend.text = element_text(size = 8),
   legend.title = element_text(size = 8)
 )
+
+p + lgd_theme
 ```
 Users can choose to **zoom** into specific regions. For example, we can zoom into the region with a high *Ano1* molecule density (upper right corner of the image above). We use `rebin()` to increase the binning resolution of the selected region.
 
@@ -205,12 +209,7 @@ spatial_image(
   logb = 10,
   scale = TRUE,
   saturation = 0.9
-) + theme(
-  legend.key.width = unit(0.10, "in"),
-  legend.key.height = unit(0.10, "in"),
-  legend.text = element_text(size = 8),
-  legend.title = element_text(size = 8)
-)
+) + lgd_theme
 ```
 
 ## The spatial_plot() function
@@ -225,12 +224,39 @@ spatial_plot(
                 "Ebf3"),
   colors = ggsci::pal_aaas()(3),
   size = 0.6
-) + theme(
-  legend.key.width = unit(0.10, "in"),
-  legend.key.height = unit(0.10, "in"),
-  legend.text = element_text(size = 8),
-  legend.title = element_text(size = 8)
-)
+) + lgd_theme
+```
+
+## The gene_contrast() function
+
+This function can be used to compare the log2 ratio between two genes across x/y bins. Several pair of genes can be provided to the function.
+
+```{r gene_contrast, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=3, fig.width=5}
+gene_contrast(
+  st_obj,
+  feat_list_1 = c("Nwd2",
+                  "Kctd8",
+                  "Chat"),
+  feat_list_2 = c("Igf1",
+                  "Ebf3", 
+                  "Hat1"),
+  centered = TRUE, 
+  trim_ratio = 0.025) + lgd_theme
+
+```
+## The multi_gene_contrast() function
+
+This function performs a contrast analysis between multiple features (genes) using an STGrid as input. It binarizes the gene expression based on a user-defined threshold across x/y bins. For each bin a binary vector is computed and encoded as a color (e.g 000, none of 3 genes above the threshold; 100, gene 1 only above the threshold; 110, gene 1 and 2 above the threshold...). The number of required colors raise rapidly (2^(length(feat_list))) as the number of features increases. So it it advised not to go beyond 4 features/genes.
+
+```{r multi_gene_contrast, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=3, fig.width=4}
+multi_gene_contrast(
+  st_obj,
+  feat_list = c("Ebf3",
+                "Kctd8",
+                "Chat",
+                "Ano1"), 
+  threshold = 2) + lgd_theme
+  
 ```
 
 # Neighborhood exploration
@@ -248,12 +274,7 @@ hc_st <- hc_tree(
   class_nb = 20, 
   lab_fontsize = 2.5,
   offset = 9
-) + theme(
-  legend.key.width = unit(0.10, "in"),
-  legend.key.height = unit(0.10, "in"),
-  legend.text = element_text(size = 8),
-  legend.title = element_text(size = 8)
-) 
+) + lgd_theme
 
 hc_st
 ```
@@ -271,21 +292,11 @@ meta_names(st_obj)
 ```
 We can map modules using the `spatial_image()` function.
 ```{r map_modules, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=6, fig.width=5, fig.asp=0.90}
-spatial_image(st_obj, features = meta_names(st_obj)[2:21], ncol = 4) + theme(
-  legend.key.width = unit(0.10, "in"),
-  legend.key.height = unit(0.10, "in"),
-  legend.text = element_text(size = 8),
-  legend.title = element_text(size = 8)
-)
+spatial_image(st_obj, features = meta_names(st_obj)[2:21], ncol = 4) + lgd_theme
 ```
 We can also plot the genes belonging to a specific module. 
 ```{r map_genes_specific_module, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=4, fig.width=4, fig.asp=0.60}
-spatial_image(st_obj, features = hc_st$tree_classes[["MOD07"]], ncol = 3) + theme(
-  legend.key.width = unit(0.10, "in"),
-  legend.key.height = unit(0.10, "in"),
-  legend.text = element_text(size = 8),
-  legend.title = element_text(size = 8)
-)
+spatial_image(st_obj, features = hc_st$tree_classes[["MOD07"]], ncol = 3) + lgd_theme
 ```
 
 ## Molecule clustering using Ripley's K function
@@ -304,12 +315,7 @@ plot_rip_k(compute_k_ripley(st_obj, rmax = 80, verbose = FALSE)) + theme(
 
 Mapping the above genes confirms they are spatially concentrated. 
 ```{r confirm_k_ripley, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=4, fig.width=4, fig.asp=0.60}
-spatial_image(st_obj, features = c("Chat", "Spag16", "Tacr1", "Calb2"), ncol = 2) + theme(
-  legend.key.width = unit(0.10, "in"),
-  legend.key.height = unit(0.10, "in"),
-  legend.text = element_text(size = 8),
-  legend.title = element_text(size = 8)
-)
+spatial_image(st_obj, features = c("Chat", "Spag16", "Tacr1", "Calb2"), ncol = 2) + lgd_theme
 ```
 
 # Dataset comparison: the STCompR class
