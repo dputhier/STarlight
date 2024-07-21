@@ -8,7 +8,7 @@ multi_gene_contrast(
   object,
   feat_list = NULL,
   threshold = 3,
-  colors = c("black", rainbow(15))
+  colors = c("black", grDevices::rainbow(15))
 )
 }
 \arguments{
@@ -19,7 +19,7 @@ A maximum of 4 genes (16 colors) is thus advised.}
 
 \item{threshold}{A numeric value specifying the expression threshold for binarization. Default is 5 counts for a feature (e.g gene) in a x/y bin.}
 
-\item{colors}{A vector of colors to associate with the bit code. Default is c("black", rainbow(15)).}
+\item{colors}{A vector of colors to associate with the bit code. Default is c("black", grDevices::rainbow(15)).}
 }
 \value{
 A ggplot2 object representing the heatmap of different gene expression configurations.

@@ -19,6 +19,8 @@ gene_contrast(
 )
 }
 \arguments{
+\item{object}{An STGrid object representing the spatial transcriptomics data.}
+
 \item{feat_list_1}{A list of features (genes) for the first condition.}
 
 \item{feat_list_2}{A list of features (genes) for the second condition.}
@@ -29,6 +31,8 @@ gene_contrast(
 
 \item{high_color}{Colours for the high end of the gradient.}
 
+\item{na_color}{Bin with 0 value for both features are set to NA. The color for NA values.}
+
 \item{midpoint}{The midpoint (in data value) of the diverging scale. Defaults to 0.}
 
 \item{pseudo_count}{A small value added to avoid log transformation issues. Default is 1.}
@@ -36,8 +40,6 @@ gene_contrast(
 \item{centered}{A boolean indicating whether to center the log2 ratio by subtracting the mean. Default is TRUE.}
 
 \item{trim_ratio}{A ratio for trimming extreme log2 ratio values. Default is 0.025.}
-
-\item{st_grid}{An STGrid object representing the spatial transcriptomics data.}
 }
 \value{
 A ggplot2 object representing the heatmap of log2 fold changes between the two feature sets.
