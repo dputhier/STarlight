@@ -100,7 +100,7 @@ readme: clean
 
 build_vignette_as_pdf: clean
 	@ echo "Sys.setenv(RSTUDIO_PANDOC='$(PANDOC)'); rmarkdown::render('vignettes/usage.Rmd', 'pdf_document')" | R --slave
-	@ mv vignettes/usage.pdf inst/doc
+	@ mkdir -p inst/doc; mv vignettes/usage.pdf inst/doc
 
 doc_html:
 	@ echo "#-----------------------------------------------#"
