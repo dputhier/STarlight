@@ -1460,7 +1460,6 @@ cmp_images <- function(...,
 #' @return A ggplot2 object representing the heatmap of log2 fold changes between the two feature sets.
 #' @importFrom ggplot2 ggplot geom_tile xlab ylab theme element_blank element_rect element_text scale_fill_gradientn facet_wrap aes
 #' @importFrom stats quantile
-#' @importFrom utils print
 #' @examples
 #' example_dataset()
 #' xen <- Xenium_Mouse_Brain_Coronal_7g
