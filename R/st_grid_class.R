@@ -2220,3 +2220,196 @@ setMethod("compute_module_score", "STGrid",
       return(object)
 })
 
+
+# -------------------------------------------------------------------------
+#      Compute queen and rock contiguity matrix
+# -------------------------------------------------------------------------
+
+#' @title Sum Over Contiguity Matrix
+#' @description
+#' This function calculates the sum of values in a matrix over a specified contiguity structure, such as a Queen or Rook neighborhood.
+#' @param mat A numeric matrix.
+#' @param ns The neighborhood size. Default is 1.
+#' @param method The contiguity method, either "queen" or "rook". Default is "queen".
+#' @param include_center Logical, indicating whether to include the center cell in the sum. Default is FALSE.
+#' @return A matrix with the same dimensions as the input matrix, where each element is the sum of its neighbors based on the specified method.
+#' @examples
+#' mat <- matrix(1:9, nrow=3, ncol=3)
+#' mat
+#' sum_over_contiguity_mat(mat, ns=1, method="queen", include_center=FALSE)
+#' @export
+#' @keyword internal
+sum_over_contiguity_mat  <- function(mat,
+                               ns=1,
+                               method=c("queen", "rock"),
+                               include_center=FALSE){
+
+  method <- match.arg(method)
+
+  nb_x <- nrow(mat)
+  nb_y <- ncol(mat)
+  x <- (ns + 1):(nb_x + ns)
+  y <- (ns + 1):(nb_y + ns)
+
+  count_sum <- function(x, y, mat, ns, nb_x, nb_y, method, include_center){
+
+    min_x <- x - ns
+    max_x <- x + ns
+    min_y <- y - ns
+    max_y <- y + ns
+
+    if(method == "queen"){
+      if(include_center){
+        return(sum(mat[min_x:max_x, min_y:max_y]))
+      }else{
+        return(sum(mat[min_x:max_x, min_y:max_y]) - mat[x, y])
+      }
+
+    }else{
+      if(include_center){
+        return(sum(mat[x, min_y:max_y]) + sum(mat[min_x:max_x, y]) - mat[x, y])
+      }else{
+
+        return(sum(mat[x, min_y:max_y]) + sum(mat[min_x:max_x, y]) - 2*mat[x, y])
+      }
+    }
+  }
+
+  count_sum <- Vectorize(count_sum, vectorize.args=c("x", "y"))
+
+
+  # Add a margin (x/y axes)
+  for(i in 1:ns){
+    mat <- rbind(0, mat)
+    mat <- rbind(mat, 0)
+    mat <- cbind(0, mat)
+    mat <- cbind(mat, 0)
+  }
+
+  outer(x, y, FUN=count_sum,
+              mat=mat,
+              ns=ns,
+              nb_x=nb_x,
+              nb_y=nb_y,
+              method=method,
+              include_center=include_center)
+
+}
+
+#' @title Find contiguous cells using Queen or Rock criterion.
+#' @description
+#' Find contiguous cells in a matrix using Queen or Rock criterion. The matrix is first binarized
+#' (any value greater than zero is set to 1, any value lower than 1 is set to 0).
+#' @param mat A numeric matrix.
+#' @param ns The neighborhood size. Default is 1.
+#' @param method The contiguity method, either "queen" or "rook". Default is "queen".
+#' @param include_center Logical, indicating whether to include the center cell in the sum. Default is FALSE.
+#' @return TODO
+#' @examples
+#' set.seed(123)
+#' m <- matrix(sample(0:2, replace=TRUE, size = 40*40, prob = c(0.98, 0.01, 0.01)), nc=40)
+#' image(m)
+#' image(is_contiguous(m, ns=1)[[1]])
+#' image(is_contiguous(m, ns=2)[[1]])
+#' image(is_contiguous(m, ns=1:3)[[3]])
+#' image(is_contiguous(m, ns=5)[[1]])
+#' image(m)
+#' image(is_contiguous(m, ns=1, threshold=2)[[1]])
+#' image(is_contiguous(m, ns=2, threshold=2)[[1]])
+#' image(is_contiguous(m, ns=1:3, threshold=2)[[3]])
+#' @export
+#' @keyword
+is_contiguous  <- function(mat,
+                           ns=1:3,
+                           method=c("queen", "rock"),
+                           threshold=1){
+
+  if(!all(is.integer(ns)))
+    print_this_msg("Neighborhood should be integers", msg_type = "DEBUG")
+
+  print_this_msg("Preparing matrix", msg_type = "DEBUG")
+
+  method <- match.arg(method)
+
+  mat[mat >= threshold] <- threshold
+  mat[mat < threshold] <- 0
+  mat[mat == threshold] <- 1
+  mat <- as.matrix(mat)
+  rownames(mat) <- as.character(1:nrow(mat))
+  colnames(mat) <- as.character(1:ncol(mat))
+
+  mat_melt <- reshape2::melt(mat)
+
+  colnames(mat_melt) <- c("x", "y", "value")
+
+  mat_melt_1 <- mat_melt[mat_melt$value==1,
+                         c("x", "y")]
+
+  mat_melt_0 <- mat_melt[mat_melt$value==0,
+                         c("x", "y")]
+
+
+  if(method == "queen"){
+    print_this_msg("Using method: Queen")
+    print_this_msg("Computing distances", msg_type = "DEBUG")
+
+    dist <- pracma::distmat(as.matrix(mat_melt_0),
+                            as.matrix(mat_melt_1))
+    list_mat  <- list()
+    for(i in 1:length(ns)){
+      bin_is_contiguous <- apply(as.matrix(dist), 1, function(x) any(x <= sqrt(2) * ns[i]))
+      mat_melt$bin_is_contiguous <- 0
+      mat_melt$bin_is_contiguous[paste(mat_melt$x, mat_melt$y) %in% paste(mat_melt_0$x[bin_is_contiguous], mat_melt_0$y[bin_is_contiguous])] <- 1
+      mat_unmelt <- reshape2::dcast(mat_melt, x~y, value.var = "bin_is_contiguous")
+      list_mat[[i]] <- as.matrix(mat_unmelt[,-1])
+    }
+
+    return(list_mat)
+
+  }else{
+    print_this_msg("Not implemented yet...", msg_type = "STOP")
+  }
+
+}
+
+#' @title Find the satellites of a particular feature using queen or rock criterion.
+#' @description
+#' This function calculates the sum of values of bins contiguous to a particular feature.
+#' It uses Queen or Rock for computation. The neighborhood_size corresponds to the distance to
+#' the bin expressing the feature of interest.
+find_contiguous <- function(object,
+                    feature=NULL,
+                    threshold=1,
+                    method=c("queen", "rock"),
+                    neighborhood_size=1:4){
+
+  method <- match.arg(method)
+
+  if(is.null(feature) | length(feature) > 1)
+    print_this_msg("Please provide one feature...", msg_type = "STOP")
+
+  bin_mat <- bin_mat(object,
+                     feat_list=feature,
+                     as_factor = TRUE)
+
+  spatial_mat <- reshape2::dcast(bin_mat, bin_x~bin_y, value.var=feature)[,-1]
+
+  print_this_msg("Looking for contiguous bins...")
+
+  isc <- is_contiguous(spatial_mat,
+                ns=neighborhood_size,
+                method=method,
+                threshold=threshold)
+
+
+  for(i in 1:length(isc)){
+
+    isc[[i]] <- reshape2::melt(t(isc[[i]]))
+  }
+
+  for(i in 1:length(isc)){
+    object[[paste0("contiguous_", feature, "_", neighborhood_size[i])]] <- isc[[i]]$value
+  }
+
+  return(object)
+}
