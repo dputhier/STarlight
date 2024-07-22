@@ -436,3 +436,109 @@ example_dataset <- function(dataset=c("11284233/files/Xenium_Mouse_Brain_Coronal
 
 }
 
+
+# -------------------------------------------------------------------------
+# control_list()   ------------------------------------------------
+# -------------------------------------------------------------------------
+
+#' @title Generate a Control Gene List with Similar Distribution
+#' @description
+#' This function generates a control gene list with a distribution of expression values similar to the provided gene list.
+#'
+#' @param expression_value A named vector containing all gene expression values and their associated gene names.
+#' @param gene_list A character vector of gene names for which a control gene list made of different genes with similar distribution is to be found.
+#' @return A character vector of control gene names with similar expression distribution to the input \code{gene_list}.
+#' @details The function works by calculating the absolute differences between the expression values of the genes in \code{gene_list}
+#' and those of all other genes in the \code{expression_value} vector. For each gene in the \code{gene_list}, the gene with the
+#' smallest difference in expression value from the remaining genes is selected. This process ensures that the selected control genes
+#' have expression values that are closely matched to the target genes, thereby maintaining a similar distribution of expression values
+#' in the control list. Ensuring the distribution are the same (e.g histogram, boxplot...) is important as the function may fail depending on the way the
+#' gene list is sampled from the global distribution.
+#' @examples
+#' # Continuous values
+#' set.seed(1)
+#' a <- sort(c(rnorm(100, mean=0), rnorm(100, mean=4)))
+#' names(a) <- paste0("gene_", 1:length(a))
+#' b <- names(a[sample(1:100, size = 10, replace = FALSE)])
+#' control <- control_list(a, b)
+#' boxplot(list(a, a[b], a[control]))
+#' all(!b %in% control)
+#'
+#' # Discrete values
+#' set.seed(1)
+#' a <- c(rpois(100, 10), rpois(100, 30))
+#' names(a) <- paste0("gene_", 1:length(a))
+#' b <- names(a[sample(50:130, size = 10, replace = FALSE)])
+#' control <- control_list(a, b)
+#' boxplot(list(a, a[b], a[control]))
+#' all(!b %in% control)
+#' @export
+control_list <- function(expression_value=NULL,
+                         gene_list=NULL){
+
+  if(is.null(expression_value) | is.null(gene_list))
+    print_this_msg("Please provide a set of expression values and a gene list",
+                   msg_type = "STOP")
+
+  if(length(unique(names(expression_value))) != length(names(expression_value)))
+    print_this_msg("The provided vector of expression values contains duplicate names.",
+                   msg_type = "STOP")
+
+  if(length(unique(gene_list)) != length(gene_list))
+    print_this_msg("The provided gene list contains duplicates.",
+                   msg_type = "STOP")
+
+  if(!all(sapply(gene_list, "nchar") > 0))
+    print_this_msg("Some gene names are empty.",
+                   msg_type = "STOP")
+
+  if(!all(sapply(names(expression_value), "nchar") > 0))
+    print_this_msg("Some gene names are empty.",
+                   msg_type = "STOP")
+
+  if(!all(gene_list %in% names(expression_value)))
+    print_this_msg("Some genes from gene_list are not part of expression_value...",
+                   msg_type = "STOP")
+
+  other_genes <- names(expression_value[!names(expression_value) %in% gene_list])
+
+  if(length(other_genes) < length(gene_list))
+    print_this_msg("The number of remaining genes is not sufficient to find a matched distribution...",
+                   msg_type = "STOP")
+
+  diff <- abs(outer(expression_value[gene_list],
+                    expression_value[other_genes], "-"))
+
+  f <- vector()
+  g <- vector()
+
+  for(i in 1:nrow(diff)){
+    if(length(f) > 0){
+      if(length(diff[i, -f]) == 0)
+        print_this_msg("Not enough remaining expression values.",
+                       msg_type = "STOP")
+
+      tmp <- which(diff[i, -f] == min(diff[i, -f]))
+
+      if(length(tmp) > 1)
+        tmp <- tmp[sample(length(tmp))][1]
+
+      g[i] <- colnames(diff[i, -f, drop=FALSE])[tmp]
+      f[i] <- which(colnames(diff) == g[i])
+
+    }else{
+
+      f[i] <- which(diff[i, ] == min(diff[i, ]))[1]
+      g[i] <- colnames(diff)[f[i]]
+
+    }
+  }
+
+
+  ks <- ks.test(expression_value[gene_list], expression_value[g])$p.value
+
+  print_this_msg("Kolmogorov-Smirnov test p-value :",  ks)
+
+  return(g)
+}
+
