@@ -1,5 +1,7 @@
 # Changelog
 
+* Added control_list() function.
+
 ## v0.0.7
 
 * "Added function gene_contrast and multi_gene_contrast".
