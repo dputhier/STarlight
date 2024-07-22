@@ -2296,9 +2296,9 @@ sum_over_contiguity_mat  <- function(mat,
 
 }
 
-#' @title Find contiguous cells using Queen or Rock criterion.
+#' @title Find contiguous cells using Queen criterion (internal).
 #' @description
-#' Find contiguous cells in a matrix using Queen or Rock criterion. The matrix is first binarized
+#' Find contiguous cells in a matrix using Queen criterion. The matrix is first binarized
 #' (any value greater than zero is set to 1, any value lower than 1 is set to 0).
 #' @param mat A numeric matrix.
 #' @param ns The neighborhood size. Default is 1.
@@ -2307,7 +2307,9 @@ sum_over_contiguity_mat  <- function(mat,
 #' @return TODO
 #' @examples
 #' set.seed(123)
-#' m <- matrix(sample(0:2, replace=TRUE, size = 40*40, prob = c(0.98, 0.01, 0.01)), nc=40)
+#' m <- matrix(sample(0:2, replace=TRUE, size = 26*26, prob = c(0.98, 0.01, 0.01)), nc=26)
+#' rownames(m) <- letters
+#' colnames(m) <- LETTERS
 #' image(m)
 #' image(is_contiguous(m, ns=1)[[1]])
 #' image(is_contiguous(m, ns=2)[[1]])
@@ -2318,10 +2320,10 @@ sum_over_contiguity_mat  <- function(mat,
 #' image(is_contiguous(m, ns=2, threshold=2)[[1]])
 #' image(is_contiguous(m, ns=1:3, threshold=2)[[3]])
 #' @export
-#' @keyword
+#' @keyword internal
 is_contiguous  <- function(mat,
                            ns=1:3,
-                           method=c("queen", "rock"),
+                           method=c("queen"),
                            threshold=1){
 
   if(!all(is.integer(ns)))
@@ -2335,12 +2337,21 @@ is_contiguous  <- function(mat,
   mat[mat < threshold] <- 0
   mat[mat == threshold] <- 1
   mat <- as.matrix(mat)
-  rownames(mat) <- as.character(1:nrow(mat))
-  colnames(mat) <- as.character(1:ncol(mat))
+
+  rn_2_x <- setNames(rownames(mat), as.character(1:nrow(mat)))
+  cn_2_y <- setNames(colnames(mat), as.character(1:ncol(mat)))
+
+  rn <- as.character(1:nrow(mat))
+  cn <- as.character(1:ncol(mat))
+
+  rownames(mat) <- rn
+  colnames(mat) <- cn
 
   mat_melt <- reshape2::melt(mat)
-
   colnames(mat_melt) <- c("x", "y", "value")
+
+  #mat_melt$bin_x <- rn_2_x[mat_melt$x]
+  #mat_melt$bin_y <- cn_2_y[mat_melt$y]
 
   mat_melt_1 <- mat_melt[mat_melt$value==1,
                          c("x", "y")]
@@ -2361,7 +2372,10 @@ is_contiguous  <- function(mat,
       mat_melt$bin_is_contiguous <- 0
       mat_melt$bin_is_contiguous[paste(mat_melt$x, mat_melt$y) %in% paste(mat_melt_0$x[bin_is_contiguous], mat_melt_0$y[bin_is_contiguous])] <- 1
       mat_unmelt <- reshape2::dcast(mat_melt, x~y, value.var = "bin_is_contiguous")
-      list_mat[[i]] <- as.matrix(mat_unmelt[,-1])
+      rownames(mat_unmelt) <- mat_unmelt[,1]
+      rownames(mat_unmelt) <- rn_2_x[rownames(mat_unmelt)]
+      colnames(mat_unmelt) <- cn_2_y[colnames(mat_unmelt)]
+      list_mat[[i]] <- as.matrix(mat_unmelt[, -1])
     }
 
     return(list_mat)
@@ -2372,15 +2386,28 @@ is_contiguous  <- function(mat,
 
 }
 
-#' @title Find the satellites of a particular feature using queen or rock criterion.
+#' @title Find the Satellites/Neighbors of Bins Expressing a Particular Feature Using Queen Criterion
 #' @description
-#' This function calculates the sum of values of bins contiguous to a particular feature.
-#' It uses Queen or Rock for computation. The neighborhood_size corresponds to the distance to
-#' the bin expressing the feature of interest.
-find_contiguous <- function(object,
+#' Given an STGrid object and a particular feature f of interest, find the bins expressing f above a
+#' specified threshold and locate their neighbors within a certain neighborhood size. If \code{neighborhood_size} is 1,
+#' the function finds the contiguous bins. The \code{neighborhood_size} can be a vector of integers.
+#' @param object An STGrid object containing the spatial expression data.
+#' @param feature A character string specifying the feature of interest. Only one feature should be provided.
+#' @param threshold A numeric value specifying the threshold above which a bin is considered to express the feature. Default is 1.
+#' @param method The contiguity method, either "queen" or "rook". Default is "queen".
+#' @param neighborhood_size An integer or a vector of integers specifying the neighborhood size(s) to consider. Default is 1:4.
+#' @return The input STGrid object with additional fields (in meta slot) indicating the satellite bins for the specified feature at each neighborhood size.
+#' @examples
+#' example_dataset()
+#' xen <- Xenium_Mouse_Brain_Coronal_7g
+#' xen <- satellite(xen, feature="Chat", threshold=4)
+#' head(xen@meta)
+#' xen <- satellite(xen, feature="Chat", threshold=4)
+#' @export
+satellites <- function(object,
                     feature=NULL,
                     threshold=1,
-                    method=c("queen", "rock"),
+                    method=c("queen"),
                     neighborhood_size=1:4){
 
   method <- match.arg(method)
@@ -2392,7 +2419,9 @@ find_contiguous <- function(object,
                      feat_list=feature,
                      as_factor = TRUE)
 
-  spatial_mat <- reshape2::dcast(bin_mat, bin_x~bin_y, value.var=feature)[,-1]
+  spatial_mat <- reshape2::dcast(bin_mat, bin_x~bin_y, value.var=feature)
+  rownames(spatial_mat) <- spatial_mat[,1]
+  spatial_mat <- spatial_mat[,-1]
 
   print_this_msg("Looking for contiguous bins...")
 
@@ -2401,10 +2430,11 @@ find_contiguous <- function(object,
                 method=method,
                 threshold=threshold)
 
-
   for(i in 1:length(isc)){
-
-    isc[[i]] <- reshape2::melt(t(isc[[i]]))
+    tmp <- reshape2::melt(t(isc[[i]]))
+    colnames(tmp) <- c("bin_y", "bin_x", "value")
+    rownames(tmp) <- paste0(tmp$bin_x, "~", tmp$bin_y)
+    isc[[i]] <- tmp[rownames(object@meta), ]
   }
 
   for(i in 1:length(isc)){
