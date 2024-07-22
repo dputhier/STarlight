@@ -2400,9 +2400,9 @@ is_contiguous  <- function(mat,
 #' @examples
 #' example_dataset()
 #' xen <- Xenium_Mouse_Brain_Coronal_7g
-#' xen <- satellite(xen, feature="Chat", threshold=4)
+#' xen <- satellites(xen, feature="Chat", threshold=4)
 #' head(xen@meta)
-#' xen <- satellite(xen, feature="Chat", threshold=4)
+#' spatial_image(xen, features=c("Chat", meta_names(xen)))
 #' @export
 satellites <- function(object,
                     feature=NULL,
