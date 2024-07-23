@@ -229,7 +229,7 @@ spatial_plot(
 
 ## The gene_contrast() function
 
-This function can be used to compare the log2 ratio between two genes across x/y bins. Several pair of genes can be provided to the function.
+This function can be used to compare the log2 ratio between two genes across x/y bins. Several genes pairs can be provided.
 
 ```{r gene_contrast, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=3, fig.width=5}
 gene_contrast(
@@ -244,9 +244,10 @@ gene_contrast(
   trim_ratio = 0.025) + lgd_theme
 
 ```
+
 ## The multi_gene_contrast() function
 
-This function performs a contrast analysis between multiple features (genes) using an STGrid as input. It binarizes the gene expression based on a user-defined threshold across x/y bins. For each bin a binary vector is computed and encoded as a color (e.g 000, none of 3 genes above the threshold; 100, gene 1 only above the threshold; 110, gene 1 and 2 above the threshold...). The number of required colors raise rapidly (2^(length(feat_list))) as the number of features increases. So it it advised not to go beyond 4 features/genes.
+This function performs a contrast analysis between multiple features (genes) by binarizing gene expression based on a user-defined threshold across x/y bins. An STGrid object is used as input. For each bin, a binary vector is computed and encoded as a color (e.g 000, none of 3 genes are above the threshold; 100, gene 1 is the only one above the threshold; 110, gene 1 and 2 are both above the threshold...). The number of colors required increases rapidly (2^(length(feat_list))) as the number of genes increases. It is advised not to go beyond 4 features/genes. 
 
 ```{r multi_gene_contrast, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=3, fig.width=4}
 multi_gene_contrast(
