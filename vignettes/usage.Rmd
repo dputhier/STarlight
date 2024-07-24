@@ -375,7 +375,10 @@ dist_st(
   transform = "log10",
   fill_color = c("#3FA0FF", "#ABF8FF", "#EF6C00", "#FFB74D"),
   names = c("region_1_1", "region_1_2", "region_2_1", "region_2_2")
-) + gg_theme
+) + 
+  gg_theme +
+  theme(axis.text.x = element_text(size = 8),
+        axis.text.y = element_text(size = 8))
 ```
 
 
@@ -404,7 +407,9 @@ cmp_boxplot(cmp,
               name = "Conditions",
               labels = c("region_1_1", "region_1_2", "region_2_1", "region_2_2"),
               values = c("#3FA0FF", "#ABF8FF", "#EF6C00", "#FFB74D")
-            )
+            ) + 
+  theme(axis.text.x = element_text(size = 8),
+        axis.text.y = element_text(size = 8))
 ```
 
 ## Count comparison

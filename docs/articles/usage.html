@@ -521,7 +521,10 @@ We can visualize the count distribution for each replicate:</p>
 <span>  transform <span class="op">=</span> <span class="st">"log10"</span>,</span>
 <span>  fill_color <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"#3FA0FF"</span>, <span class="st">"#ABF8FF"</span>, <span class="st">"#EF6C00"</span>, <span class="st">"#FFB74D"</span><span class="op">)</span>,</span>
 <span>  names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"region_1_1"</span>, <span class="st">"region_1_2"</span>, <span class="st">"region_2_1"</span>, <span class="st">"region_2_2"</span><span class="op">)</span></span>
-<span><span class="op">)</span> <span class="op">+</span> <span class="va">gg_theme</span></span></code></pre></div>
+<span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="va">gg_theme</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">8</span><span class="op">)</span>,</span>
+<span>        axis.text.y <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">8</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="usage_files/figure-html/violin_plot-1.png" width="600" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level3">
@@ -553,7 +556,9 @@ replicate:</p>
 <span>              name <span class="op">=</span> <span class="st">"Conditions"</span>,</span>
 <span>              labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"region_1_1"</span>, <span class="st">"region_1_2"</span>, <span class="st">"region_2_1"</span>, <span class="st">"region_2_2"</span><span class="op">)</span>,</span>
 <span>              values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"#3FA0FF"</span>, <span class="st">"#ABF8FF"</span>, <span class="st">"#EF6C00"</span>, <span class="st">"#FFB74D"</span><span class="op">)</span></span>
-<span>            <span class="op">)</span></span>
+<span>            <span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">8</span><span class="op">)</span>,</span>
+<span>        axis.text.y <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">8</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Scale for <span style="color: #00BB00;">fill</span> is already present.</span></span>
 <span><span class="co">#&gt; Adding another scale for <span style="color: #00BB00;">fill</span>, which will replace the existing scale.</span></span></code></pre></div>
 <p><img src="usage_files/figure-html/cmp_boxplot-1.png" width="600" style="display: block; margin: auto;"></p>
