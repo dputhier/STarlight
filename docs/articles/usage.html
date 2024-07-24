@@ -414,7 +414,7 @@ hull around the connected components.</p>
 <span>                    colors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"black"</span>, <span class="fu"><a href="https://rdrr.io/r/grDevices/palettes.html" class="external-link">rainbow</a></span><span class="op">(</span><span class="va">nb_cc</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="va">gg_theme</span></span>
 <span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="va">p1</span> <span class="op">+</span> <span class="fu">create_hull</span><span class="op">(</span><span class="va">st_obj</span>, feat <span class="op">=</span> <span class="st">"Nwd2_cpt"</span><span class="op">)</span>  <span class="op">+</span> <span class="va">gg_theme</span></span>
 <span><span class="va">p1</span> <span class="op">+</span> <span class="va">p2</span></span></code></pre></div>
-<p><img src="usage_files/figure-html/connected_components-1.png" width="600" style="display: block; margin: auto;"></p>
+<p><img src="usage_files/figure-html/connected_components-1.png" width="1050" style="display: block; margin: auto;"></p>
 <p>We can next extend the connected component with neighboring bins with
 the objective to more clearly highlight the component of interest.</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
@@ -427,7 +427,7 @@ analysing Cabp7.</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/spatial_image.html">spatial_image</a></span><span class="op">(</span><span class="va">st_obj</span>, <span class="st">"Cabp7"</span><span class="op">)</span> <span class="op">+</span> <span class="fu">create_hull</span><span class="op">(</span><span class="va">st_obj</span>, </span>
 <span>                                             feat <span class="op">=</span> <span class="st">"Nwd2_cpt_ngb"</span>, </span>
-<span>                                             linewidth <span class="op">=</span> <span class="fl">1</span>, color<span class="op">=</span><span class="st">"white"</span><span class="op">)</span> <span class="op">+</span> <span class="va">gg_theme</span></span></code></pre></div>
+<span>                                             linewidth <span class="op">=</span> <span class="fl">.5</span>, color<span class="op">=</span><span class="st">"white"</span><span class="op">)</span> <span class="op">+</span> <span class="va">gg_theme</span></span></code></pre></div>
 <p><img src="usage_files/figure-html/Cabp7-1.png" width="600" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level3">

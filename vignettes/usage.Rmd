@@ -271,7 +271,7 @@ multi_gene_contrast(
 
 Cell populations expressing a specific marker may be found more or less clustered in the tissue. The  bins containing the corresponding molecules may appear as connected components that can be captured using the  *connected_components()* function. The connected components are stored in the *meta* slot of the STGrid object and named with original feature name and a "_cpt" suffix. Here we will search for connected components with displaying at least 1 count for Cabp7 filtering out those with surface lower than 9 bins. We will also add a hull around the  connected components.
 
-```{r connected_components, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=2, fig.width=4}
+```{r connected_components, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=4, fig.width=7}
 st_obj <- connected_components(st_obj, feat_list = "Nwd2", 
                                threshold = 1, min_size = 8)
 nb_cc <- length(unique(st_obj$Nwd2_cpt))
@@ -295,7 +295,7 @@ And use this hull as a footprint of Nwd2 gene expression when analysing Cabp7.
 ```{r Cabp7, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=2, fig.width=4}
 spatial_image(st_obj, "Cabp7") + create_hull(st_obj, 
                                              feat = "Nwd2_cpt_ngb", 
-                                             linewidth = 1, color="white") + gg_theme
+                                             linewidth = .5, color="white") + gg_theme
 ```
 
 
