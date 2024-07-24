@@ -19,6 +19,7 @@
 #' @param size The size of the overlayed points.
 #' @param logb The basis for the log transformation. Default to 10. If NULL no log transformation.
 #' @param pseudo_count a value for the pseudo count used for log transformation (default to 1).
+#' @param as_factor Whether to consider the feature as a factor (e.g. for ggplot scale).
 #' @param ncol The number of columns for the facets.
 #' @keywords internal
 #' @examples
@@ -50,6 +51,7 @@ setGeneric("spatial_image", function(object = NULL,
                                      size = 0.5,
                                      logb = 10,
                                      pseudo_count = 1,
+                                     as_factor=FALSE,
                                      ncol = 4)
            standardGeneric("spatial_image"))
 
@@ -71,6 +73,7 @@ setGeneric("spatial_image", function(object = NULL,
 #' @param size The size of the overlayed points.
 #' @param logb The basis for the log transformation. Default to 10. If NULL no log transformation.
 #' @param pseudo_count a value for the pseudo count used for log transformation (default to 1).
+#' @param as_factor Whether to consider the feature as a factor (e.g. for ggplot scale).
 #' @param ncol The number of columns for the facets.
 #' @importFrom ggplot2 aes coord_fixed facet_wrap geom_point geom_tile scale_fill_gradientn theme xlab ylab element_blank element_rect element_text scale_x_discrete scale_y_discrete
 #' @importFrom reshape2 melt
@@ -104,6 +107,7 @@ setMethod("spatial_image", signature(object = "STGrid"), function(object = NULL,
                                                                   size = 0.5,
                                                                   logb = 10,
                                                                   pseudo_count = 1,
+                                                                  as_factor=FALSE,
                                                                   ncol = 4) {
   check_this_var(grid_by, null_accepted = TRUE, type = "int")
 
@@ -116,7 +120,7 @@ setMethod("spatial_image", signature(object = "STGrid"), function(object = NULL,
     print_this_msg("Please provide an STGrid object.", msg_type = "STOP")
 
   if (!is.null(overlay_feature)) {
-    if (!overlay_feature %in% c(feat_names(object), meta_names(object)))
+    if (!check_features_exist(object, overlay_feature))
       print_this_msg("The feature to overlay was not found in the object.", msg_type = "STOP")
 
   }
@@ -128,7 +132,7 @@ setMethod("spatial_image", signature(object = "STGrid"), function(object = NULL,
                    msg_type = "STOP")
 
 
-  if (!all(features %in% c(feat_names(object), colnames(object@meta)))) {
+  if (!check_features_exist(object, features)) {
     print_this_msg("The feature was not found in the object.", msg_type = "STOP")
   }
 
@@ -146,31 +150,23 @@ setMethod("spatial_image", signature(object = "STGrid"), function(object = NULL,
 
   tmp <- spatial_matrix[, features, drop = FALSE]
 
-  for (i in 1:ncol(tmp)) {
-    if (saturation < 1) {
-      q_sat <- stats::quantile(tmp[, i][tmp[, i] != 0], saturation)
-      tmp[tmp[, i] > q_sat, i] <- q_sat
-    }
+  if(!as_factor){
+    for (i in 1:ncol(tmp)) {
+      if (saturation < 1) {
+        q_sat <- stats::quantile(tmp[, i][tmp[, i] != 0], saturation)
+        tmp[tmp[, i] > q_sat, i] <- q_sat
+      }
 
-    if (!is.null(logb)) {
-      tmp[, i] <- log(tmp[, i] + pseudo_count, base = logb)
-    }
+      if (!is.null(logb)) {
+        tmp[, i] <- log(tmp[, i] + pseudo_count, base = logb)
+      }
 
-    if (scale) {
-      tmp[, i] <- (tmp[, i] - min(tmp[, i])) / (max(tmp[, i]) - min(tmp[, i]))
+      if (scale) {
+        tmp[, i] <- (tmp[, i] - min(tmp[, i])) / (max(tmp[, i]) - min(tmp[, i]))
+      }
     }
+    spatial_matrix[, features] <- tmp
   }
-
-
-  spatial_matrix[, features] <- tmp
-
-  spatial_matrix$bin_x <- factor(spatial_matrix$bin_x,
-                                 levels = bin_x(object),
-                                 ordered = TRUE)
-
-  spatial_matrix$bin_y <- factor(spatial_matrix$bin_y,
-                                 levels = bin_y(object),
-                                 ordered = TRUE)
 
   spatial_matrix_melted <-
     reshape2::melt(spatial_matrix, id.vars = c("bin_x", "bin_y"))
@@ -179,7 +175,25 @@ setMethod("spatial_image", signature(object = "STGrid"), function(object = NULL,
            levels = features,
            ordered = TRUE)
 
+  spatial_matrix_melted$bin_x <- factor(spatial_matrix_melted$bin_x,
+                                 levels = bin_x(object),
+                                 ordered = TRUE)
+
+  spatial_matrix_melted$bin_y <- factor(spatial_matrix_melted$bin_y,
+                                 levels = bin_y(object),
+                                 ordered = TRUE)
+
   bin_x <- bin_y <- value <- .data <- NULL
+
+  if(as_factor){
+    spatial_matrix_melted$value <- as.factor(spatial_matrix_melted$value)
+    if(length(colors) < length(levels(spatial_matrix_melted$value)))
+      print_this_msg("Need more color for the factor to be displayed...",
+                     msg_type = "STOP")
+    colors <- colors[1:length(levels(spatial_matrix_melted$value))]
+  }
+
+
   p <- ggplot2::ggplot(data = spatial_matrix_melted,
                        mapping = ggplot2::aes(x = bin_x, y = bin_y, fill = value)) +
     ggplot2::geom_tile() +
@@ -192,9 +206,17 @@ setMethod("spatial_image", signature(object = "STGrid"), function(object = NULL,
                                                  "gray30"),
       strip.text = ggplot2::element_text(color =
                                            "white")
-    ) +
-    ggplot2::scale_fill_gradientn(colours = colors) +
-    ggplot2::facet_wrap(~ variable, ncol = ncol)
+    )
+
+  if(as_factor){
+
+    p <- p + ggplot2::scale_fill_manual(values = colors)
+
+  }else{
+    p <- p + ggplot2::scale_fill_gradientn(colours = colors)
+  }
+
+  p <- p + ggplot2::facet_wrap(~ variable, ncol = ncol)
 
   if (coord_fixed)
     p <- p + ggplot2::coord_fixed()
@@ -1658,7 +1680,7 @@ setMethod("multi_gene_contrast",
     print_this_msg("Please provide at least one feature",
                    msg_type = "STOP")
   }else{
-    if(any(!feat_list %in% feat_names(object))){
+    if(!check_features_exist(object, feat_list)){
       print_this_msg("Some features were not found in the object",
                      msg_type = "STOP")
     }
@@ -1675,6 +1697,7 @@ setMethod("multi_gene_contrast",
                        melt_tab = FALSE,
                        transform = "None",
                        pseudo_count=0)
+
   tmp <- bin_mat[,feat_list]
   tmp[tmp < threshold] <- 0
   tmp[tmp >= threshold] <- 1
@@ -1721,3 +1744,106 @@ setMethod("multi_gene_contrast",
   return(p)
 
 })
+
+# -------------------------------------------------------------------------
+##    Create a hull around a contiguous set of bins
+# -------------------------------------------------------------------------
+
+setGeneric("create_hull",
+           function(object=NULL,
+                    feature=NULL,
+                    color="white",
+                    linewidth=0.5)
+             standardGeneric("create_hull"))
+
+
+#' @title Create a Hull around a Feature component of an STGrid
+#' @description
+#' The component of a binarized feature can be produced by the connected_components() function. This function creates a hull around
+#' these components.
+#' @param object An STGrid object containing the spatial expression data.
+#' @param feature A character string specifying the meta feature of interest. Only one feature should be provided.
+#' @param color A character string specifying the color of the hull lines. Default is "white".
+#' @param linewidth A numeric value specifying the width of the hull lines. Default is 0.5.
+#' @return A list of ggplot2 geom_segment objects representing the convex hull. This elements can be added
+#' to a ggplot object as produced by spatial_image().
+#' @details
+#' The function first checks if the specified meta feature exists in the STGrid object and whether it is numeric and integer.
+#' It then generates a binary matrix representing the feature's presence, constructs horizontal and vertical segments
+#' for the hull, and returns these segments as ggplot2 geom_segment objects.
+#' @examples
+#' library(patchwork)
+#' example_dataset()
+#' xen <- Xenium_Mouse_Brain_Coronal_7g
+#' p1 <- spatial_image(xen, feat="Necab2")
+#' xen <- connected_components(xen, feat_list = "Necab2", threshold = 5, min_size = 30)
+#' head(meta(xen))
+#' p2 <- spatial_image(xen, feat="Necab2_cpt", ncol=2, as_factor=TRUE, colors = c("black", rainbow(9)))
+#' hull <- create_hull(xen, feat="Necab2_cpt", color="red", linew=0.3)
+#' p3 <- p2 + hull
+#' p4 <- spatial_image(xen, feat="Nwd2") + hull
+#' (p1 | p2 ) / (p3 | p4)
+#' @export
+setMethod("create_hull", "STGrid",
+          function(object=NULL,
+                   feature=NULL,
+                   color="white",
+                   linewidth=0.5){
+
+  check_features_exist(object, feature)
+  check_st_list(list(object), feature)
+
+  mat <- bin_mat(object, melt_tab = TRUE,
+                      feat_list = feature,
+                      axis_as_number = TRUE)[,c(1,2,4)]
+
+  if(!is.numeric(mat$value))
+    print_this_msg("The feature values should be numerical !", msg_type = "STOP")
+
+  if(!all(mat$value-floor(mat$value)==0))
+    print_this_msg("The feature values should be integers !", msg_type = "STOP")
+
+  ymax <- max(mat$bin_y)
+  xmax <- max(mat$bin_x)
+
+  m <- matrix(0, nrow=ymax, ncol=xmax)
+  m[as.matrix(mat[,2:1])] <- mat[,3]
+
+  # Thx to https://tinyurl.com/3kswvh3j
+  has.breaks<-function(x) ncol(x)==2 & nrow(x)>0
+
+  hw <- do.call(rbind.data.frame,
+                Filter(has.breaks,
+                       Map(function(i,x)
+                         cbind(y=i, x=which(diff(c(0, x, 0)) !=0)),
+                         1:nrow(m),
+                         split(m, 1:nrow(m)))))
+
+  vw <- do.call(rbind.data.frame,
+                Filter(has.breaks,
+                       Map(function(i,x) cbind(x=i,y=which(diff(c(0,x,0))!=0)),
+                           1:ncol(m), as.data.frame(m))))
+
+
+  print_this_msg("Creating segments")
+
+  sgmt <- list()
+  sgmt[[1]] <- geom_segment(data=hw, aes(x= x- .5,
+                              xend= x-.5,
+                              y= y-.5,
+                              yend=y+.5),
+                         linewidth=linewidth,
+                         color=color)
+  sgmt[[2]] <- geom_segment(data=vw, aes(x=x-.5,
+                              xend=x+.5,
+                              y=y-.5,
+                              yend=y-.5),
+                           linewidth=linewidth,
+                           color=color)
+
+  return(sgmt)
+
+})
+
+
+
