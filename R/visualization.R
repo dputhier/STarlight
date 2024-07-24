@@ -1778,7 +1778,7 @@ setGeneric("create_hull",
 #' p1 <- spatial_image(xen, feat="Necab2")
 #' xen <- connected_components(xen, feat_list = "Necab2", threshold = 5, min_size = 30)
 #' head(meta(xen))
-#' p2 <- spatial_image(xen, feat="Necab2_cpt", ncol=2, as_factor=TRUE, colors = c("black", rainbow(9)))
+#' p2 <- spatial_image(xen, feat="Necab2_cpt",  as_factor=TRUE, colors = c("black", rainbow(9)))
 #' hull <- create_hull(xen, feat="Necab2_cpt", color="red", linew=0.3)
 #' p3 <- p2 + hull
 #' p4 <- spatial_image(xen, feat="Nwd2") + hull

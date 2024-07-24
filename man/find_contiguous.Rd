@@ -37,3 +37,4 @@ image(find_contiguous(m, ns=1, threshold=2)[[1]])
 image(find_contiguous(m, ns=2, threshold=2)[[1]])
 image(find_contiguous(m, ns=1:3, threshold=2)[[3]])
 }
+\keyword{internal}

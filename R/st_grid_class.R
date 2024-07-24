@@ -2342,7 +2342,7 @@ setMethod("compute_module_score", "STGrid",
 #' image(find_contiguous(m, ns=2, threshold=2)[[1]])
 #' image(find_contiguous(m, ns=1:3, threshold=2)[[3]])
 #' @export
-#' @keyword internal
+#' @keywords internal
 find_contiguous  <- function(mat,
                            ns=1:3,
                            method=c("queen"),
@@ -2497,10 +2497,38 @@ setMethod("as_matrix", "STGrid",
 #' head(meta(xen))
 #' spatial_image(xen, feat=meta_names(xen)[-1], ncol=2, as_factor=TRUE, colors = c("black", rainbow(60)))
 #' @export
-connected_components <- function(object=NULL,
-                             feat_list=NULL,
-                             threshold=NULL,
-                             min_size = 9){
+#' @keywords internal
+setGeneric("connected_components",
+           function(object=NULL,
+                    feat_list=NULL,
+                    threshold=NULL,
+                    min_size = 9)
+             standardGeneric("connected_components"))
+
+#' @title Given a Feature and an STGrid object, Label and Store Connected Components.
+#' @description
+#' This function identifies and labels connected components in a binary matrix representation of features of an STGrid object.
+#' The connected components are determined using the specified threshold and a minimum size for the components.
+#' @param object An STGrid object containing the spatial expression data.
+#' @param feat_list A character vector specifying the features of interest.
+#' @param threshold A numeric value specifying the threshold for binarizing the matrix. If NULL, the matrix should already be binary.
+#' @param min_size An integer specifying the minimum size of the connected components to retain. Default is 9.
+#' @return The input STGrid object with additional fields for each feature's connected components.
+#' @importFrom mgc ConnCompLabel
+#' @importFrom reshape2 melt
+#' @examples
+#' example_dataset()
+#' xen <- Xenium_Mouse_Brain_Coronal_7g
+#' xen <- connected_components(xen, feat_list = feat_names(xen)[1:5], threshold = 1, min_size = 9)
+#' head(meta(xen))
+#' spatial_image(xen, feat=meta_names(xen)[-1], ncol=2, as_factor=TRUE, colors = c("black", rainbow(60)))
+#' @export
+setMethod("connected_components",
+          "STGrid",
+          function(object=NULL,
+                   feat_list=NULL,
+                   threshold=NULL,
+                   min_size = 9){
 
   if(is.null(xen))
     print_this_msg("please provide at least a single feature...", msg_type = "STOP")
@@ -2557,7 +2585,7 @@ connected_components <- function(object=NULL,
   }
 
   return(object)
-}
+})
 
 # -------------------------------------------------------------------------
 #      Find the neighbors of a Connected Component Using Queen Criterion
@@ -2583,15 +2611,49 @@ connected_components <- function(object=NULL,
 #' p4 <- spatial_image(xen, feat="Nwd2") + hull_1
 #' xen <- cc_neighborhood(xen, feat="Necab2_cpt", neighborhood_size=1:3)
 #' head(meta(xen))
-#' hull_2 <- create_hull(xen, feat="Necab2_cpt_ns_1", color="green", linew=0.3)
+#' hull_2 <- create_hull(xen, feat="Necab2_cpt_ns_1", color="red", linew=0.3)
 #' p5 <- spatial_image(xen, feat="Necab2_cpt", as_factor=TRUE, colors = c("black", rainbow(9))) + hull_2
-#' hull_3 <- create_hull(xen, feat="Necab2_cpt_ns_3", color="green", linew=0.3)
-#' p6 <- spatial_image(xen, feat="Necab2_cpt", as_factor=TRUE, colors = c("black", rainbow(9))) + hull_3
+#' p6 <- spatial_image(xen, feat="Nwd2") + hull_2
 #' (p1 | p2 ) / (p3 | p4) / (p5 + p6)
 #' @export
-cc_neighborhood <- function(object,
-                            feature=NULL,
-                            neighborhood_size=0:4){
+#' @keywords internal
+setGeneric("cc_neighborhood",
+           function(object,
+                    feature=NULL,
+                    neighborhood_size=0:4)
+             standardGeneric("cc_neighborhood"))
+
+
+#' @title Find the neighbors of a Connected Component Using Queen Criterion
+#' @description
+#' Given an STGrid object and a Connected Component (see connected_components()) find the neighboring bins.
+#' @param object An STGrid object containing the spatial expression data.
+#' @param feature A character string specifying the feature of interest.
+#' @param neighborhood_size An integer or a vector of integers specifying the neighborhood size(s) to consider. Default is 1:4.
+#' @return The input STGrid object with additional fields (in meta slot) indicating the satellite bins for the specified feature at each neighborhood size.
+#' @examples
+#' library(patchwork)
+#' example_dataset()
+#' xen <- Xenium_Mouse_Brain_Coronal_7g
+#' p1 <- spatial_image(xen, feat="Necab2")
+#' xen <- connected_components(xen, feat_list = "Necab2", threshold = 5, min_size = 30)
+#' head(meta(xen))
+#' p2 <- spatial_image(xen, feat="Necab2_cpt", as_factor=TRUE, colors = c("black", rainbow(9)))
+#' hull_1 <- create_hull(xen, feat="Necab2_cpt", color="red", linew=0.3)
+#' p3 <- p2 + hull_1
+#' p4 <- spatial_image(xen, feat="Nwd2") + hull_1
+#' xen <- cc_neighborhood(xen, feat="Necab2_cpt", neighborhood_size=1:3)
+#' head(meta(xen))
+#' hull_2 <- create_hull(xen, feat="Necab2_cpt_ns_1", color="red", linew=0.3)
+#' p5 <- spatial_image(xen, feat="Necab2_cpt", as_factor=TRUE, colors = c("black", rainbow(9))) + hull_2
+#' p6 <- spatial_image(xen, feat="Nwd2") + hull_2
+#' (p1 | p2 ) / (p3 | p4) / (p5 + p6)
+#' @export
+setMethod("cc_neighborhood",
+          "STGrid",
+          function(object,
+                   feature=NULL,
+                   neighborhood_size=0:4){
 
   if(is.null(feature) | length(feature) > 1)
     print_this_msg("Please provide one feature...", msg_type = "STOP")
@@ -2631,4 +2693,4 @@ cc_neighborhood <- function(object,
   }
 
   return(object)
-}
+})
