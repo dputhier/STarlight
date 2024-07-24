@@ -351,7 +351,7 @@ st_obj_r2_2 <- st_obj[x_bins, y_bins]
 
 These are the datasets were are working with:
 
-```{r compare_count_distribution, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=3, fig.width=3}
+```{r compare_count_distribution, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=4, fig.width=2}
 cmp_images(st_obj_r1_1,
            st_obj_r1_2,
            st_obj_r2_1, 
