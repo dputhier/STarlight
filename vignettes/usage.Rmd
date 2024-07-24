@@ -330,7 +330,7 @@ meta_names(st_obj)
 ```
 We can map modules using the `spatial_image()` function.
 ```{r map_modules, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=6, fig.width=5, fig.asp=0.90}
-spatial_image(st_obj, features = meta_names(st_obj)[2:21], ncol = 4) + gg_theme
+spatial_image(st_obj, features = meta_names(st_obj)[-c(1:3)], ncol = 4) + gg_theme
 ```
 We can also plot the genes belonging to a specific module. 
 ```{r map_genes_specific_module, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=4, fig.width=4, fig.asp=0.60}
