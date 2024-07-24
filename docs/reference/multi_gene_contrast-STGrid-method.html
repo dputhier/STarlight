@@ -67,7 +67,7 @@ For each bin a binary vector is computed and encoded as a color (e.g 000, not ex
 <span>  <span class="va">object</span>,</span>
 <span>  feat_list <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  threshold <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>  colors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"black"</span>, <span class="fu"><a href="https://rdrr.io/r/grDevices/palettes.html" class="external-link">rainbow</a></span><span class="op">(</span><span class="fl">15</span><span class="op">)</span><span class="op">)</span></span>
+<span>  colors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"black"</span>, <span class="fu">grDevices</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/grDevices/palettes.html" class="external-link">rainbow</a></span><span class="op">(</span><span class="fl">15</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -87,7 +87,7 @@ A maximum of 4 genes (16 colors) is thus advised.</p></dd>
 
 
 <dt>colors</dt>
-<dd><p>A vector of colors to associate with the bit code. Default is c("black", rainbow(15)).</p></dd>
+<dd><p>A vector of colors to associate with the bit code. Default is c("black", grDevices::rainbow(15)).</p></dd>
 
 </dl></div>
     <div id="value">

@@ -182,10 +182,10 @@ The `spatial_image()` function allows users to visualize the spatial density of 
  p <- spatial_image(
   st_obj,
   feat = "Ano1",
-  grid = 20,
   logb = 10,
   scale = TRUE,
-  saturation = 0.9
+  saturation = 0.9,
+  grid_by  = 20,
 ) 
 
 lgd_theme <- theme(
@@ -244,6 +244,7 @@ gene_contrast(
   trim_ratio = 0.025) + lgd_theme
 
 ```
+
 ## The multi_gene_contrast() function
 
 This function performs a contrast analysis between multiple features (genes) using an STGrid as input. It binarizes the gene expression based on a user-defined threshold across x/y bins. For each bin a binary vector is computed and encoded as a color (e.g 000, none of 3 genes above the threshold; 100, gene 1 only above the threshold; 110, gene 1 and 2 above the threshold...). The number of required colors raise rapidly (2^(length(feat_list))) as the number of features increases. So it it advised not to go beyond 4 features/genes.
@@ -260,6 +261,37 @@ multi_gene_contrast(
 ```
 
 # Neighborhood exploration
+
+## Indentifying connected components
+
+Cell populations expressing a specific marker may be found more or less clustered in the tissue. The  bins containing the corresponding molecules may appear as connected components that can be captured using the  *connected_components()* function. The connected components are stored in the *meta* slot of the STGrid object and named with original feature name and a "_cpt" suffix. Here we will search for connected components with displaying at least 1 count for Cabp7 filtering out those with surface lower than 9 bins. We will also add a hull around the  connected components.
+
+```{r}
+set_verb_level(1)
+library(patchwork)
+st_obj <- connected_components(st_obj, feat_list = "Nwd2", threshold = 1, min_size = 8)
+head(meta(st_obj), 3)
+nb_cc <- length(unique(st_obj$Nwd2_cpt))
+p1 <- spatial_image(st_obj, features = "Nwd2_cpt", 
+                    as_factor = TRUE, 
+                    colors = c("black", rainbow(nb_cc - 1))) + lgd_theme
+p2 <- p1 + create_hull(st_obj, feat = "Nwd2_cpt")  + lgd_theme
+p1 + p2
+```
+We can next  find the neighbors of connected componed with the objective to more clearly highlight the component of interest.
+
+```{r}
+st_obj <- cc_neighborhood(st_obj, feat = "Nwd2_cpt")
+head(meta(st_obj), 3)
+p1 + create_hull(st_obj, feat = "Nwd2_cpt_ngb")  + lgd_theme
+```
+
+And use this hull as a footprint of Nwd2 gene expression when analysis Cabp7.
+
+```{r}
+spatial_image(st_obj, "Cabp7") + create_hull(st_obj, feat = "Nwd2_cpt_ngb", linewidth = 1, color="white") + lgd_theme
+```
+
 
 ## Identifying co-localizing genes 
 
@@ -299,9 +331,10 @@ We can also plot the genes belonging to a specific module.
 spatial_image(st_obj, features = hc_st$tree_classes[["MOD07"]], ncol = 3) + lgd_theme
 ```
 
+
 ## Molecule clustering using Ripley's K function
 
-We've implemented the use of Ripley’s K function to assess if genes tend to be more concentrated or dispersed across the tissue. Users can use the `compute_k_ripley` function to get a list of genes whose molecules are spatially concentrated. For this tutorial, we chose to compute Ripley's K function for a few genes because this step is rather time consuming as the molecule density increases. 
+Starlight implements the use of Ripley’s K function to assess if gene molecules tend to be more concentrated or dispersed across the tissue. Users can use the `compute_k_ripley` function to get a list of genes whose molecules are spatially concentrated. For this tutorial, we chose to compute Ripley's K function for a few genes because this step is rather time consuming as the molecule density increases. 
 
 ```{r compute_k_ripley, warning=FALSE, results='hide', echo = TRUE, eval=TRUE}
 gene_list <- c("Chat", "Spag16", "Tacr1", "Sncg", feat_names(st_obj)[1:10])
@@ -313,6 +346,8 @@ plot_rip_k(compute_k_ripley(st_obj, rmax = 80, verbose = FALSE)) + theme(
   )
 ```
 
+
+
 Mapping the above genes confirms they are spatially concentrated. 
 ```{r confirm_k_ripley, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=4, fig.width=4, fig.asp=0.60}
 spatial_image(st_obj, features = c("Chat", "Spag16", "Tacr1", "Calb2"), ncol = 2) + lgd_theme
@@ -323,6 +358,7 @@ spatial_image(st_obj, features = c("Chat", "Spag16", "Tacr1", "Calb2"), ncol = 2
 Users can create an STCompR object from their STGrid object(s) using the `stcompr()` function. This object can then be used to easily compare multiple datasets. For illustrative purposes and to limit the computation time required for this vignette, we will compare two regions of the organ, which will be considered here as two conditions. We have chosen to generate two replicates per region (representative of two close regions). 
 
 ## Creating sample datasets
+
 ```{r create_sample_data, warning=FALSE, results='hide', echo = TRUE, eval=TRUE}
 ## "Region 1 = Condition 1"
 # "replicate 1"

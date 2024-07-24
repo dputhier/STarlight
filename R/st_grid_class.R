@@ -2313,110 +2313,6 @@ setMethod("compute_module_score", "STGrid",
       return(object)
 })
 
-
-# -------------------------------------------------------------------------
-#      Find contiguous cells
-# -------------------------------------------------------------------------
-
-#' @title Find contiguous cells using Queen criterion (internal).
-#' @description
-#' Find contiguous cells in a matrix using Queen criterion. The matrix is first binarized
-#' (any value greater than zero is set to 1, any value lower than 1 is set to 0).
-#' @param mat A numeric matrix.
-#' @param ns The neighborhood size. Default is 1.
-#' @param method The contiguity method. Default is "queen".
-#' @param threshold A threshold for binarization.
-#' @return A list of matrices.
-#' @examples
-#' set.seed(123)
-#' m <- matrix(sample(0:2, replace=TRUE, size = 26*26, prob = c(0.98, 0.01, 0.01)), nc=26)
-#' rownames(m) <- letters
-#' colnames(m) <- LETTERS
-#' image(m)
-#' image(find_contiguous(m, ns=1)[[1]])
-#' image(find_contiguous(m, ns=2)[[1]])
-#' image(find_contiguous(m, ns=1:3)[[3]])
-#' image(find_contiguous(m, ns=5)[[1]])
-#' image(m)
-#' image(find_contiguous(m, ns=1, threshold=2)[[1]])
-#' image(find_contiguous(m, ns=2, threshold=2)[[1]])
-#' image(find_contiguous(m, ns=1:3, threshold=2)[[3]])
-#' @export
-#' @keywords internal
-find_contiguous  <- function(mat,
-                           ns=1:3,
-                           method=c("queen"),
-                           threshold=1){
-
-  if(!all(is.integer(ns)))
-    print_this_msg("Neighborhood should be integers", msg_type = "DEBUG")
-
-  print_this_msg("Preparing matrix", msg_type = "DEBUG")
-
-  method <- match.arg(method)
-
-  mat[mat >= threshold] <- threshold
-  mat[mat < threshold] <- 0
-  mat[mat == threshold] <- 1
-  mat <- as.matrix(mat)
-
-  rn_2_x <- setNames(rownames(mat), as.character(1:nrow(mat)))
-  cn_2_y <- setNames(colnames(mat), as.character(1:ncol(mat)))
-
-  rn <- as.character(1:nrow(mat))
-  cn <- as.character(1:ncol(mat))
-
-  rownames(mat) <- rn
-  colnames(mat) <- cn
-
-  mat_melt <- reshape2::melt(mat)
-  colnames(mat_melt) <- c("x", "y", "value")
-
-  #mat_melt$bin_x <- rn_2_x[mat_melt$x]
-  #mat_melt$bin_y <- cn_2_y[mat_melt$y]
-
-  mat_melt_1 <- mat_melt[mat_melt$value==1,
-                         c("x", "y")]
-
-  mat_melt_0 <- mat_melt[mat_melt$value==0,
-                         c("x", "y")]
-
-
-  if(method == "queen"){
-    print_this_msg("Using method: Queen")
-    print_this_msg("Computing distances", msg_type = "DEBUG")
-
-    dist <- pracma::distmat(as.matrix(mat_melt_0),
-                            as.matrix(mat_melt_1))
-    list_mat  <- list()
-    for(i in 1:length(ns)){
-      if(ns[i] > 0){
-        bin_find_contiguous <- apply(as.matrix(dist), 1, function(x) any(x <= sqrt(2) * ns[i]))
-        mat_melt$bin_find_contiguous <- 0
-        mat_melt$bin_find_contiguous[paste(mat_melt$x, mat_melt$y) %in% paste(mat_melt_0$x[bin_find_contiguous], mat_melt_0$y[bin_find_contiguous])] <- 1
-        mat_melt$bin_find_contiguous <- mat_melt$bin_find_contiguous + mat_melt$value
-      }else{
-        mat_melt$bin_find_contiguous <- mat_melt$value
-      }
-
-
-      mat_unmelt <- reshape2::dcast(mat_melt, x~y, value.var = "bin_find_contiguous")
-      rownames(mat_unmelt) <- mat_unmelt[,1]
-      rownames(mat_unmelt) <- rn_2_x[rownames(mat_unmelt)]
-      colnames(mat_unmelt) <- cn_2_y[colnames(mat_unmelt)]
-      list_mat[[i]] <- as.matrix(mat_unmelt[, -1])
-    }
-
-    return(list_mat)
-
-  }else{
-    print_this_msg("Only Queen method is currently implemented...", msg_type = "STOP")
-  }
-
-}
-
-
-
 # -------------------------------------------------------------------------
 #      Convert bin_mat slot to x/y matrix (i.e. dcast bin_mat)
 #      (e.g. to be displayed using image())
@@ -2450,30 +2346,180 @@ setMethod("as_matrix", "STGrid",
           function(object,
                    feature=NULL) {
 
-    if(length(feature) > 1)
-      print_this_msg("Only a single feature is accepted...")
+            if(length(feature) > 1)
+              print_this_msg("Only a single feature is accepted...")
 
-    if(!check_features_exist(object, feature))
-      print_this_msg("Please provide a feature")
+            if(!check_features_exist(object, feature))
+              print_this_msg("Please provide a feature")
 
-    check_st_list(list(object), feature)
+            check_st_list(list(object), feature)
 
-    bin_mat <- bin_mat(object,
-                       feat_list=feature,
-                       as_factor = TRUE)
+            bin_mat <- bin_mat(object,
+                               feat_list=feature,
+                               as_factor = TRUE)
 
-    spatial_mat <- reshape2::dcast(bin_mat,
-                                   bin_x~bin_y,
-                                   value.var=feature)
+            spatial_mat <- reshape2::dcast(bin_mat,
+                                           bin_x~bin_y,
+                                           value.var=feature)
 
-    rownames(spatial_mat) <- spatial_mat[,1]
-    spatial_mat <- spatial_mat[,-1]
+            rownames(spatial_mat) <- spatial_mat[,1]
+            spatial_mat <- spatial_mat[,-1]
 
 
-    return(as.matrix(spatial_mat[bin_x(object), bin_y(object)]))
+            return(as.matrix(spatial_mat[bin_x(object), bin_y(object)]))
 
-  }
+          }
 )
+
+
+# -------------------------------------------------------------------------
+#      Find contiguous cells
+# -------------------------------------------------------------------------
+#' @title Find contiguous cells using Queen criterion (internal).
+#' @description
+#' Find contiguous cells in a matrix using Queen criterion. The matrix is first binarized
+#' (any value greater than zero is set to 1, any value lower than 1 is set to 0).
+#' @param mat A numeric matrix.
+#' @param threshold A threshold for binarization.
+#' @return A list of matrices.
+#' @examples
+#' set.seed(123)
+#' m <- matrix(sample(0:2, replace=TRUE, size = 26*26, prob = c(0.98, 0.01, 0.01)), nc=26)
+#' rownames(m) <- letters
+#' colnames(m) <- LETTERS
+#' image(m)
+#' image(find_contiguous(m))
+#' image(find_contiguous(m, ns=2)[[1]])
+#' image(find_contiguous(m, threshold=2))
+#' @export
+#' @keywords internal
+find_contiguous <- function(mat,
+                            threshold=1) {
+
+  print_this_msg("Preparing matrix", msg_type = "DEBUG")
+
+
+  mat[mat >= threshold] <- threshold
+  mat[mat < threshold] <- 0
+  mat[mat == threshold] <- 1
+  mat <- as.matrix(mat)
+
+  nr <- nrow(mat)
+  nc <- ncol(mat)
+
+  flagged_mat <- mat
+
+  for (i in 1:nr) {
+    for (j in 1:nc) {
+      if (mat[i, j] == 1) {
+        for (di in -1:1) {
+          for (dj in -1:1) {
+            ni <- i + di
+            nj <- j + dj
+            if (ni > 0 && ni <= nr && nj > 0 && nj <= nc) {
+              flagged_mat[ni, nj] <- 1
+            }
+          }
+        }
+      }
+    }
+  }
+  return(flagged_mat)
+}
+
+# -------------------------------------------------------------------------
+#      Find the neighbors of a Connected Component
+# -------------------------------------------------------------------------
+
+#' @title Find the neighbors of a Connected Component.
+#' @description
+#' Given an STGrid object and a Connected Component (see connected_components()) find the neighboring bins.
+#' @param object An STGrid object containing the spatial expression data.
+#' @param feature A character string specifying the feature of interest.
+#' @return The input STGrid object with additional fields (in meta slot) indicating the satellite bins for the specified feature at each neighborhood size.
+#' @examples
+#' library(patchwork)
+#' example_dataset()
+#' xen <- Xenium_Mouse_Brain_Coronal_7g
+#' p1 <- spatial_image(xen, feat="Necab2")
+#' xen <- connected_components(xen, feat_list = "Necab2", threshold = 5, min_size = 30)
+#' head(meta(xen))
+#' p2 <- spatial_image(xen, feat="Necab2_cpt", as_factor=TRUE, colors = c("black", rainbow(9)))
+#' hull_1 <- create_hull(xen, feat="Necab2_cpt", color="red", linew=0.3)
+#' p3 <- p2 + hull_1
+#' p4 <- spatial_image(xen, feat="Nwd2") + hull_1
+#' (p1 | p2 ) / (p3 | p4)
+#' @export
+#' @keywords internal
+setGeneric("cc_neighborhood",
+           function(object,
+                    feature=NULL)
+             standardGeneric("cc_neighborhood"))
+
+
+#' @title Find the neighbors of a Connected Component.
+#' @description
+#' Given an STGrid object and a Connected Component (see connected_components()) find the neighboring bins.
+#' @param object An STGrid object containing the spatial expression data.
+#' @param feature A character string specifying the feature of interest.
+#' @return The input STGrid object with additional fields (in meta slot) indicating the satellite bins for the specified feature at each neighborhood size.
+#' @examples
+#' library(patchwork)
+#' example_dataset()
+#' xen <- Xenium_Mouse_Brain_Coronal_7g
+#' p1 <- spatial_image(xen, feat="Necab2")
+#' xen <- connected_components(xen, feat_list = "Necab2", threshold = 5, min_size = 30)
+#' head(meta(xen))
+#' p2 <- spatial_image(xen, feat="Necab2_cpt", as_factor=TRUE, colors = c("black", rainbow(9)))
+#' hull_1 <- create_hull(xen, feat="Necab2_cpt", color="red", linew=0.3)
+#' p3 <- p2 + hull_1
+#' p4 <- spatial_image(xen, feat="Nwd2") + hull_1
+#' (p1 | p2 ) / (p3 | p4)
+#' @export
+setMethod("cc_neighborhood",
+          "STGrid",
+          function(object,
+                   feature=NULL){
+
+            if(is.null(feature) | length(feature) > 1)
+              print_this_msg("Please provide one feature...", msg_type = "STOP")
+
+            bin_mat <- bin_mat(object,
+                               feat_list=feature,
+                               as_factor = TRUE)
+
+            if(!is.numeric(bin_mat[[feature]]))
+              print_this_msg("The feature values should be numerical !", msg_type = "STOP")
+
+            if(!all(bin_mat[[feature]]-floor(bin_mat[[feature]])==0))
+              print_this_msg("The feature values should be integers !", msg_type = "STOP")
+
+            print_this_msg("Binarizing...")
+
+            bin_mat[[feature]][bin_mat[[feature]] >= 1] <- 1
+            bin_mat[[feature]][bin_mat[[feature]] < 1] <- 0
+
+            spatial_mat <- reshape2::dcast(bin_mat, bin_x~bin_y, value.var=feature)
+            rownames(spatial_mat) <- spatial_mat[,1]
+            spatial_mat <- spatial_mat[,-1]
+
+            print_this_msg("Looking for contiguous bins...")
+
+            isc <- find_contiguous(spatial_mat,
+                                   threshold=1)
+
+
+            tmp <- reshape2::melt(t(isc))
+            colnames(tmp) <- c("bin_y", "bin_x", "value")
+            rownames(tmp) <- paste0(tmp$bin_x, "~", tmp$bin_y)
+            isc <- tmp[rownames(object@meta), ]
+
+
+            object[[paste0(feature, "_ngb")]] <- isc$value
+
+
+            return(object)
+          })
 
 # -------------------------------------------------------------------------
 #      Connected Components Labelling
@@ -2530,11 +2576,11 @@ setMethod("connected_components",
                    threshold=NULL,
                    min_size = 9){
 
-  if(is.null(xen))
+  if(is.null(feat_list))
     print_this_msg("please provide at least a single feature...", msg_type = "STOP")
 
   if(!check_features_exist(object, feat_list))
-    print_this_msg("Please provide a feature", msg_type = "STOP")
+    print_this_msg("Please provide an available feature", msg_type = "STOP")
 
   check_st_list(list(object), feat_list)
 
@@ -2587,110 +2633,3 @@ setMethod("connected_components",
   return(object)
 })
 
-# -------------------------------------------------------------------------
-#      Find the neighbors of a Connected Component Using Queen Criterion
-# -------------------------------------------------------------------------
-
-#' @title Find the neighbors of a Connected Component Using Queen Criterion
-#' @description
-#' Given an STGrid object and a Connected Component (see connected_components()) find the neighboring bins.
-#' @param object An STGrid object containing the spatial expression data.
-#' @param feature A character string specifying the feature of interest.
-#' @param neighborhood_size An integer or a vector of integers specifying the neighborhood size(s) to consider. Default is 1:4.
-#' @return The input STGrid object with additional fields (in meta slot) indicating the satellite bins for the specified feature at each neighborhood size.
-#' @examples
-#' library(patchwork)
-#' example_dataset()
-#' xen <- Xenium_Mouse_Brain_Coronal_7g
-#' p1 <- spatial_image(xen, feat="Necab2")
-#' xen <- connected_components(xen, feat_list = "Necab2", threshold = 5, min_size = 30)
-#' head(meta(xen))
-#' p2 <- spatial_image(xen, feat="Necab2_cpt", as_factor=TRUE, colors = c("black", rainbow(9)))
-#' hull_1 <- create_hull(xen, feat="Necab2_cpt", color="red", linew=0.3)
-#' p3 <- p2 + hull_1
-#' p4 <- spatial_image(xen, feat="Nwd2") + hull_1
-#' xen <- cc_neighborhood(xen, feat="Necab2_cpt", neighborhood_size=1:3)
-#' head(meta(xen))
-#' hull_2 <- create_hull(xen, feat="Necab2_cpt_ns_1", color="red", linew=0.3)
-#' p5 <- spatial_image(xen, feat="Necab2_cpt", as_factor=TRUE, colors = c("black", rainbow(9))) + hull_2
-#' p6 <- spatial_image(xen, feat="Nwd2") + hull_2
-#' (p1 | p2 ) / (p3 | p4) / (p5 + p6)
-#' @export
-#' @keywords internal
-setGeneric("cc_neighborhood",
-           function(object,
-                    feature=NULL,
-                    neighborhood_size=0:4)
-             standardGeneric("cc_neighborhood"))
-
-
-#' @title Find the neighbors of a Connected Component Using Queen Criterion
-#' @description
-#' Given an STGrid object and a Connected Component (see connected_components()) find the neighboring bins.
-#' @param object An STGrid object containing the spatial expression data.
-#' @param feature A character string specifying the feature of interest.
-#' @param neighborhood_size An integer or a vector of integers specifying the neighborhood size(s) to consider. Default is 1:4.
-#' @return The input STGrid object with additional fields (in meta slot) indicating the satellite bins for the specified feature at each neighborhood size.
-#' @examples
-#' library(patchwork)
-#' example_dataset()
-#' xen <- Xenium_Mouse_Brain_Coronal_7g
-#' p1 <- spatial_image(xen, feat="Necab2")
-#' xen <- connected_components(xen, feat_list = "Necab2", threshold = 5, min_size = 30)
-#' head(meta(xen))
-#' p2 <- spatial_image(xen, feat="Necab2_cpt", as_factor=TRUE, colors = c("black", rainbow(9)))
-#' hull_1 <- create_hull(xen, feat="Necab2_cpt", color="red", linew=0.3)
-#' p3 <- p2 + hull_1
-#' p4 <- spatial_image(xen, feat="Nwd2") + hull_1
-#' xen <- cc_neighborhood(xen, feat="Necab2_cpt", neighborhood_size=1:3)
-#' head(meta(xen))
-#' hull_2 <- create_hull(xen, feat="Necab2_cpt_ns_1", color="red", linew=0.3)
-#' p5 <- spatial_image(xen, feat="Necab2_cpt", as_factor=TRUE, colors = c("black", rainbow(9))) + hull_2
-#' p6 <- spatial_image(xen, feat="Nwd2") + hull_2
-#' (p1 | p2 ) / (p3 | p4) / (p5 + p6)
-#' @export
-setMethod("cc_neighborhood",
-          "STGrid",
-          function(object,
-                   feature=NULL,
-                   neighborhood_size=0:4){
-
-  if(is.null(feature) | length(feature) > 1)
-    print_this_msg("Please provide one feature...", msg_type = "STOP")
-
-  bin_mat <- bin_mat(object,
-                     feat_list=feature,
-                     as_factor = TRUE)
-
-  if(!is.numeric(bin_mat[[feature]]))
-    print_this_msg("The feature values should be numerical !", msg_type = "STOP")
-
-  if(!all(bin_mat[[feature]]-floor(bin_mat[[feature]])==0))
-    print_this_msg("The feature values should be integers !", msg_type = "STOP")
-
-  bin_mat[[feature]][bin_mat[[feature]] >= 1] <- 1
-  bin_mat[[feature]][bin_mat[[feature]] < 1] <- 0
-
-  spatial_mat <- reshape2::dcast(bin_mat, bin_x~bin_y, value.var=feature)
-  rownames(spatial_mat) <- spatial_mat[,1]
-  spatial_mat <- spatial_mat[,-1]
-
-  print_this_msg("Looking for contiguous bins...")
-
-  isc <- find_contiguous(spatial_mat,
-                         ns=neighborhood_size,
-                         threshold=1)
-
-  for(i in 1:length(isc)){
-    tmp <- reshape2::melt(t(isc[[i]]))
-    colnames(tmp) <- c("bin_y", "bin_x", "value")
-    rownames(tmp) <- paste0(tmp$bin_x, "~", tmp$bin_y)
-    isc[[i]] <- tmp[rownames(object@meta), ]
-  }
-
-  for(i in 1:length(isc)){
-    object[[paste0(feature, "_ns_", neighborhood_size[i])]] <- isc[[i]]$value
-  }
-
-  return(object)
-})

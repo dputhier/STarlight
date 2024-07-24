@@ -209,18 +209,20 @@ within tissue sections.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">STarlight</span><span class="fu">::</span><span class="fu"><a href="../reference/show_st_methods.html">show_st_methods</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  [1] "["                    "[["                   "[[&lt;-"                </span></span>
-<span><span class="co">#&gt;  [4] "$"                    "$&lt;-"                  "bin_mat"             </span></span>
-<span><span class="co">#&gt;  [7] "bin_size"             "bin_x"                "bin_y"               </span></span>
-<span><span class="co">#&gt; [10] "col_names"            "compute_k_ripley"     "compute_module_score"</span></span>
-<span><span class="co">#&gt; [13] "coord"                "dim"                  "feat_names"          </span></span>
-<span><span class="co">#&gt; [16] "gene_contrast"        "get_coord"            "hc_tree"             </span></span>
-<span><span class="co">#&gt; [19] "meta_names"           "multi_gene_contrast"  "nb_feat"             </span></span>
-<span><span class="co">#&gt; [22] "nb_items"             "nbin_x"               "nbin_y"              </span></span>
-<span><span class="co">#&gt; [25] "order_feat_by_ripley" "plot_rip_k"           "re_bin"              </span></span>
-<span><span class="co">#&gt; [28] "ripley_k_function"    "rm_controls"          "row_names"           </span></span>
-<span><span class="co">#&gt; [31] "show"                 "spatial_image"        "spatial_plot"        </span></span>
-<span><span class="co">#&gt; [34] "summary"              "tab"                  "table_st"            </span></span>
-<span><span class="co">#&gt; [37] "write_coord"</span></span></code></pre></div>
+<span><span class="co">#&gt;  [4] "$"                    "$&lt;-"                  "as_matrix"           </span></span>
+<span><span class="co">#&gt;  [7] "bin_mat"              "bin_size"             "bin_x"               </span></span>
+<span><span class="co">#&gt; [10] "bin_y"                "cc_neighborhood"      "check_features_exist"</span></span>
+<span><span class="co">#&gt; [13] "col_names"            "compute_k_ripley"     "compute_module_score"</span></span>
+<span><span class="co">#&gt; [16] "connected_components" "coord"                "create_hull"         </span></span>
+<span><span class="co">#&gt; [19] "dim"                  "feat_names"           "gene_contrast"       </span></span>
+<span><span class="co">#&gt; [22] "get_coord"            "hc_tree"              "meta_names"          </span></span>
+<span><span class="co">#&gt; [25] "meta"                 "multi_gene_contrast"  "nb_feat"             </span></span>
+<span><span class="co">#&gt; [28] "nb_items"             "nbin_x"               "nbin_y"              </span></span>
+<span><span class="co">#&gt; [31] "order_feat_by_ripley" "plot_rip_k"           "re_bin"              </span></span>
+<span><span class="co">#&gt; [34] "ripley_k_function"    "rm_controls"          "row_names"           </span></span>
+<span><span class="co">#&gt; [37] "show"                 "spatial_image"        "spatial_plot"        </span></span>
+<span><span class="co">#&gt; [40] "summary"              "tab"                  "table_st"            </span></span>
+<span><span class="co">#&gt; [43] "write_coord"</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="subsetting">Subsetting<a class="anchor" aria-label="anchor" href="#subsetting"></a>
 </h3>
@@ -292,10 +294,10 @@ which eases the selection of particular regions.</p>
 <code class="sourceCode R"><span> <span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spatial_image.html">spatial_image</a></span><span class="op">(</span></span>
 <span>  <span class="va">st_obj</span>,</span>
 <span>  feat <span class="op">=</span> <span class="st">"Ano1"</span>,</span>
-<span>  grid <span class="op">=</span> <span class="fl">20</span>,</span>
 <span>  logb <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  scale <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  saturation <span class="op">=</span> <span class="fl">0.9</span></span>
+<span>  saturation <span class="op">=</span> <span class="fl">0.9</span>,</span>
+<span>  grid_by  <span class="op">=</span> <span class="fl">20</span>,</span>
 <span><span class="op">)</span> </span>
 <span></span>
 <span><span class="va">lgd_theme</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span></span>
@@ -360,8 +362,11 @@ function.</p>
 <span>                  <span class="st">"Hat1"</span><span class="op">)</span>,</span>
 <span>  centered <span class="op">=</span> <span class="cn">TRUE</span>, </span>
 <span>  trim_ratio <span class="op">=</span> <span class="fl">0.025</span><span class="op">)</span> <span class="op">+</span> <span class="va">lgd_theme</span></span></code></pre></div>
-<p><img src="usage_files/figure-html/gene_contrast-1.png" width="750" style="display: block; margin: auto;">
-## The multi_gene_contrast() function</p>
+<p><img src="usage_files/figure-html/gene_contrast-1.png" width="750" style="display: block; margin: auto;"></p>
+</div>
+<div class="section level3">
+<h3 id="the-multi_gene_contrast-function">The multi_gene_contrast() function<a class="anchor" aria-label="anchor" href="#the-multi_gene_contrast-function"></a>
+</h3>
 <p>This function performs a contrast analysis between multiple features
 (genes) using an STGrid as input. It binarizes the gene expression based
 on a user-defined threshold across x/y bins. For each bin a binary
@@ -385,12 +390,62 @@ advised not to go beyond 4 features/genes.</p>
 <h2 id="neighborhood-exploration">Neighborhood exploration<a class="anchor" aria-label="anchor" href="#neighborhood-exploration"></a>
 </h2>
 <div class="section level3">
+<h3 id="indentifying-connected-components">Indentifying connected components<a class="anchor" aria-label="anchor" href="#indentifying-connected-components"></a>
+</h3>
+<p>Cell populations expressing a specific marker may be found more or
+less clustered in the tissue. The bins containing the corresponding
+molecules may appear as connected components that can be captured using
+the <em>connected_components()</em> function. The connected components
+are stored in the <em>meta</em> slot of the STGrid object and named with
+original feature name and a “_cpt” suffix. Here we will search for
+connected components with displaying at least 1 count for Cabp7
+filtering out those with surface lower than 9 bins. We will also add a
+hull around the connected components.</p>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/set_verb_level.html">set_verb_level</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://patchwork.data-imaginist.com" class="external-link">patchwork</a></span><span class="op">)</span></span>
+<span><span class="va">st_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/connected_components.html">connected_components</a></span><span class="op">(</span><span class="va">st_obj</span>, feat_list <span class="op">=</span> <span class="st">"Nwd2"</span>, threshold <span class="op">=</span> <span class="fl">1</span>, min_size <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="../reference/meta.html">meta</a></span><span class="op">(</span><span class="va">st_obj</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="co">#&gt;                                 count_sum Nwd2_cpt</span></span>
+<span><span class="co">#&gt; [1.01e+03,1.03e+03)~[12.1,37.1)         0        0</span></span>
+<span><span class="co">#&gt; [1.01e+03,1.03e+03)~[37.1,62.1)         0        0</span></span>
+<span><span class="co">#&gt; [1.01e+03,1.03e+03)~[62.1,87.1)         0        0</span></span>
+<span><span class="va">nb_cc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">st_obj</span><span class="op">$</span><span class="va">Nwd2_cpt</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">p1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spatial_image.html">spatial_image</a></span><span class="op">(</span><span class="va">st_obj</span>, features <span class="op">=</span> <span class="st">"Nwd2_cpt"</span>, </span>
+<span>                    as_factor <span class="op">=</span> <span class="cn">TRUE</span>, </span>
+<span>                    colors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"black"</span>, <span class="fu"><a href="https://rdrr.io/r/grDevices/palettes.html" class="external-link">rainbow</a></span><span class="op">(</span><span class="va">nb_cc</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="va">lgd_theme</span></span>
+<span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="va">p1</span> <span class="op">+</span> <span class="fu">create_hull</span><span class="op">(</span><span class="va">st_obj</span>, feat <span class="op">=</span> <span class="st">"Nwd2_cpt"</span><span class="op">)</span>  <span class="op">+</span> <span class="va">lgd_theme</span></span>
+<span><span class="co">#&gt; |-- INFO :  Creating segments</span></span>
+<span><span class="va">p1</span> <span class="op">+</span> <span class="va">p2</span></span></code></pre></div>
+<p><img src="usage_files/figure-html/unnamed-chunk-2-1.png" width="1093.75" style="display: block; margin: auto;">
+We can next find the neighbors of connected componed with the objective
+to more clearly highlight the component of interest.</p>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">st_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cc_neighborhood.html">cc_neighborhood</a></span><span class="op">(</span><span class="va">st_obj</span>, feat <span class="op">=</span> <span class="st">"Nwd2_cpt"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; |-- INFO :  Binarizing... </span></span>
+<span><span class="co">#&gt; |-- INFO :  Looking for contiguous bins...</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="../reference/meta.html">meta</a></span><span class="op">(</span><span class="va">st_obj</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="co">#&gt;                                 count_sum Nwd2_cpt Nwd2_cpt_ngb</span></span>
+<span><span class="co">#&gt; [1.01e+03,1.03e+03)~[12.1,37.1)         0        0            0</span></span>
+<span><span class="co">#&gt; [1.01e+03,1.03e+03)~[37.1,62.1)         0        0            0</span></span>
+<span><span class="co">#&gt; [1.01e+03,1.03e+03)~[62.1,87.1)         0        0            0</span></span>
+<span><span class="va">p1</span> <span class="op">+</span> <span class="fu">create_hull</span><span class="op">(</span><span class="va">st_obj</span>, feat <span class="op">=</span> <span class="st">"Nwd2_cpt_ngb"</span><span class="op">)</span>  <span class="op">+</span> <span class="va">lgd_theme</span></span>
+<span><span class="co">#&gt; |-- INFO :  Creating segments</span></span></code></pre></div>
+<p><img src="usage_files/figure-html/unnamed-chunk-3-1.png" width="1093.75" style="display: block; margin: auto;"></p>
+<p>And use this hull as a footprint of Nwd2 gene expression when
+analysis Cabp7.</p>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/spatial_image.html">spatial_image</a></span><span class="op">(</span><span class="va">st_obj</span>, <span class="st">"Cabp7"</span><span class="op">)</span> <span class="op">+</span> <span class="fu">create_hull</span><span class="op">(</span><span class="va">st_obj</span>, feat <span class="op">=</span> <span class="st">"Nwd2_cpt_ngb"</span>, linewidth <span class="op">=</span> <span class="fl">1</span>, color<span class="op">=</span><span class="st">"white"</span><span class="op">)</span> <span class="op">+</span> <span class="va">lgd_theme</span></span>
+<span><span class="co">#&gt; |-- INFO :  Creating segments</span></span></code></pre></div>
+<p><img src="usage_files/figure-html/unnamed-chunk-4-1.png" width="1093.75" style="display: block; margin: auto;"></p>
+</div>
+<div class="section level3">
 <h3 id="identifying-co-localizing-genes">Identifying co-localizing genes<a class="anchor" aria-label="anchor" href="#identifying-co-localizing-genes"></a>
 </h3>
 <p>The <code><a href="../reference/hc_tree.html">hc_tree()</a></code> function can used to organize genes into
 subclusters (modules), revealing which genes tend to colocalize and
 follow a similar spatial distribution across the tissue.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">hc_st</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/hc_tree.html">hc_tree</a></span><span class="op">(</span></span>
 <span>  <span class="va">st_obj</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"ward.D"</span>,</span>
@@ -403,7 +458,7 @@ follow a similar spatial distribution across the tissue.</p>
 <span></span>
 <span><span class="va">hc_st</span></span></code></pre></div>
 <p><img src="usage_files/figure-html/gene_colocalization-1.png" width="750" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># The first 3 modules</span></span>
 <span><span class="va">hc_st</span><span class="op">$</span><span class="va">tree_classes</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span>
 <span><span class="co">#&gt; $MOD01</span></span>
@@ -415,36 +470,37 @@ follow a similar spatial distribution across the tissue.</p>
 <span><span class="co">#&gt; $MOD03</span></span>
 <span><span class="co">#&gt; [1] "Acvrl1" "Adgrl4"</span></span></code></pre></div>
 <p>Compute average module score.</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">st_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_module_score.html">compute_module_score</a></span><span class="op">(</span><span class="va">st_obj</span>, modules <span class="op">=</span> <span class="va">hc_st</span><span class="op">$</span><span class="va">tree_classes</span><span class="op">)</span></span>
 <span><span class="co">#&gt; |-- INFO :  Computing module score... </span></span>
 <span><span class="co">#&gt; |-- INFO :  Iterating over modules... </span></span>
 <span><span class="co">#&gt; |-- INFO :  Returning object...</span></span>
 <span><span class="fu"><a href="../reference/meta_names.html">meta_names</a></span><span class="op">(</span><span class="va">st_obj</span><span class="op">)</span></span>
-<span><span class="co">#&gt;  [1] "count_sum" "MOD01"     "MOD02"     "MOD03"     "MOD04"     "MOD05"    </span></span>
-<span><span class="co">#&gt;  [7] "MOD06"     "MOD07"     "MOD08"     "MOD09"     "MOD10"     "MOD11"    </span></span>
-<span><span class="co">#&gt; [13] "MOD12"     "MOD13"     "MOD14"     "MOD15"     "MOD16"     "MOD17"    </span></span>
-<span><span class="co">#&gt; [19] "MOD18"     "MOD19"     "MOD20"</span></span></code></pre></div>
+<span><span class="co">#&gt;  [1] "count_sum"    "Nwd2_cpt"     "Nwd2_cpt_ngb" "MOD01"        "MOD02"       </span></span>
+<span><span class="co">#&gt;  [6] "MOD03"        "MOD04"        "MOD05"        "MOD06"        "MOD07"       </span></span>
+<span><span class="co">#&gt; [11] "MOD08"        "MOD09"        "MOD10"        "MOD11"        "MOD12"       </span></span>
+<span><span class="co">#&gt; [16] "MOD13"        "MOD14"        "MOD15"        "MOD16"        "MOD17"       </span></span>
+<span><span class="co">#&gt; [21] "MOD18"        "MOD19"        "MOD20"</span></span></code></pre></div>
 <p>We can map modules using the <code><a href="../reference/spatial_image.html">spatial_image()</a></code>
 function.</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/spatial_image.html">spatial_image</a></span><span class="op">(</span><span class="va">st_obj</span>, features <span class="op">=</span> <span class="fu"><a href="../reference/meta_names.html">meta_names</a></span><span class="op">(</span><span class="va">st_obj</span><span class="op">)</span><span class="op">[</span><span class="fl">2</span><span class="op">:</span><span class="fl">21</span><span class="op">]</span>, ncol <span class="op">=</span> <span class="fl">4</span><span class="op">)</span> <span class="op">+</span> <span class="va">lgd_theme</span></span></code></pre></div>
 <p><img src="usage_files/figure-html/map_modules-1.png" width="750" style="display: block; margin: auto;">
 We can also plot the genes belonging to a specific module.</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/spatial_image.html">spatial_image</a></span><span class="op">(</span><span class="va">st_obj</span>, features <span class="op">=</span> <span class="va">hc_st</span><span class="op">$</span><span class="va">tree_classes</span><span class="op">[[</span><span class="st">"MOD07"</span><span class="op">]</span><span class="op">]</span>, ncol <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op">+</span> <span class="va">lgd_theme</span></span></code></pre></div>
 <p><img src="usage_files/figure-html/map_genes_specific_module-1.png" width="600" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level3">
 <h3 id="molecule-clustering-using-ripleys-k-function">Molecule clustering using Ripley’s K function<a class="anchor" aria-label="anchor" href="#molecule-clustering-using-ripleys-k-function"></a>
 </h3>
-<p>We’ve implemented the use of Ripley’s K function to assess if genes
-tend to be more concentrated or dispersed across the tissue. Users can
-use the <code>compute_k_ripley</code> function to get a list of genes
-whose molecules are spatially concentrated. For this tutorial, we chose
-to compute Ripley’s K function for a few genes because this step is
-rather time consuming as the molecule density increases.</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<p>Starlight implements the use of Ripley’s K function to assess if gene
+molecules tend to be more concentrated or dispersed across the tissue.
+Users can use the <code>compute_k_ripley</code> function to get a list
+of genes whose molecules are spatially concentrated. For this tutorial,
+we chose to compute Ripley’s K function for a few genes because this
+step is rather time consuming as the molecule density increases.</p>
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">gene_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Chat"</span>, <span class="st">"Spag16"</span>, <span class="st">"Tacr1"</span>, <span class="st">"Sncg"</span>, <span class="fu"><a href="../reference/feat_names.html">feat_names</a></span><span class="op">(</span><span class="va">st_obj</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/plot_rip_k.html">plot_rip_k</a></span><span class="op">(</span><span class="fu"><a href="../reference/compute_k_ripley.html">compute_k_ripley</a></span><span class="op">(</span><span class="va">st_obj</span>, rmax <span class="op">=</span> <span class="fl">80</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span></span>
 <span>  axis.title.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">8</span><span class="op">)</span>,</span>
@@ -454,7 +510,7 @@ rather time consuming as the molecule density increases.</p>
 <span>  <span class="op">)</span></span></code></pre></div>
 <p><img src="usage_files/figure-html/compute_k_ripley-1.png" width="1093.75" style="display: block; margin: auto;"></p>
 <p>Mapping the above genes confirms they are spatially concentrated.</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/spatial_image.html">spatial_image</a></span><span class="op">(</span><span class="va">st_obj</span>, features <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Chat"</span>, <span class="st">"Spag16"</span>, <span class="st">"Tacr1"</span>, <span class="st">"Calb2"</span><span class="op">)</span>, ncol <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> <span class="op">+</span> <span class="va">lgd_theme</span></span></code></pre></div>
 <p><img src="usage_files/figure-html/confirm_k_ripley-1.png" width="600" style="display: block; margin: auto;"></p>
 </div>
@@ -472,7 +528,7 @@ two close regions).</p>
 <div class="section level3">
 <h3 id="creating-sample-datasets">Creating sample datasets<a class="anchor" aria-label="anchor" href="#creating-sample-datasets"></a>
 </h3>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## "Region 1 = Condition 1"</span></span>
 <span><span class="co"># "replicate 1"</span></span>
 <span><span class="va">x_bins</span> <span class="op">&lt;-</span>  <span class="fu"><a href="../reference/bin_x.html">bin_x</a></span><span class="op">(</span><span class="va">st_obj</span><span class="op">)</span><span class="op">[</span><span class="fl">180</span><span class="op">:</span><span class="fu"><a href="../reference/nbin_x.html">nbin_x</a></span><span class="op">(</span><span class="va">st_obj</span><span class="op">)</span><span class="op">]</span></span>
@@ -496,7 +552,7 @@ two close regions).</p>
 <span><span class="va">y_bins</span> <span class="op">&lt;-</span>  <span class="fu"><a href="../reference/bin_y.html">bin_y</a></span><span class="op">(</span><span class="va">st_obj</span><span class="op">)</span><span class="op">[</span><span class="fl">80</span><span class="op">:</span><span class="fl">130</span><span class="op">]</span></span>
 <span><span class="va">st_obj_r2_2</span> <span class="op">&lt;-</span> <span class="va">st_obj</span><span class="op">[</span><span class="va">x_bins</span>, <span class="va">y_bins</span><span class="op">]</span></span></code></pre></div>
 <p>These are the datasets were are working with:</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/cmp_images.html">cmp_images</a></span><span class="op">(</span><span class="va">st_obj_r1_1</span>,</span>
 <span>           <span class="va">st_obj_r1_2</span>,</span>
 <span>           <span class="va">st_obj_r2_1</span>, </span>
@@ -517,7 +573,7 @@ two close regions).</p>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="usage_files/figure-html/compare_count_distribution-1.png" width="450" style="display: block; margin: auto;">
 We can visualize the count distribution for each replicate:</p>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/dist_st.html">dist_st</a></span><span class="op">(</span></span>
 <span>  <span class="va">st_obj_r1_1</span>,</span>
 <span>  <span class="va">st_obj_r1_2</span>,</span>
@@ -543,7 +599,7 @@ We can visualize the count distribution for each replicate:</p>
 </h3>
 <p>Now we can create an STCompR object using the <code><a href="../reference/stcompr.html">stcompr()</a></code>
 function.</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/stcompr.html">stcompr</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">st_obj_r1_1</span>,</span>
 <span>                    <span class="va">st_obj_r1_2</span><span class="op">)</span>,</span>
 <span>                <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">st_obj_r2_1</span>, </span>
@@ -558,7 +614,7 @@ function.</p>
 </h3>
 <p>We can visualize the normalized count distribution for each
 replicate:</p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/cmp_boxplot.html">cmp_boxplot</a></span><span class="op">(</span><span class="va">cmp</span>,</span>
 <span>            transform <span class="op">=</span> <span class="st">"log10"</span>,</span>
 <span>            normalized <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span></span>
@@ -584,7 +640,7 @@ replicate:</p>
 </h3>
 <p>As we can see below, the expression level of several genes differ
 between both regions.</p>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/cmp_volcano.html">cmp_volcano</a></span><span class="op">(</span></span>
 <span>  <span class="va">cmp</span>,</span>
 <span>  text_y_lim <span class="op">=</span> <span class="fl">20</span>,</span>
@@ -605,7 +661,7 @@ between both regions.</p>
 <p><img src="usage_files/figure-html/cmp_volcano-1.png" width="600" style="display: block; margin: auto;">
 Using the <code><a href="../reference/cmp_images.html">cmp_images()</a></code> function, we map these genes to see
 how they spatially differ across regions.</p>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">genes</span> <span class="op">&lt;-</span> <span class="va">cmp</span><span class="op">@</span><span class="va">stat_test</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">log2_ratio</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">2.5</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">log2_ratio</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>

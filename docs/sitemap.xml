@@ -25,6 +25,12 @@
     <loc>/reference/STGrid-class.html</loc>
   </url>
   <url>
+    <loc>/reference/as_matrix-STGrid-method.html</loc>
+  </url>
+  <url>
+    <loc>/reference/as_matrix.html</loc>
+  </url>
+  <url>
     <loc>/reference/bin_mat-STGrid-method.html</loc>
   </url>
   <url>
@@ -56,6 +62,18 @@
   </url>
   <url>
     <loc>/reference/cash-set-STGrid-method.html</loc>
+  </url>
+  <url>
+    <loc>/reference/cc_neighborhood-STGrid-method.html</loc>
+  </url>
+  <url>
+    <loc>/reference/cc_neighborhood.html</loc>
+  </url>
+  <url>
+    <loc>/reference/check_features_exist-STGrid-method.html</loc>
+  </url>
+  <url>
+    <loc>/reference/check_features_exist.html</loc>
   </url>
   <url>
     <loc>/reference/check_st_list.html</loc>
@@ -109,10 +127,22 @@
     <loc>/reference/compute_module_score.html</loc>
   </url>
   <url>
+    <loc>/reference/connected_components-STGrid-method.html</loc>
+  </url>
+  <url>
+    <loc>/reference/connected_components.html</loc>
+  </url>
+  <url>
+    <loc>/reference/control_list.html</loc>
+  </url>
+  <url>
     <loc>/reference/coord-STGrid-method.html</loc>
   </url>
   <url>
     <loc>/reference/coord.html</loc>
+  </url>
+  <url>
+    <loc>/reference/create_hull-STGrid-method.html</loc>
   </url>
   <url>
     <loc>/reference/dim-STGrid-method.html</loc>
@@ -134,6 +164,9 @@
   </url>
   <url>
     <loc>/reference/feat_names.html</loc>
+  </url>
+  <url>
+    <loc>/reference/find_contiguous.html</loc>
   </url>
   <url>
     <loc>/reference/fov_selection.html</loc>
@@ -164,6 +197,12 @@
   </url>
   <url>
     <loc>/reference/load_spatial.html</loc>
+  </url>
+  <url>
+    <loc>/reference/meta-STGrid-method.html</loc>
+  </url>
+  <url>
+    <loc>/reference/meta.html</loc>
   </url>
   <url>
     <loc>/reference/meta_names-STGrid-method.html</loc>

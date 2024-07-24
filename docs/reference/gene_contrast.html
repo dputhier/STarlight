@@ -77,7 +77,11 @@
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>feat_list_1</dt>
+    <dl><dt>object</dt>
+<dd><p>An STGrid object representing the spatial transcriptomics data.</p></dd>
+
+
+<dt>feat_list_1</dt>
 <dd><p>A list of features (genes) for the first condition.</p></dd>
 
 
@@ -97,6 +101,10 @@
 <dd><p>Colours for the high end of the gradient.</p></dd>
 
 
+<dt>na_color</dt>
+<dd><p>Bin with 0 value for both features are set to NA. The color for NA values.</p></dd>
+
+
 <dt>midpoint</dt>
 <dd><p>The midpoint (in data value) of the diverging scale. Defaults to 0.</p></dd>
 
@@ -111,10 +119,6 @@
 
 <dt>trim_ratio</dt>
 <dd><p>A ratio for trimming extreme log2 ratio values. Default is 0.025.</p></dd>
-
-
-<dt>st_grid</dt>
-<dd><p>An STGrid object representing the spatial transcriptomics data.</p></dd>
 
 </dl></div>
     <div id="value">

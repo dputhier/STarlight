@@ -248,8 +248,8 @@ setMethod("spatial_image", signature(object = "STGrid"), function(object = NULL,
   }
 
   if (!is.null(grid_by)) {
-    lev_bin_x <- levels(spatial_matrix$bin_x)
-    lev_bin_y <- levels(spatial_matrix$bin_y)
+    lev_bin_x <- bin_x(object)
+    lev_bin_y <- bin_y(object)
 
     x_seq <- seq(from = 1,
                  to = length(lev_bin_x),
@@ -267,12 +267,12 @@ setMethod("spatial_image", signature(object = "STGrid"), function(object = NULL,
 
     p <-
       p + geom_vline(
-        data = data.frame(bin_x = levels(spatial_matrix$bin_x)[x_seq]),
+        data = data.frame(bin_x = bin_x(object)[x_seq]) ,
         mapping = aes(xintercept = bin_x),
         color = color_grid
       ) +
       geom_hline(
-        data = data.frame(bin_y = levels(spatial_matrix$bin_y)[y_seq]),
+        data = data.frame(bin_y = bin_y(object)[y_seq]),
         mapping = aes(yintercept = bin_y),
         color = color_grid
       ) +
