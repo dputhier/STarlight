@@ -278,7 +278,7 @@ nb_cc <- length(unique(st_obj$Nwd2_cpt))
 p1 <- spatial_image(st_obj, features = "Nwd2_cpt", 
                     as_factor = TRUE, 
                     colors = c("black", rainbow(nb_cc - 1))) + gg_theme
-p2 <- p1 + create_hull(st_obj, feat = "Nwd2_cpt")  + gg_theme
+p2 <- p1 + create_hull(st_obj, feat = "Nwd2_cpt", color="grey")  + gg_theme
 p1 + p2
 ```
 
