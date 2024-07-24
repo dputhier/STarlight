@@ -347,8 +347,7 @@ other molecules potentially located in the vicinity of
 <h3 id="the-gene_contrast-function">The gene_contrast() function<a class="anchor" aria-label="anchor" href="#the-gene_contrast-function"></a>
 </h3>
 <p>This function can be used to compare the log2 ratio between two genes
-across x/y bins. Several pair of genes can be provided to the
-function.</p>
+across x/y bins. Several genes pairs can be provided.</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/gene_contrast.html">gene_contrast</a></span><span class="op">(</span></span>
 <span>  <span class="va">st_obj</span>,</span>
@@ -360,16 +359,20 @@ function.</p>
 <span>                  <span class="st">"Hat1"</span><span class="op">)</span>,</span>
 <span>  centered <span class="op">=</span> <span class="cn">TRUE</span>, </span>
 <span>  trim_ratio <span class="op">=</span> <span class="fl">0.025</span><span class="op">)</span> <span class="op">+</span> <span class="va">lgd_theme</span></span></code></pre></div>
-<p><img src="usage_files/figure-html/gene_contrast-1.png" width="750" style="display: block; margin: auto;">
-## The multi_gene_contrast() function</p>
+<p><img src="usage_files/figure-html/gene_contrast-1.png" width="750" style="display: block; margin: auto;"></p>
+</div>
+<div class="section level3">
+<h3 id="the-multi_gene_contrast-function">The multi_gene_contrast() function<a class="anchor" aria-label="anchor" href="#the-multi_gene_contrast-function"></a>
+</h3>
 <p>This function performs a contrast analysis between multiple features
-(genes) using an STGrid as input. It binarizes the gene expression based
-on a user-defined threshold across x/y bins. For each bin a binary
-vector is computed and encoded as a color (e.g 000, none of 3 genes
-above the threshold; 100, gene 1 only above the threshold; 110, gene 1
-and 2 above the threshold…). The number of required colors raise rapidly
-(2^(length(feat_list))) as the number of features increases. So it it
-advised not to go beyond 4 features/genes.</p>
+(genes) by binarizing gene expression based on a user-defined threshold
+across x/y bins. An STGrid object is used as input. For each bin, a
+binary vector is computed and encoded as a color (e.g 000, none of 3
+genes are above the threshold; 100, gene 1 is the only one above the
+threshold; 110, gene 1 and 2 are both above the threshold…). The number
+of colors required increases rapidly (2^(length(feat_list))) as the
+number of genes increases. It is advised not to go beyond 4
+features/genes.</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/multi_gene_contrast.html">multi_gene_contrast</a></span><span class="op">(</span></span>
 <span>  <span class="va">st_obj</span>,</span>
