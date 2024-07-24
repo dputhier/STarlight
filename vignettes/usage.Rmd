@@ -254,7 +254,7 @@ gene_contrast(
 
 This function performs a contrast analysis between multiple features (genes) by binarizing gene expression based on a user-defined threshold across x/y bins. An STGrid object is used as input. For each bin, a binary vector is computed and encoded as a color (e.g 000, none of 3 genes are above the threshold; 100, gene 1 is the only one above the threshold; 110, gene 1 and 2 are both above the threshold...). The number of colors required increases rapidly (2^(length(feat_list))) as the number of genes increases. It is advised not to go beyond 4 features/genes. 
 
-```{r multi_gene_contrast, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=2, fig.width=6}
+```{r multi_gene_contrast, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=2, fig.width=5}
 multi_gene_contrast(
   st_obj,
   feat_list = c("Ebf3",
