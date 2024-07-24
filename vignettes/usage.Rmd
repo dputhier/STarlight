@@ -179,6 +179,22 @@ st_obj[10:12, ]
 The `spatial_image()` function allows users to visualize the spatial density of molecules across tissue sections. Users can do the following if they want to visualize a single gene. The `grid=TRUE` argument overlays a bin of a specified size, which eases the selection of particular regions.
 
 ```{r single_gene, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=3, fig.width=4}
+
+# First prepare a general ggplot theme for this presentation
+gg_theme <- theme(
+  legend.key.width = unit(0.10, "in"),
+  legend.key.height = unit(0.10, "in"),
+  legend.text = element_text(size = 8),
+  legend.title = element_text(size = 8),
+  axis.title.x = element_text(size = 8),
+  axis.title.y = element_text(size = 8),
+  axis.text.x = element_text(size = 8),
+  axis.text.y = element_text(size = 8),
+  strip.text.x = element_text(size = 7),
+  strip.text.y = element_text(size = 7)
+)
+
+# Call the spatial_image() function
  p <- spatial_image(
   st_obj,
   feat = "Ano1",
@@ -186,16 +202,7 @@ The `spatial_image()` function allows users to visualize the spatial density of 
   logb = 10,
   scale = TRUE,
   saturation = 0.9
-) 
-
-lgd_theme <- theme(
-  legend.key.width = unit(0.10, "in"),
-  legend.key.height = unit(0.10, "in"),
-  legend.text = element_text(size = 8),
-  legend.title = element_text(size = 8)
-)
-
-p + lgd_theme
+) + gg_theme
 ```
 Users can choose to **zoom** into specific regions. For example, we can zoom into the region with a high *Ano1* molecule density (upper right corner of the image above). We use `rebin()` to increase the binning resolution of the selected region.
 
@@ -209,7 +216,7 @@ spatial_image(
   logb = 10,
   scale = TRUE,
   saturation = 0.9
-) + lgd_theme
+) + gg_theme
 ```
 
 ## The spatial_plot() function
@@ -224,7 +231,7 @@ spatial_plot(
                 "Ebf3"),
   colors = ggsci::pal_aaas()(3),
   size = 0.6
-) + lgd_theme
+) + gg_theme
 ```
 
 ## The gene_contrast() function
@@ -241,7 +248,7 @@ gene_contrast(
                   "Ebf3", 
                   "Hat1"),
   centered = TRUE, 
-  trim_ratio = 0.025) + lgd_theme
+  trim_ratio = 0.025) + gg_theme
 
 ```
 
@@ -256,7 +263,7 @@ multi_gene_contrast(
                 "Kctd8",
                 "Chat",
                 "Ano1"), 
-  threshold = 2) + lgd_theme
+  threshold = 2) + gg_theme
   
 ```
 
@@ -275,7 +282,7 @@ hc_st <- hc_tree(
   class_nb = 20, 
   lab_fontsize = 2.5,
   offset = 9
-) + lgd_theme
+) + gg_theme
 
 hc_st
 ```
@@ -293,11 +300,11 @@ meta_names(st_obj)
 ```
 We can map modules using the `spatial_image()` function.
 ```{r map_modules, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=6, fig.width=5, fig.asp=0.90}
-spatial_image(st_obj, features = meta_names(st_obj)[2:21], ncol = 4) + lgd_theme
+spatial_image(st_obj, features = meta_names(st_obj)[2:21], ncol = 4) + gg_theme
 ```
 We can also plot the genes belonging to a specific module. 
 ```{r map_genes_specific_module, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=4, fig.width=4, fig.asp=0.60}
-spatial_image(st_obj, features = hc_st$tree_classes[["MOD07"]], ncol = 3) + lgd_theme
+spatial_image(st_obj, features = hc_st$tree_classes[["MOD07"]], ncol = 3) + gg_theme
 ```
 
 ## Molecule clustering using Ripley's K function
@@ -306,17 +313,12 @@ We've implemented the use of Ripley’s K function to assess if genes tend to be
 
 ```{r compute_k_ripley, warning=FALSE, results='hide', echo = TRUE, eval=TRUE}
 gene_list <- c("Chat", "Spag16", "Tacr1", "Sncg", feat_names(st_obj)[1:10])
-plot_rip_k(compute_k_ripley(st_obj, rmax = 80, verbose = FALSE)) + theme(
-  axis.title.x = element_text(size = 8),
-  axis.title.y = element_text(size = 8),
-  axis.text.x = element_text(size = 8),
-  axis.text.y = element_text(size = 8)
-  )
+plot_rip_k(compute_k_ripley(st_obj, rmax = 80, verbose = FALSE)) + gg_theme
 ```
 
 Mapping the above genes confirms they are spatially concentrated. 
 ```{r confirm_k_ripley, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=4, fig.width=4, fig.asp=0.60}
-spatial_image(st_obj, features = c("Chat", "Spag16", "Tacr1", "Calb2"), ncol = 2) + lgd_theme
+spatial_image(st_obj, features = c("Chat", "Spag16", "Tacr1", "Calb2"), ncol = 2) + gg_theme
 ```
 
 # Dataset comparison: the STCompR class
@@ -362,14 +364,7 @@ cmp_images(st_obj_r1_1,
            color_strip_text_y = "black",
            color_x_strip="#333333",
            colors = viridis::magma(10)
-           ) + theme(
-  legend.key.width = unit(0.10, "in"),
-  legend.key.height = unit(0.10, "in"),
-  legend.text = element_text(size = 8),
-  legend.title = element_text(size = 8),
-  strip.text.x = element_text(size = 7),
-  strip.text.y = element_text(size = 7)
-)
+           ) + gg_theme
 ```
 We can visualize the count distribution for each replicate:
 
@@ -382,16 +377,7 @@ dist_st(
   transform = "log10",
   fill_color = c("#3FA0FF", "#ABF8FF", "#EF6C00", "#FFB74D"),
   names = c("region_1_1", "region_1_2", "region_2_1", "region_2_2")
-) + theme(
-  legend.key.width = unit(0.10, "in"),
-  legend.key.height = unit(0.10, "in"),
-  legend.text = element_text(size = 8),
-  legend.title = element_text(size = 8),
-  axis.title.x = element_text(size = 7),
-  axis.title.y = element_text(size = 7),
-  axis.text.x = element_text(size = 7),
-  axis.text.y = element_text(size = 7)
-)
+) + gg_theme
 ```
 
 
@@ -414,16 +400,9 @@ We can visualize the normalized count distribution for each replicate:
 ```{r cmp_boxplot, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=3, fig.width=4}
 cmp_boxplot(cmp,
             transform = "log10",
-            normalized = TRUE) + theme(
-              legend.key.width = unit(0.10, "in"),
-              legend.key.height = unit(0.10, "in"),
-              legend.text = element_text(size = 8),
-              legend.title = element_text(size = 8),
-              axis.title.x = element_text(size = 7),
-              axis.title.y = element_text(size = 7),
-              axis.text.x = element_text(size = 7),
-              axis.text.y = element_text(size = 7)
-            ) + scale_fill_manual(
+            normalized = TRUE) + 
+    gg_theme + 
+  scale_fill_manual(
               name = "Conditions",
               labels = c("region_1_1", "region_1_2", "region_2_1", "region_2_2"),
               values = c("#3FA0FF", "#ABF8FF", "#EF6C00", "#FFB74D")
@@ -441,17 +420,7 @@ cmp_volcano(
   text_size = 2,
   text_x_lim = 2.5,
   title = "Comparison of region_1 vs. region_2"
-) + theme(
-  legend.key.width = unit(0.10, "in"),
-  legend.key.height = unit(0.10, "in"),
-  legend.text = element_text(size = 8),
-  legend.title = element_text(size = 8),
-  axis.title.x = element_text(size = 8),
-  axis.title.y = element_text(size = 8),
-  axis.text.x = element_text(size = 7),
-  axis.text.y = element_text(size = 7), 
-  title = element_text(size = 8)
-)
+) + gg_theme
 ```
 Using the `cmp_images()` function, we map these genes to see how they spatially differ across regions. 
 
@@ -473,12 +442,5 @@ cmp_images(
   color_x_strip = c("#558B2F", "#558B2F", "#C5E1A5", "#C5E1A5", "#C5E1A5"),
   color_strip_text_x = "black",
   colors = viridis::magma(10)
-) + theme(
-  legend.key.width = unit(0.10, "in"),
-  legend.key.height = unit(0.10, "in"),
-  legend.text = element_text(size = 8),
-  legend.title = element_text(size = 8),
-  strip.text.x = element_text(size = 7),
-  strip.text.y = element_text(size = 7)
-  )
+) + gg_theme
 ```
