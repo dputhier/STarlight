@@ -1,6 +1,13 @@
 # Changelog
 
+## v0.0.8
+
 * Added control_list() function.
+* Added meta() method for STGrid.
+* Added as_matrix() method for STGrid.
+* Added connected_components(), cc_neighborhood(), create_hull(), find_contiguous().
+* Added as_factor arg to spatial_image()
+* Added axis_as_number arg to bin_mat()
 
 ## v0.0.7
 
