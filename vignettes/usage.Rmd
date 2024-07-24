@@ -295,7 +295,7 @@ And use this hull as a footprint of Nwd2 gene expression when analysing Cpne4.
 ```{r Cabp7, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=2, fig.width=4}
 spatial_image(st_obj, "Cpne4") + create_hull(st_obj, 
                                              feat = "Nwd2_cpt_ngb", 
-                                             linewidth = .5, color="white") + gg_theme
+                                             linewidth = .3, color="white") + gg_theme
 ```
 
 
