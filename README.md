@@ -39,7 +39,7 @@ Then load the library within R.
 Documentation is available at
 <https://dputhier.github.io/STarlight/>.
 
-A guided tutorial can be found here.
+A guided tutorial can be found here
 <https://dputhier.github.io/STarlight/articles/usage.html>
 
 
