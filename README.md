@@ -39,6 +39,10 @@ Then load the library within R.
 Documentation is available at
 <https://dputhier.github.io/STarlight/>.
 
+A guided tutorial can be found here.
+<https://dputhier.github.io/STarlight/articles/usage.html>
+
+
 ## Case study material
 Scripts used to produce the Merscope hepatocarcinoma case study figures are available at <https://github.com/dputhier/STarlight_article>. Merscope data used is from [Magen et al.](https://www.nature.com/articles/s41591-023-02345-0).
 
