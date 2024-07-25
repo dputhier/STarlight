@@ -402,12 +402,12 @@ molecules may appear as connected components that can be captured using
 the <em>connected_components()</em> function. The connected components
 are stored in the <em>meta</em> slot of the STGrid object and named with
 original feature name and a “_cpt” suffix. Here we will search for
-connected components with displaying at least 1 count for Cabp7
-filtering out those with surface lower than 9 bins. We will also add a
-hull around the connected components.</p>
+connected components displaying at least 1 count for Nwd2 filtering out
+those with surface lower than 9 bins. We will also add a hull around the
+connected components.</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">st_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/connected_components.html">connected_components</a></span><span class="op">(</span><span class="va">st_obj</span>, feat_list <span class="op">=</span> <span class="st">"Nwd2"</span>, </span>
-<span>                               threshold <span class="op">=</span> <span class="fl">1</span>, min_size <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span>
+<span>                               threshold <span class="op">=</span> <span class="fl">1</span>, min_size <span class="op">=</span> <span class="fl">9</span><span class="op">)</span></span>
 <span><span class="va">nb_cc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">st_obj</span><span class="op">$</span><span class="va">Nwd2_cpt</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">p1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spatial_image.html">spatial_image</a></span><span class="op">(</span><span class="va">st_obj</span>, features <span class="op">=</span> <span class="st">"Nwd2_cpt"</span>, </span>
 <span>                    as_factor <span class="op">=</span> <span class="cn">TRUE</span>, </span>

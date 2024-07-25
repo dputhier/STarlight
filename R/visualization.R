@@ -1650,7 +1650,9 @@ setGeneric("multi_gene_contrast",
            function(object,
                     feat_list=NULL,
                     threshold=3,
-                    colors = c("black", grDevices::rainbow(15))) standardGeneric("multi_gene_contrast"))
+                    colors = c("black",
+                               grDevices::rainbow(15)))
+             standardGeneric("multi_gene_contrast"))
 
 #' @title Multi-Gene contrast analysis for an STGrid object.
 #' @description
@@ -1674,7 +1676,8 @@ setMethod("multi_gene_contrast",
           function(object,
                    feat_list=NULL,
                    threshold=3,
-                   colors = c("black", grDevices::rainbow(15))) {
+                   colors = c("black",
+                              grDevices::rainbow(15))) {
 
   if(is.null(feat_list)){
     print_this_msg("Please provide at least one feature",
@@ -1704,8 +1707,10 @@ setMethod("multi_gene_contrast",
 
   bin_mat[,feat_list] <- tmp
   bitwise_sum <- function(x){a <- 2^(x*1:length(x)); sum(a[a!=1])}
+
   bin_mat$config <- as.factor(apply(bin_mat[,feat_list, drop=FALSE], 1, bitwise_sum))
   name_config <- function(x,y){paste(y[x==1], collapse = " + ")}
+
   bin_mat$name_config <- as.factor(apply(bin_mat[,feat_list, drop=FALSE],
                                          1,
                                          name_config,
