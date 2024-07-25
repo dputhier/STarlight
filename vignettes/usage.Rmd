@@ -307,7 +307,7 @@ spatial_image(st_obj, features = hc_st$tree_classes[["MOD07"]], ncol = 3) + gg_t
 
 ## Molecule clustering using Ripley's K function
 
-We've implemented the use of Ripley’s K function to assess if genes tend to be more concentrated or dispersed across the tissue. Users can use the `compute_k_ripley` function to get a list of genes whose molecules are spatially concentrated. For this tutorial, we chose to compute Ripley's K function for a few genes because this step is rather time consuming as the molecule density increases. 
+The STarlight package proposes the Ripley’s K function (from spatstat.explore package) to assess if genes tend to be more concentrated or dispersed across the tissue. Users can use the `compute_k_ripley` function to get a list of genes whose molecules are spatially concentrated. For this tutorial, we chose to compute Ripley's K function for a few genes because this step is rather time consuming as the molecule density increases. 
 
 ```{r compute_k_ripley, warning=FALSE, results='hide', echo = TRUE, eval=TRUE}
 gene_list <- c("Chat", "Spag16", "Tacr1", "Sncg", feat_names(st_obj)[1:10])

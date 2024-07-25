@@ -445,12 +445,13 @@ We can also plot the genes belonging to a specific module.</p>
 <div class="section level3">
 <h3 id="molecule-clustering-using-ripleys-k-function">Molecule clustering using Ripley’s K function<a class="anchor" aria-label="anchor" href="#molecule-clustering-using-ripleys-k-function"></a>
 </h3>
-<p>We’ve implemented the use of Ripley’s K function to assess if genes
-tend to be more concentrated or dispersed across the tissue. Users can
-use the <code>compute_k_ripley</code> function to get a list of genes
-whose molecules are spatially concentrated. For this tutorial, we chose
-to compute Ripley’s K function for a few genes because this step is
-rather time consuming as the molecule density increases.</p>
+<p>The STarlight package proposes the Ripley’s K function (from
+spatstat.explore package) to assess if genes tend to be more
+concentrated or dispersed across the tissue. Users can use the
+<code>compute_k_ripley</code> function to get a list of genes whose
+molecules are spatially concentrated. For this tutorial, we chose to
+compute Ripley’s K function for a few genes because this step is rather
+time consuming as the molecule density increases.</p>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">gene_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Chat"</span>, <span class="st">"Spag16"</span>, <span class="st">"Tacr1"</span>, <span class="st">"Sncg"</span>, <span class="fu"><a href="../reference/feat_names.html">feat_names</a></span><span class="op">(</span><span class="va">st_obj</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/plot_rip_k.html">plot_rip_k</a></span><span class="op">(</span><span class="fu"><a href="../reference/compute_k_ripley.html">compute_k_ripley</a></span><span class="op">(</span><span class="va">st_obj</span>, rmax <span class="op">=</span> <span class="fl">80</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="va">gg_theme</span></span></code></pre></div>
