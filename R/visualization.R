@@ -924,7 +924,8 @@ setMethod("cmp_boxplot", signature("STCompR"), function(object,
       panel.border = ggplot2::element_blank()
     ) +
     ggplot2::ylab(ylabel) +
-    ggplot2::scale_fill_manual(values = colors)
+    ggplot2::scale_fill_manual(values = colors) +
+    st_gg_theming()
 
 })
 
@@ -1720,6 +1721,6 @@ setMethod("multi_gene_contrast",
                    strip.text = ggplot2::element_text(color="white")) +
     ggplot2::scale_fill_manual(values = colors)
 
-  return(p)
+  return(p + st_gg_theming())
 
 })

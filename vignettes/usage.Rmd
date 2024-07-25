@@ -428,3 +428,10 @@ cmp_images(
   colors = viridis::magma(10)
 )
 ```
+
+# Session info
+
+```{r}
+sessionInfo()
+```
+

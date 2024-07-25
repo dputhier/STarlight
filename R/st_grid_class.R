@@ -2003,7 +2003,7 @@ setMethod("hc_tree", "STGrid",
             if(return_tree){
               return(list(hc_clust, tree_classes, annotation, p))
             }else{
-              return(p)
+              return(p + st_gg_theming())
             }
 
 
