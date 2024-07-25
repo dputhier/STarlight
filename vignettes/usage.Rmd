@@ -408,7 +408,7 @@ cmp_volcano(
 ```
 Using the `cmp_images()` function, we map these genes to see how they spatially differ across regions. 
 
-```{r cmp_images, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=4, fig.width=4, fig.asp=1}
+```{r cmp_images, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=4, fig.width=5, fig.asp=1}
 genes <- cmp@stat_test %>%
   dplyr::filter(abs(log2_ratio) > 2.5) %>%
   dplyr::arrange(log2_ratio) %>%
