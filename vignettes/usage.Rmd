@@ -432,6 +432,10 @@ cmp_images(
 # Session info
 
 ```{r}
-sessionInfo()
+sessioninfo::session_info()%>%
+  details::details(
+    summary = 'Current session info',
+    open    = TRUE
+  )
 ```
 
