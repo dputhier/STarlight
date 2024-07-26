@@ -557,6 +557,8 @@ control_list <- function(expression_value=NULL,
 #'
 #' @details
 #' The `st_gg_theming` function customizes the appearance of ggplot2 plots.
+#' @examples
+#' is(st_gg_theming())
 #'
 #' @keywords internal
 #' @importFrom ggplot2 theme
