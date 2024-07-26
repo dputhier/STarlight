@@ -5,7 +5,6 @@ test_that("STGrid...", {
   library(STarlight)
   set_verb_level(0)
 
-
   example_dataset()
   test_data <- Xenium_Mouse_Brain_Coronal_7g
   x_bins <-  bin_x(test_data)[181:nbin_x(test_data)]
@@ -75,5 +74,4 @@ test_that("STGrid...", {
                                mapping=c("x"="x_global_px",
                                          "y"="y_global_px", feature="target"),
                                verbose = FALSE))
-
 })
