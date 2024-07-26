@@ -8,6 +8,10 @@ developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.re
 MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://cran.r-project.org/web/licenses/MIT)
 [![](https://img.shields.io/github/last-commit/dputhier/STarlight.svg)](https://github.com/dputhier/STarlight/commits/main)
 [![](https://codecov.io/gh/dputhier/STarlight/branch/main/graph/badge.svg)](https://codecov.io/gh/dputhier/STarlight)
+[![](https://github.com/dputhier/STarlight/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/dputhier/STarlight/actions)
+[![](https://github.com/dputhier/STarlight/actions/workflows/pkgdown.yaml/badge.svg)](https://github.com/dputhier/STarlight/actions)
+
+
 
 # STarlight
 
