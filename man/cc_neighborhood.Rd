@@ -2,16 +2,14 @@
 % Please edit documentation in R/st_grid_class.R
 \name{cc_neighborhood}
 \alias{cc_neighborhood}
-\title{Find the neighbors of a Connected Component Using Queen Criterion}
+\title{Find the neighbors of a Connected Component.}
 \usage{
-cc_neighborhood(object, feature = NULL, neighborhood_size = 0:4)
+cc_neighborhood(object, feature = NULL)
 }
 \arguments{
 \item{object}{An STGrid object containing the spatial expression data.}
 
 \item{feature}{A character string specifying the feature of interest.}
-
-\item{neighborhood_size}{An integer or a vector of integers specifying the neighborhood size(s) to consider. Default is 1:4.}
 }
 \value{
 The input STGrid object with additional fields (in meta slot) indicating the satellite bins for the specified feature at each neighborhood size.
@@ -30,11 +28,6 @@ p2 <- spatial_image(xen, feat="Necab2_cpt", as_factor=TRUE, colors = c("black", 
 hull_1 <- create_hull(xen, feat="Necab2_cpt", color="red", linew=0.3)
 p3 <- p2 + hull_1
 p4 <- spatial_image(xen, feat="Nwd2") + hull_1
-xen <- cc_neighborhood(xen, feat="Necab2_cpt", neighborhood_size=1:3)
-head(meta(xen))
-hull_2 <- create_hull(xen, feat="Necab2_cpt_ns_1", color="red", linew=0.3)
-p5 <- spatial_image(xen, feat="Necab2_cpt", as_factor=TRUE, colors = c("black", rainbow(9))) + hull_2
-p6 <- spatial_image(xen, feat="Nwd2") + hull_2
-(p1 | p2 ) / (p3 | p4) / (p5 + p6)
+(p1 | p2 ) / (p3 | p4)
 }
 \keyword{internal}

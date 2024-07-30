@@ -32,7 +32,7 @@ counts, this will allow to delete these blanks/controls for computation.}
 
 \item{threads}{The number of threads (see data.table::fread).}
 
-\item{constrain}{Whether to put constrains on a column when method is set to 'coordinates'. E.g: 'list("global_z==0", "fov==0")'.}
+\item{constrain}{Whether to put constrains on a column when method is set to 'coordinates'. E.g: 'list("global_z==0", "fov==0")'. Works currently with 'coordinates'.}
 
 \item{verbose}{Whether to display the progress bar.}
 
@@ -52,7 +52,19 @@ as path (contains 'global_x', 'global_y' and 'gene' column). If method is set to
 path is passed to the 'data.dir' argument of Seurat::ReadXenium and Seurat::ReadVizgen respectively (see corresponding docs).
 }
 \examples{
-  fp <- file.path(system.file("extdata", package = "STarlight"), "tyni_xenium.txt")
+  # Coordinate example
+  fp <- file.path(system.file("extdata", package = "STarlight"), "tyni.txt")
   st <- load_spatial(fp, method = "coordinates")
+  # merscope csv file
+  fp <- file.path(system.file("extdata", package = "STarlight"), "merscope_122_r1_sub.csv.gz")
+  st <- load_spatial(fp, method = "merscope_csv", sep=",")
+  # Xenium
+  fp <- file.path(system.file("extdata", package = "STarlight"), "xenium_mouse_brain_tx_tiny.csv")
+  st <- load_spatial(fp,
+                     method = "coordinates", sep=",",
+                     mapping = c("x"="x_location", "y"="y_location", "feature"="feature_name"))
+  # Cosmix
+  fp <- file.path(system.file("extdata", package = "STarlight"), "Lung5_Rep1_tx_file_tiny.csv.gz")
+  st <- load_spatial(fp, method = "coordinates", sep=",", mapping=c("x"="x_global_px", "y"="y_global_px", feature="target"))
 
 }

@@ -8,6 +8,10 @@ developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.re
 MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://cran.r-project.org/web/licenses/MIT)
 [![](https://img.shields.io/github/last-commit/dputhier/STarlight.svg)](https://github.com/dputhier/STarlight/commits/main)
 [![](https://codecov.io/gh/dputhier/STarlight/branch/main/graph/badge.svg)](https://codecov.io/gh/dputhier/STarlight)
+[![](https://github.com/dputhier/STarlight/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/dputhier/STarlight/actions)
+[![](https://github.com/dputhier/STarlight/actions/workflows/pkgdown.yaml/badge.svg)](https://github.com/dputhier/STarlight/actions)
+
+
 
 # STarlight
 
@@ -38,6 +42,10 @@ Then load the library within R.
 
 Documentation is available at
 <https://dputhier.github.io/STarlight/>.
+
+A guided tutorial can be found here
+<https://dputhier.github.io/STarlight/articles/usage.html>
+
 
 ## Case study material
 Scripts used to produce the Merscope hepatocarcinoma case study figures are available at <https://github.com/dputhier/STarlight_article>. Merscope data used is from [Magen et al.](https://www.nature.com/articles/s41591-023-02345-0).

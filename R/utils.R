@@ -542,3 +542,39 @@ control_list <- function(expression_value=NULL,
   return(g)
 }
 
+
+
+# -------------------------------------------------------------------------
+# st_gg_theming.           ------------------------------------------------
+# -------------------------------------------------------------------------
+
+#' Custom ggplot2 Theming
+#'
+#' This function defines a custom theme for ggplot2 plots with specific adjustments
+#' to the legend key dimensions, legend text, axis titles, and strip text sizes.
+#'
+#' @return A ggplot2 theme object with predefined settings for legend, axis, and strip text.
+#'
+#' @details
+#' The `st_gg_theming` function customizes the appearance of ggplot2 plots.
+#' @examples
+#' is(st_gg_theming())
+#'
+#' @keywords internal
+#' @importFrom ggplot2 theme
+#' @export
+st_gg_theming <- function(){
+
+  gg_theme <- ggplot2::theme(
+    legend.key.width = unit(0.10, "in"),
+    legend.key.height = unit(0.10, "in"),
+    legend.text = element_text(size = 8),
+    legend.title = element_text(size = 8),
+    axis.title.x = element_text(size = 8),
+    axis.title.y = element_text(size = 8),
+    strip.text.x = element_text(size = 7),
+    strip.text.y = element_text(size = 7))
+
+  return(gg_theme)
+
+}

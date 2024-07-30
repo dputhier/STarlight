@@ -4,14 +4,10 @@
 \alias{find_contiguous}
 \title{Find contiguous cells using Queen criterion (internal).}
 \usage{
-find_contiguous(mat, ns = 1:3, method = c("queen"), threshold = 1)
+find_contiguous(mat, threshold = 1)
 }
 \arguments{
 \item{mat}{A numeric matrix.}
-
-\item{ns}{The neighborhood size. Default is 1.}
-
-\item{method}{The contiguity method. Default is "queen".}
 
 \item{threshold}{A threshold for binarization.}
 }
@@ -28,13 +24,8 @@ m <- matrix(sample(0:2, replace=TRUE, size = 26*26, prob = c(0.98, 0.01, 0.01)),
 rownames(m) <- letters
 colnames(m) <- LETTERS
 image(m)
-image(find_contiguous(m, ns=1)[[1]])
+image(find_contiguous(m))
 image(find_contiguous(m, ns=2)[[1]])
-image(find_contiguous(m, ns=1:3)[[3]])
-image(find_contiguous(m, ns=5)[[1]])
-image(m)
-image(find_contiguous(m, ns=1, threshold=2)[[1]])
-image(find_contiguous(m, ns=2, threshold=2)[[1]])
-image(find_contiguous(m, ns=1:3, threshold=2)[[3]])
+image(find_contiguous(m, threshold=2))
 }
 \keyword{internal}

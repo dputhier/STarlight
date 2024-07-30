@@ -281,7 +281,7 @@ setMethod("spatial_image", signature(object = "STGrid"), function(object = NULL,
       ggplot2::scale_y_discrete("y", labels = names(label_y))
   }
 
-  return(p)
+  return(p + st_gg_theming())
 
 })
 
@@ -366,7 +366,7 @@ setMethod("spatial_plot", "STGrid", function(object = NULL,
   if (coord_fixed)
     p <- p + ggplot2::coord_fixed()
 
-  return(p)
+  return(p + st_gg_theming())
 
 })
 
@@ -841,7 +841,9 @@ dist_st <- function(...,
       ggplot2::xlab("Conditions")
   }
 
-  return(p)
+  return(p + ggplot2::theme(axis.text.x = element_text(size = 8),
+                 axis.text.y = element_text(size = 8)) +
+           st_gg_theming())
 
 }
 
@@ -934,18 +936,19 @@ setMethod("cmp_boxplot", signature("STCompR"), function(object,
     ggplot2::theme_bw() +
     ggplot2::theme(
       axis.text.x = ggplot2::element_text(
-        size = 10,
+        size = 8,
         angle = 45,
         vjust = 0.5
       ),
-      axis.text.y = ggplot2::element_text(size = 12),
+      axis.text.y = ggplot2::element_text(size = 8),
       panel.grid.major.y = ggplot2::element_blank(),
       panel.grid.minor.x = ggplot2::element_blank(),
       panel.grid.minor.y = ggplot2::element_blank(),
       panel.border = ggplot2::element_blank()
     ) +
     ggplot2::ylab(ylabel) +
-    ggplot2::scale_fill_manual(values = colors)
+    ggplot2::scale_fill_manual(values = colors) +
+    st_gg_theming()
 
 })
 
@@ -1080,7 +1083,7 @@ setMethod("cmp_volcano", signature("STCompR"), function(object,
     ) +
     ggplot2::ggtitle(title) +
     ggplot2::xlab(x_axis_lab) +
-    ggplot2::theme(
+    ggplot2::theme(plot.title = ggplot2::element_text(size = 8),
       axis.text.x = ggplot2::element_text(size = 10, vjust = 0.5),
       axis.text.y = ggplot2::element_text(size = 8),
       panel.grid.major.y = ggplot2::element_blank(),
@@ -1090,7 +1093,8 @@ setMethod("cmp_volcano", signature("STCompR"), function(object,
     ) +
     ggplot2::ylab(paste0("-log10(", y_axis, ")")) +
     ggplot2::expand_limits(x = x_lim) +
-    ggplot2::scale_fill_gradientn(colors = colors, name = "Log2 ratio")
+    ggplot2::scale_fill_gradientn(colors = colors, name = "Log2 ratio") +
+    st_gg_theming()
 
 })
 
@@ -1206,7 +1210,7 @@ setMethod("plot_rip_k", signature("STGrid"), function(object,
     ggplot2::ylab(paste0("Ripley's K function (correction=", correction, ")")) +
     ggplot2::scale_color_manual(values = color)
 
-  return(p)
+  return(p + st_gg_theming())
 })
 
 
@@ -1457,7 +1461,7 @@ cmp_images <- function(...,
   }
 
 
-  p
+  p + st_gg_theming()
 }
 
 
@@ -1613,7 +1617,7 @@ setMethod("gene_contrast",
                                       high = high_color,
                                       midpoint = midpoint,
                                       na.value = na_color) +
-      ggplot2::facet_wrap(~feature)
+      ggplot2::facet_wrap(~feature) + st_gg_theming()
 
     return(p)
 
@@ -1746,7 +1750,7 @@ setMethod("multi_gene_contrast",
                    strip.text = ggplot2::element_text(color="white")) +
     ggplot2::scale_fill_manual(values = colors)
 
-  return(p)
+  return(p + st_gg_theming())
 
 })
 

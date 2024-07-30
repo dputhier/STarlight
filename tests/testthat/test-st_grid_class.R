@@ -5,7 +5,6 @@ test_that("STGrid...", {
   library(STarlight)
   set_verb_level(0)
 
-
   example_dataset()
   test_data <- Xenium_Mouse_Brain_Coronal_7g
   x_bins <-  bin_x(test_data)[181:nbin_x(test_data)]
@@ -58,7 +57,22 @@ test_that("STGrid...", {
   expect_equal(sum(round(compute_k_ripley(xen_1["Ano1",], verbose = FALSE)@ripley_k_function$iso, 0)), 9121974)
 
   ## load_spatial
-  #fp <- file.path(system.file("extdata", package = "STarlight"), "tyni_xenium.txt")
-  #expect_no_error(load_spatial(fp, method = "coordinates"))
+  fp <- file.path(system.file("extdata", package = "STarlight"), "tyni.txt")
+  expect_no_error(load_spatial(fp, method = "coordinates", verbose = FALSE))
+  # merscope csv file
+  fp <- file.path(system.file("extdata", package = "STarlight"), "merscope_122_r1_sub.csv.gz")
+  expect_no_error(load_spatial(fp, method = "merscope_csv", sep=",", verbose = FALSE))
+  # Xenium
+  fp <- file.path(system.file("extdata", package = "STarlight"), "xenium_mouse_brain_tx_tiny.csv")
+  expect_no_error(load_spatial(fp,
+                     method = "coordinates", sep=",",
+                     mapping = c("x"="x_location", "y"="y_location", "feature"="feature_name"),
+                     verbose = FALSE))
+  # Cosmix
+  fp <- file.path(system.file("extdata", package = "STarlight"), "Lung5_Rep1_tx_file_tiny.csv.gz")
+  expect_no_error(load_spatial(fp, method = "coordinates", sep=",",
+                               mapping=c("x"="x_global_px",
+                                         "y"="y_global_px", feature="target"),
+                               verbose = FALSE))
 
 })
