@@ -12,6 +12,7 @@ MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://cran.r-project.
 [![](https://github.com/dputhier/STarlight/actions/workflows/pkgdown.yaml/badge.svg)](https://github.com/dputhier/STarlight/actions)
 
 
+STarlight is still in beta version.
 
 # STarlight
 
