@@ -16,7 +16,7 @@ STarlight is still in beta version.
 
 # STarlight
 
-STarlight leverages a grid-based strategy via a uniform binning of x/y molecular for exploratory analysis of cell or molecule coordinate.
+STarlight leverages a grid-based strategy via a uniform binning of x/y axis for exploratory analysis of cell or molecule coordinates.
 
 <img src="https://github.com/dputhier/STarlight/assets/49205456/6b4da4b3-5be7-40de-95e3-80b851cce8db" style="float: center" class="logo" width="150">
 
