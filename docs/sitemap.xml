@@ -109,6 +109,9 @@
     <loc>/reference/compute_module_score.html</loc>
   </url>
   <url>
+    <loc>/reference/control_list.html</loc>
+  </url>
+  <url>
     <loc>/reference/coord-STGrid-method.html</loc>
   </url>
   <url>
@@ -281,6 +284,9 @@
   </url>
   <url>
     <loc>/reference/spatial_plot.html</loc>
+  </url>
+  <url>
+    <loc>/reference/st_gg_theming.html</loc>
   </url>
   <url>
     <loc>/reference/stat_test-STCompR-method.html</loc>
