@@ -275,30 +275,6 @@ setMethod("spatial_image", signature(object = "STGrid"), function(object = NULL,
 #' @param colors The colors to use for features in the spatial image.
 #' @param size The size of the points
 #' @param coord_fixed Logical value indicating whether to keep the aspect ratio fixed. Defaults to TRUE.
-#' @export
-#' @examples
-#' example_dataset()
-#' xen <- Xenium_Mouse_Brain_Coronal_7g
-#' spatial_plot(xen,
-#'              feat_list=c("Chat", "Nwd2", "Ano1"),
-#'              size=0.05)
-#' @keywords internal
-setGeneric("spatial_plot", function(object = NULL,
-                                    feat_list = NULL,
-                                    colors = NULL,
-                                    size = 0.1,
-                                    coord_fixed = TRUE)
-  standardGeneric("spatial_plot"))
-
-#' Plot x/y coordinates of molecules
-#'
-#' Plot x/y coordinates of molecules of a spatial transcriptomics experiment.
-#'
-#' @param object The STGrid object.
-#' @param feat_list The name of the features for which the spatial image will be created.
-#' @param colors The colors to use for features in the spatial image.
-#' @param size The size of the points
-#' @param coord_fixed Logical value indicating whether to keep the aspect ratio fixed. Defaults to TRUE.
 #' @examples
 #' example_dataset()
 #' xen <- Xenium_Mouse_Brain_Coronal_7g
@@ -307,13 +283,14 @@ setGeneric("spatial_plot", function(object = NULL,
 #'              size=0.05)
 #' @importFrom ggplot2 aes geom_point scale_color_manual xlab ylab theme_minimal theme coord_fixed geom_point scale_color_manual aes
 #' @export
-setMethod("spatial_plot", "STGrid", function(object = NULL,
-                                             feat_list = NULL,
-                                             colors = NULL,
-                                             size = 0.1,
-                                             coord_fixed = TRUE) {
-  if (is.null(object))
-    print_this_msg("Please provide an STGrid object.", msg_type = "STOP")
+spatial_plot <-  function(...,
+                         feat_list = NULL,
+                         names=NULL,
+                         colors = NULL,
+                         size = 0.1,
+                         coord_fixed = TRUE,
+                         ncol = 4) {
+
   if (!is.null(colors)) {
     if (length(colors) < length(feat_list))
       print_this_msg("More colors are needed...", msg_type = "STOP")
@@ -323,20 +300,52 @@ setMethod("spatial_plot", "STGrid", function(object = NULL,
     print_this_msg("Please provide feature names (see feat_list arguments).",
                    msg_type = "STOP")
 
-  if (!all(feat_list %in% feat_names(object)))
-    print_this_msg("One or several features were not found in the object.", msg_type = "STOP")
+  print_this_msg("Checking STGrid objects", msg_type = "DEBUG")
 
-  coord <-
-    get_coord(object, feat_list = feat_list, as.factor = TRUE)
+  st_list <- list(...)
 
-  x <- y <- feature <- NULL
+  if(is.list(st_list[[1]]))
+    st_list <- st_list[[1]]
+
+  check_st_list(st_list, feat_list = feat_list)
+
+  feat_all <- Reduce(intersect, lapply(st_list, feat_names))
+
+  if(!all(feat_list %in% feat_all)){
+    print_this_msg("Some features are not found in all objects...", msg_type = "STOP")
+  }
+
+  if (is.null(names)) {
+    names <- paste("Condition_", 1:length(st_list), sep = "")
+  } else{
+    if (length(names) != length(st_list))
+      print_this_msg("The number of names should be same as the number of objects.",
+                     msg_type = "STOP")
+  }
+
+  print_this_msg("Subsetting STGrid objects.", msg_type = "DEBUG")
+
+  names(st_list) <- names
+  coord <- lapply(st_list, coord)
+  coord <- lapply(coord, as.data.frame)
+  for(i in 1:length(coord)){coord[[i]]$condition <- names(coord)[i]}
+  coord <- do.call("rbind", coord)
+
+  coord <- coord[coord$feature %in% feat_list, ]
+
+  print_this_msg("Subsetting STGrid objects.", msg_type = "DEBUG")
+
+  print_this_msg("Number of analyzed feature:",
+                 length(unique(coord$feature)), msg_type = "DEBUG")
+
+  x <- y <- feature <- condition <- NULL
   p <- ggplot2::ggplot(data = coord,
                        mapping = ggplot2::aes(x = x, y = y, color = feature)) +
     ggplot2::geom_point(size = size) +
     ggplot2::xlab("x")  +
     ggplot2::ylab("y") +
     ggplot2::theme_minimal() +
-    ggplot2::theme(axis.text = element_text(size = 6))
+    ggplot2::theme(axis.text = ggplot2::element_text(size = 6))
 
   if (!is.null(colors))
     p <- p + ggplot2::scale_color_manual(values = colors)
@@ -344,9 +353,12 @@ setMethod("spatial_plot", "STGrid", function(object = NULL,
   if (coord_fixed)
     p <- p + ggplot2::coord_fixed()
 
+  p <- p + ggplot2::facet_wrap(~ condition, ncol = ncol)
+
+
   return(p)
 
-})
+}
 
 # -------------------------------------------------------------------------
 ##     cmp_bar_plot()
