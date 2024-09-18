@@ -138,6 +138,48 @@ setMethod(
     x@bin_x
 )
 
+#' @title Check all specified features exist in  an STGrid object.
+#' @description
+#' Check all specified features exist in  an STGrid object.
+#' @param object The STGrid object
+#' @param feat_list The list of features to be tested.
+#' @param no_meta Whether meta features should not be considered. Default is FALSE.
+#' @examples
+#' example_dataset()
+#' check_features_exist(Xenium_Mouse_Brain_Coronal_7g, "Ano1")
+#' check_features_exist(Xenium_Mouse_Brain_Coronal_7g, "foo")
+#' @keywords internal
+#' @export
+setGeneric(
+  name = "check_features_exist",
+  def = function(object, feat_list, no_meta=FALSE)
+    standardGeneric("check_features_exist")
+)
+
+#' @title Check all specified features exist in  an STGrid object.
+#' @description
+#' Check all specified features exist in  an STGrid object.
+#' @param object The STGrid object
+#' @param feat_list The list of features to be tested.
+#' @param no_meta Whether meta features should not be considered. Default is FALSE.
+#' @examples
+#' example_dataset()
+#' check_features_exist(Xenium_Mouse_Brain_Coronal_7g, "Ano1")
+#' check_features_exist(Xenium_Mouse_Brain_Coronal_7g, "foo")
+#' @export
+setMethod(
+  f = "check_features_exist",
+  signature = "STGrid",
+  definition = function(object, feat_list, no_meta=FALSE)
+    if(no_meta){
+      return(all(feat_list %in% c(feat_names(object))))
+    }else{
+      return(all(feat_list %in% c(feat_names(object), meta_names(object))))
+    }
+
+)
+
+
 #' @title Row names of a STGrid object.
 #' @description
 #' The row names of a STGrid object.
@@ -315,6 +357,7 @@ setMethod("coord", "STGrid",
 #' @param del_bin Whether to delete the bin_x, bin_y columns.
 #' @param pseudo_count Whether to add a pseudo_count.
 #' @param transform Whether the count should be transformed.
+#' @param axis_as_number If melt_tab is TRUE, whether bin_x and bin_y should be transformed to numerics.
 #' @keywords internal
 #' @examples
 #' example_dataset()
@@ -327,7 +370,8 @@ setGeneric("bin_mat",
                     melt_tab = FALSE,
                     del_bin = FALSE,
                     pseudo_count=0,
-                    transform = c("None", "log2", "log10", "log"))
+                    transform = c("None", "log2", "log10", "log"),
+                    axis_as_number=FALSE)
              standardGeneric("bin_mat"))
 
 #' @title The binned matrix stored in a STGrid object.
@@ -340,6 +384,7 @@ setGeneric("bin_mat",
 #' @param del_bin Whether to delete the bin_x, bin_y columns.
 #' @param pseudo_count Whether to add a pseudo_count.
 #' @param transform Whether the count should be transformed.
+#' @param axis_as_number If melt_tab is TRUE, whether bin_x and bin_y should be transformed to numerics.
 #' @examples
 #' example_dataset()
 #' head(bin_mat(Xenium_Mouse_Brain_Coronal_7g))
@@ -351,7 +396,8 @@ setMethod("bin_mat", "STGrid",
                    melt_tab = FALSE,
                    del_bin = FALSE,
                    pseudo_count=0,
-                   transform = c("None", "log2", "log10", "log")) {
+                   transform = c("None", "log2", "log10", "log"),
+                   axis_as_number=FALSE) {
 
             transform <- match.arg(transform)
 
@@ -409,7 +455,30 @@ setMethod("bin_mat", "STGrid",
 
             }
 
+          if(axis_as_number){
+            if(!del_bin){
+              if(melt_tab){
 
+                bin_x_2_num <- setNames(1:length(bin_x(object)),
+                                        bin_x(object))
+                bin_y_2_num <- setNames(1:length(bin_y(object)),
+                                        bin_y(object))
+
+                this_bin_mat$bin_x <- bin_x_2_num[this_bin_mat$bin_x]
+                this_bin_mat$bin_y <- bin_y_2_num[this_bin_mat$bin_y]
+
+                if(as_factor){
+                  this_bin_mat$bin_x <- factor(this_bin_mat$bin_x,
+                                                  levels=1:length(bin_x(object)),
+                                                  ordered=TRUE)
+                  this_bin_mat$bin_y <- factor(this_bin_mat$bin_y,
+                                                  levels=1:length(bin_y(object)),
+                                                  ordered=TRUE)
+                }
+
+              }
+            }
+          }
 
             return(this_bin_mat)
           })
@@ -634,6 +703,30 @@ setMethod("bin_size", "STGrid",
           function(x)
             x@bin_size)
 
+#' @title Extract meta slot of an STGrid object
+#' @description
+#' Extract meta slot of an STGrid object
+#' @param object The STGrid object
+#' @examples
+#' example_dataset()
+#' head(meta(Xenium_Mouse_Brain_Coronal_7g))
+#' @keywords internal
+#' @export meta
+setGeneric("meta",
+           function(object)
+             standardGeneric("meta"))
+
+#' @title Extract meta slot of an STGrid object
+#' @description
+#' Extract meta slot of an STGrid object
+#' @param object The STGrid object
+#' @examples
+#' example_dataset()
+#' head(meta(Xenium_Mouse_Brain_Coronal_7g))
+#' @export meta
+setMethod("meta", "STGrid",
+          function(object)
+            object@meta)
 #' @title Remove control (Blank-*) features from a STGrid object.
 #' @description
 #'  Remove control (Blank-*) features.
@@ -1753,7 +1846,7 @@ setMethod("get_coord", "STGrid",
           function(object,
                    feat_list = character(),
                    as.factor = TRUE) {
-            if (!all(feat_list %in% feat_names(object))) {
+            if (!check_features_exist(object, feat_list)) {
               print_this_msg("Some features were not found...",
                         msg_type = "STOP")
             }
@@ -2097,7 +2190,7 @@ check_st_list <- function(st_list,
   }
 
   for (i in 1:length(st_list)) {
-    if (!all(feat_list %in% c(feat_names(st_list[[i]]), colnames(st_list[[i]]@meta)))) {
+    if (!check_features_exist(st_list[[i]], feat_list)) {
       print_this_msg("The feature was not found in the object.", msg_type = "STOP")
     }
   }
@@ -2230,5 +2323,325 @@ setMethod("compute_module_score", "STGrid",
       print_this_msg("Returning object...")
 
       return(object)
+})
+
+# -------------------------------------------------------------------------
+#      Convert bin_mat slot to x/y matrix (i.e. dcast bin_mat)
+#      (e.g. to be displayed using image())
+# -------------------------------------------------------------------------
+#' @title Convert the bin_mat slot of an STGrid object into an x/y matrix (e.g. to be displayed using image())
+#' @description
+#' This function converts the bin_mat slot of an STGrid object into an x/y matrix (e.g. to be displayed using image())
+#' @param object The STGrid object
+#' @param feature The (meta)feature of interest.
+#' @examples
+#' example_dataset()
+#' xen <- Xenium_Mouse_Brain_Coronal_7g
+#' image(as_matrix(xen))
+#' @export
+setGeneric("as_matrix",
+           function(object,
+                    feature=NULL)
+             standardGeneric("as_matrix"))
+
+#' @title Convert the bin_mat slot of an STGrid object into an x/y matrix (e.g. to be displayed using image())
+#' @description
+#' This function converts the bin_mat slot of an STGrid object into an x/y matrix (e.g. to be displayed using image())
+#' @param object The STGrid object
+#' @param feature The (meta)feature of interest.
+#' @examples
+#' example_dataset()
+#' xen <- Xenium_Mouse_Brain_Coronal_7g
+#' image(as_matrix(xen))
+#' @export
+setMethod("as_matrix", "STGrid",
+          function(object,
+                   feature=NULL) {
+
+            if(length(feature) > 1)
+              print_this_msg("Only a single feature is accepted...")
+
+            if(!check_features_exist(object, feature))
+              print_this_msg("Please provide a feature")
+
+            check_st_list(list(object), feature)
+
+            bin_mat <- bin_mat(object,
+                               feat_list=feature,
+                               as_factor = TRUE)
+
+            spatial_mat <- reshape2::dcast(bin_mat,
+                                           bin_x~bin_y,
+                                           value.var=feature)
+
+            rownames(spatial_mat) <- spatial_mat[,1]
+            spatial_mat <- spatial_mat[,-1]
+
+
+            return(as.matrix(spatial_mat[bin_x(object), bin_y(object)]))
+
+          }
+)
+
+
+# -------------------------------------------------------------------------
+#      Find contiguous cells
+# -------------------------------------------------------------------------
+#' @title Find contiguous cells using Queen criterion (internal).
+#' @description
+#' Find contiguous cells in a matrix using Queen criterion. The matrix is first binarized
+#' (any value greater than zero is set to 1, any value lower than 1 is set to 0).
+#' @param mat A numeric matrix.
+#' @param threshold A threshold for binarization.
+#' @return A list of matrices.
+#' @examples
+#' set.seed(123)
+#' m <- matrix(sample(0:2, replace=TRUE, size = 26*26, prob = c(0.98, 0.01, 0.01)), nc=26)
+#' rownames(m) <- letters
+#' colnames(m) <- LETTERS
+#' image(m)
+#' image(find_contiguous(m))
+#' image(find_contiguous(m, ns=2)[[1]])
+#' image(find_contiguous(m, threshold=2))
+#' @export
+#' @keywords internal
+find_contiguous <- function(mat,
+                            threshold=1) {
+
+  print_this_msg("Preparing matrix", msg_type = "DEBUG")
+
+
+  mat[mat >= threshold] <- threshold
+  mat[mat < threshold] <- 0
+  mat[mat == threshold] <- 1
+  mat <- as.matrix(mat)
+
+  nr <- nrow(mat)
+  nc <- ncol(mat)
+
+  flagged_mat <- mat
+
+  for (i in 1:nr) {
+    for (j in 1:nc) {
+      if (mat[i, j] == 1) {
+        for (di in -1:1) {
+          for (dj in -1:1) {
+            ni <- i + di
+            nj <- j + dj
+            if (ni > 0 && ni <= nr && nj > 0 && nj <= nc) {
+              flagged_mat[ni, nj] <- 1
+            }
+          }
+        }
+      }
+    }
+  }
+  return(flagged_mat)
+}
+
+# -------------------------------------------------------------------------
+#      Find the neighbors of a Connected Component
+# -------------------------------------------------------------------------
+
+#' @title Find the neighbors of a Connected Component.
+#' @description
+#' Given an STGrid object and a Connected Component (see connected_components()) find the neighboring bins.
+#' @param object An STGrid object containing the spatial expression data.
+#' @param feature A character string specifying the feature of interest.
+#' @return The input STGrid object with additional fields (in meta slot) indicating the satellite bins for the specified feature at each neighborhood size.
+#' @examples
+#' library(patchwork)
+#' example_dataset()
+#' xen <- Xenium_Mouse_Brain_Coronal_7g
+#' p1 <- spatial_image(xen, feat="Necab2")
+#' xen <- connected_components(xen, feat_list = "Necab2", threshold = 5, min_size = 30)
+#' head(meta(xen))
+#' p2 <- spatial_image(xen, feat="Necab2_cpt", as_factor=TRUE, colors = c("black", rainbow(9)))
+#' hull_1 <- create_hull(xen, feat="Necab2_cpt", color="red", linew=0.3)
+#' p3 <- p2 + hull_1
+#' p4 <- spatial_image(xen, feat="Nwd2") + hull_1
+#' (p1 | p2 ) / (p3 | p4)
+#' @export
+#' @keywords internal
+setGeneric("cc_neighborhood",
+           function(object,
+                    feature=NULL)
+             standardGeneric("cc_neighborhood"))
+
+
+#' @title Find the neighbors of a Connected Component.
+#' @description
+#' Given an STGrid object and a Connected Component (see connected_components()) find the neighboring bins.
+#' @param object An STGrid object containing the spatial expression data.
+#' @param feature A character string specifying the feature of interest.
+#' @return The input STGrid object with additional fields (in meta slot) indicating the satellite bins for the specified feature at each neighborhood size.
+#' @examples
+#' library(patchwork)
+#' example_dataset()
+#' xen <- Xenium_Mouse_Brain_Coronal_7g
+#' p1 <- spatial_image(xen, feat="Necab2")
+#' xen <- connected_components(xen, feat_list = "Necab2", threshold = 5, min_size = 30)
+#' head(meta(xen))
+#' p2 <- spatial_image(xen, feat="Necab2_cpt", as_factor=TRUE, colors = c("black", rainbow(9)))
+#' hull_1 <- create_hull(xen, feat="Necab2_cpt", color="red", linew=0.3)
+#' p3 <- p2 + hull_1
+#' p4 <- spatial_image(xen, feat="Nwd2") + hull_1
+#' (p1 | p2 ) / (p3 | p4)
+#' @export
+setMethod("cc_neighborhood",
+          "STGrid",
+          function(object,
+                   feature=NULL){
+
+            if(is.null(feature) | length(feature) > 1)
+              print_this_msg("Please provide one feature...", msg_type = "STOP")
+
+            bin_mat <- bin_mat(object,
+                               feat_list=feature,
+                               as_factor = TRUE)
+
+            if(!is.numeric(bin_mat[[feature]]))
+              print_this_msg("The feature values should be numerical !", msg_type = "STOP")
+
+            if(!all(bin_mat[[feature]]-floor(bin_mat[[feature]])==0))
+              print_this_msg("The feature values should be integers !", msg_type = "STOP")
+
+            print_this_msg("Binarizing...")
+
+            bin_mat[[feature]][bin_mat[[feature]] >= 1] <- 1
+            bin_mat[[feature]][bin_mat[[feature]] < 1] <- 0
+
+            spatial_mat <- reshape2::dcast(bin_mat, bin_x~bin_y, value.var=feature)
+            rownames(spatial_mat) <- spatial_mat[,1]
+            spatial_mat <- spatial_mat[,-1]
+
+            print_this_msg("Looking for contiguous bins...")
+
+            isc <- find_contiguous(spatial_mat,
+                                   threshold=1)
+
+
+            tmp <- reshape2::melt(t(isc))
+            colnames(tmp) <- c("bin_y", "bin_x", "value")
+            rownames(tmp) <- paste0(tmp$bin_x, "~", tmp$bin_y)
+            isc <- tmp[rownames(object@meta), ]
+
+
+            object[[paste0(feature, "_ngb")]] <- isc$value
+
+
+            return(object)
+          })
+
+# -------------------------------------------------------------------------
+#      Connected Components Labelling
+# -------------------------------------------------------------------------
+
+#' @title Given a Feature and an STGrid object, Label and Store Connected Components.
+#' @description
+#' This function identifies and labels connected components in a binary matrix representation of features of an STGrid object.
+#' The connected components are determined using the specified threshold and a minimum size for the components.
+#' @param object An STGrid object containing the spatial expression data.
+#' @param feat_list A character vector specifying the features of interest.
+#' @param threshold A numeric value specifying the threshold for binarizing the matrix. If NULL, the matrix should already be binary.
+#' @param min_size An integer specifying the minimum size of the connected components to retain. Default is 9.
+#' @return The input STGrid object with additional fields for each feature's connected components.
+#' @importFrom mgc ConnCompLabel
+#' @importFrom reshape2 melt
+#' @examples
+#' example_dataset()
+#' xen <- Xenium_Mouse_Brain_Coronal_7g
+#' xen <- connected_components(xen, feat_list = feat_names(xen)[1:5], threshold = 1, min_size = 9)
+#' head(meta(xen))
+#' spatial_image(xen, feat=meta_names(xen)[-1], ncol=2, as_factor=TRUE, colors = c("black", rainbow(60)))
+#' @export
+#' @keywords internal
+setGeneric("connected_components",
+           function(object=NULL,
+                    feat_list=NULL,
+                    threshold=NULL,
+                    min_size = 9)
+             standardGeneric("connected_components"))
+
+#' @title Given a Feature and an STGrid object, Label and Store Connected Components.
+#' @description
+#' This function identifies and labels connected components in a binary matrix representation of features of an STGrid object.
+#' The connected components are determined using the specified threshold and a minimum size for the components.
+#' @param object An STGrid object containing the spatial expression data.
+#' @param feat_list A character vector specifying the features of interest.
+#' @param threshold A numeric value specifying the threshold for binarizing the matrix. If NULL, the matrix should already be binary.
+#' @param min_size An integer specifying the minimum size of the connected components to retain. Default is 9.
+#' @return The input STGrid object with additional fields for each feature's connected components.
+#' @importFrom mgc ConnCompLabel
+#' @importFrom reshape2 melt
+#' @examples
+#' example_dataset()
+#' xen <- Xenium_Mouse_Brain_Coronal_7g
+#' xen <- connected_components(xen, feat_list = feat_names(xen)[1:5], threshold = 1, min_size = 9)
+#' head(meta(xen))
+#' spatial_image(xen, feat=meta_names(xen)[-1], ncol=2, as_factor=TRUE, colors = c("black", rainbow(60)))
+#' @export
+setMethod("connected_components",
+          "STGrid",
+          function(object=NULL,
+                   feat_list=NULL,
+                   threshold=NULL,
+                   min_size = 9){
+
+  if(is.null(feat_list))
+    print_this_msg("please provide at least a single feature...", msg_type = "STOP")
+
+  if(!check_features_exist(object, feat_list))
+    print_this_msg("Please provide an available feature", msg_type = "STOP")
+
+  check_st_list(list(object), feat_list)
+
+  for(feature in feat_list){
+
+    mat <- as_matrix(object, feature)
+
+    if(!all(unique(mat) %in% c(0,1))){
+      if(is.null(threshold)){
+        print_this_msg("This should be a binary matrix. Maybe use 'threshold'.", msg_type = "STOP")
+      }else{
+        mat[mat >= threshold] <- threshold
+        mat[mat < threshold] <- 0
+        mat[mat == threshold] <- 1
+      }
+
+    }else{
+      print_this_msg("This is already a binarized matrix. Skipping thresholding...")
+    }
+
+    components <- mgc::ConnCompLabel(mat)
+
+    components <- reshape2::melt(components)
+    rownames(components) <- paste0(components$Var1, "~", components$Var2)
+    components <- components[rownames(object@meta),]
+
+    value_as_factor <- as.factor(components$value)
+    cpt_size <- sort(table(value_as_factor), decreasing = TRUE)
+
+    max_size_cpt <- as.numeric(names(cpt_size)[1])
+
+    for(i in 1:length(names(cpt_size))){
+
+      if(cpt_size[i] < min_size){
+        print_this_msg("Deleting compartment ", names(cpt_size[i]), "(see min_size).",
+                       msg_type = "DEBUG")
+        components$value[components$value == as.numeric(names(cpt_size)[i])] <- max_size_cpt
+      }
+
+    }
+
+    cpt_name <- paste0(feature, "_cpt")
+    object[[cpt_name]] <- components$value
+    object[[cpt_name]] <- as.factor(object[[cpt_name]])
+    levels(object[[cpt_name]]) <- 0:length(levels(object[[cpt_name]]))
+    object[[cpt_name]] <- as.numeric(object[[cpt_name]]) - 1
+
+  }
+
+  return(object)
 })
 

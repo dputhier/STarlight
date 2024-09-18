@@ -18,6 +18,7 @@ spatial_image(
   size = 0.5,
   logb = 10,
   pseudo_count = 1,
+  as_factor = FALSE,
   ncol = 4
 )
 }
@@ -48,6 +49,8 @@ No overlay if NULL otherwise the size of the interval (e.g. 20).}
 \item{logb}{The basis for the log transformation. Default to 10. If NULL no log transformation.}
 
 \item{pseudo_count}{a value for the pseudo count used for log transformation (default to 1).}
+
+\item{as_factor}{Whether to consider the feature as a factor (e.g. for ggplot scale).}
 
 \item{ncol}{The number of columns for the facets.}
 }

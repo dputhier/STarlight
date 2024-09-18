@@ -11,7 +11,8 @@
   melt_tab = FALSE,
   del_bin = FALSE,
   pseudo_count = 0,
-  transform = c("None", "log2", "log10", "log")
+  transform = c("None", "log2", "log10", "log"),
+  axis_as_number = FALSE
 )
 }
 \arguments{
@@ -28,6 +29,8 @@
 \item{pseudo_count}{Whether to add a pseudo_count.}
 
 \item{transform}{Whether the count should be transformed.}
+
+\item{axis_as_number}{If melt_tab is TRUE, whether bin_x and bin_y should be transformed to numerics.}
 }
 \description{
 The binned matrix stored in a STGrid object.

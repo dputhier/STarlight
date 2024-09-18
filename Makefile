@@ -1,5 +1,5 @@
 MAKEFILE=Makefile
-VERSION=0.0.7
+VERSION=0.0.9
 PANDOC=/Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/x86_64
 
 .PHONY: help

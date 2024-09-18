@@ -74,4 +74,5 @@ test_that("STGrid...", {
                                mapping=c("x"="x_global_px",
                                          "y"="y_global_px", feature="target"),
                                verbose = FALSE))
+
 })
