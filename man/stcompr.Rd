@@ -11,7 +11,8 @@ stcompr(
   name_2 = "Condition_2",
   fit_type = c("local", "mean", "parametric", "glmGamPoi"),
   p_adj_method = c("BH", "holm", "hochberg", "hommel", "bonferroni", "BY", "fdr", "none"),
-  pseudo_count = 1
+  pseudo_count = 1,
+  cooksCutoff = FALSE
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ stcompr(
 \item{p_adj_method}{The pvalue correction method. See stats::p.adjust.}
 
 \item{pseudo_count}{A pseudo-count value to be stored in the object.}
+
+\item{cooksCutoff}{See DESeq2::results().}
 }
 \value{
 An object of class 'STCompR'.

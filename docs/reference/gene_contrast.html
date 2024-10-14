@@ -52,7 +52,7 @@
     <div class="page-header">
     <h1>Gene Contrast Analysis for an STgrid object.</h1>
     <small class="dont-index">Source: <a href="https://github.com/dputhier/STarlight/blob/HEAD/R/visualization.R" class="external-link"><code>R/visualization.R</code></a></small>
-    <div class="hidden name"><code>gene_contrast.Rd</code></div>
+    <div class="hidden name"><code>feature_contrast.Rd</code></div>
     </div>
 
     <div class="ref-description">
@@ -60,7 +60,7 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">gene_contrast</span><span class="op">(</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">feature_contrast</span><span class="op">(</span></span>
 <span>  <span class="va">object</span>,</span>
 <span>  feat_list_1 <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  feat_list_2 <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -133,10 +133,10 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="example_dataset.html">example_dataset</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> |-- INFO :  Dataset 11284233/files/Xenium_Mouse_Brain_Coronal_7g was already loaded. </span>
 <span class="r-in"><span><span class="va">xen</span> <span class="op">&lt;-</span> <span class="va">Xenium_Mouse_Brain_Coronal_7g</span></span></span>
-<span class="r-in"><span><span class="fu">gene_contrast</span><span class="op">(</span><span class="va">xen</span>, feat_list_1<span class="op">=</span><span class="st">"Ano1"</span>, feat_list_2<span class="op">=</span><span class="st">"Chat"</span><span class="op">)</span></span></span>
-<span class="r-plt img"><img src="gene_contrast-1.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span><span class="fu">gene_contrast</span><span class="op">(</span><span class="va">xen</span>, feat_list_1<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Ano1"</span>, <span class="st">"Necab2"</span><span class="op">)</span>, feat_list_2<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Chat"</span>, <span class="st">"Nrp2"</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-plt img"><img src="gene_contrast-2.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span><span class="fu">feature_contrast</span><span class="op">(</span><span class="va">xen</span>, feat_list_1<span class="op">=</span><span class="st">"Ano1"</span>, feat_list_2<span class="op">=</span><span class="st">"Chat"</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="feature_contrast-1.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span><span class="fu">feature_contrast</span><span class="op">(</span><span class="va">xen</span>, feat_list_1<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Ano1"</span>, <span class="st">"Necab2"</span><span class="op">)</span>, feat_list_2<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Chat"</span>, <span class="st">"Nrp2"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="feature_contrast-2.png" alt="" width="700" height="433"></span>
 </code></pre></div>
     </div>
   </div>

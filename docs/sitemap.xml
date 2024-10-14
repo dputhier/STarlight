@@ -172,10 +172,10 @@
     <loc>/reference/fov_selection.html</loc>
   </url>
   <url>
-    <loc>/reference/gene_contrast-STGrid-method.html</loc>
+    <loc>/reference/feature_contrast-STGrid-method.html</loc>
   </url>
   <url>
-    <loc>/reference/gene_contrast.html</loc>
+    <loc>/reference/feature_contrast.html</loc>
   </url>
   <url>
     <loc>/reference/get_coord-STGrid-method.html</loc>
@@ -211,10 +211,10 @@
     <loc>/reference/meta_names.html</loc>
   </url>
   <url>
-    <loc>/reference/multi_gene_contrast-STGrid-method.html</loc>
+    <loc>/reference/multi_feat_contrast-STGrid-method.html</loc>
   </url>
   <url>
-    <loc>/reference/multi_gene_contrast.html</loc>
+    <loc>/reference/multi_feat_contrast.html</loc>
   </url>
   <url>
     <loc>/reference/nb_feat-STCompR-method.html</loc>

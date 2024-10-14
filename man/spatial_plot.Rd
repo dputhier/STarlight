@@ -5,21 +5,22 @@
 \title{Plot x/y coordinates of molecules}
 \usage{
 spatial_plot(
-  object = NULL,
+  ...,
   feat_list = NULL,
+  names = NULL,
   colors = NULL,
   size = 0.1,
-  coord_fixed = TRUE
+  ncol = 4
 )
 }
 \arguments{
-\item{object}{The STGrid object.}
-
 \item{feat_list}{The name of the features for which the spatial image will be created.}
 
 \item{colors}{The colors to use for features in the spatial image.}
 
 \item{size}{The size of the points}
+
+\item{object}{The STGrid object.}
 
 \item{coord_fixed}{Logical value indicating whether to keep the aspect ratio fixed. Defaults to TRUE.}
 }
@@ -33,4 +34,3 @@ spatial_plot(xen,
              feat_list=c("Chat", "Nwd2", "Ano1"),
              size=0.05)
 }
-\keyword{internal}

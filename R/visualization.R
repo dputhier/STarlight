@@ -310,7 +310,6 @@ spatial_plot <-  function(...,
                          names=NULL,
                          colors = NULL,
                          size = 0.1,
-                         coord_fixed = TRUE,
                          ncol = 4) {
 
   if (!is.null(colors)) {
@@ -372,8 +371,7 @@ spatial_plot <-  function(...,
   if (!is.null(colors))
     p <- p + ggplot2::scale_color_manual(values = colors)
 
-  if (coord_fixed)
-    p <- p + ggplot2::coord_fixed()
+  p <- p + ggplot2::facet_wrap(~ condition, ncol = ncol, scales = "free")
 
   return(p + st_gg_theming())
 
@@ -1655,17 +1653,17 @@ setMethod("gene_contrast",
 #' @examples
 #' example_dataset()
 #' xen <- Xenium_Mouse_Brain_Coronal_7g
-#' multi_gene_contrast(re_bin(xen, 50), feat_list=feat_names(xen)[1:4], threshold=2)
+#' multi_feat_contrast(re_bin(xen, 50), feat_list=feat_names(xen)[1:4], threshold=2)
 #' @export
 #' @keywords internal
 #'
-setGeneric("multi_gene_contrast",
+setGeneric("multi_feat_contrast",
            function(object,
                     feat_list=NULL,
                     threshold=3,
                     colors = c("black",
                                grDevices::rainbow(15)))
-             standardGeneric("multi_gene_contrast"))
+             standardGeneric("multi_feat_contrast"))
 
 #' @title Multi-Gene contrast analysis for an STGrid object.
 #' @description
@@ -1681,10 +1679,10 @@ setGeneric("multi_gene_contrast",
 #' @examples
 #' example_dataset()
 #' xen <- Xenium_Mouse_Brain_Coronal_7g
-#' multi_gene_contrast(re_bin(xen, 50), feat_list=feat_names(xen)[1:4], threshold=2)
+#' multi_feat_contrast(re_bin(xen, 50), feat_list=feat_names(xen)[1:4], threshold=2)
 #' @export
 #'
-setMethod("multi_gene_contrast",
+setMethod("multi_feat_contrast",
           "STGrid",
           function(object,
                    feat_list=NULL,

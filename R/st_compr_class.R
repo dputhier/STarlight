@@ -69,6 +69,7 @@ setClass("STCompR",
 #' @param fit_type See  estimateDispersions() in DESeq2 library.
 #' @param p_adj_method The pvalue correction method. See stats::p.adjust.
 #' @param pseudo_count A pseudo-count value to be stored in the object.
+#' @param cooksCutoff See DESeq2::results().
 #' @return An object of class 'STCompR'.
 #' @importFrom DESeq2 DESeqDataSetFromMatrix estimateSizeFactors counts estimateDispersions nbinomWaldTest results sizeFactors
 #' @importFrom stats p.adjust
@@ -95,7 +96,8 @@ stcompr <- function(object_1,
                                    "hochberg", "hommel",
                                    "bonferroni", "BY",
                                    "fdr", "none"),
-                    pseudo_count=1) {
+                    pseudo_count=1,
+                    cooksCutoff=FALSE) {
 
   fit_type <- match.arg(fit_type)
   p_adj_method <- match.arg(p_adj_method)
@@ -208,7 +210,7 @@ stcompr <- function(object_1,
     dds.disp <- DESeq2::estimateDispersions(dds.norm, fitType=fit_type)
     wald.test <- DESeq2::nbinomWaldTest(dds.disp)
     res_deseq2 <- DESeq2::results(wald.test,
-                                  pAdjustMethod="BH")
+                                  pAdjustMethod="BH", cooksCutoff=cooksCutoff)
     res_deseq2 <- res_deseq2[rownames(raw_counts), ]
     stats <- data.frame(row.names = rownames(raw_counts),
                         log2_ratio=res_deseq2$log2FoldChange,
