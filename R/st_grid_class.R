@@ -62,7 +62,6 @@ setClass(
   )
 )
 
-
 # -------------------------------------------------------------------------
 #      NCOL/NROW/DIM METHOD FOR CLASS OBJECT : STGrid
 # -------------------------------------------------------------------------
@@ -1888,7 +1887,8 @@ setMethod("get_coord", "STGrid",
 #' @param no_legend Whether to discard legend.
 #' @param size The size of the labels.
 #' @param colors A set of colors for the classes.
-#' @param return_tree Logical. Whether to return the tree not the plot.
+#' @param return_list Logical. Whether to return a list with the tree,
+#' associated clusters, distance and correlation matrices.
 #' @examples
 #' example_dataset()
 #' p <- hc_tree(Xenium_Mouse_Brain_Coronal_7g)
@@ -1914,7 +1914,7 @@ setGeneric("hc_tree",
                     lab_barsize=2,
                     geom_label=c('text', 'label', 'shadowtext'),
                     no_legend=FALSE,
-                    return_tree=FALSE)
+                    return_list=FALSE)
              standardGeneric("hc_tree"))
 
 #' @title Create a tree from an STGrid object
@@ -1935,8 +1935,8 @@ setGeneric("hc_tree",
 #' @param lab_barsize Bar label size.
 #' @param geom_label Label fomat.
 #' @param no_legend Whether to discard legend.
-#' @param return_tree Logical. Whether to return the tree not the plot. In fact a list with the tree
-#' and associated clusters.
+#' @param return_list Logical. Whether to return a list with the tree,
+#' associated clusters, distance and correlation matrices.
 #' @importFrom ggtree ggtree geom_hilight geom_tippoint geom_tiplab MRCA geom_cladelab
 #' @importFrom ggnewscale new_scale_fill
 #' @importFrom ggplot2 aes scale_color_viridis_d scale_fill_manual
@@ -1971,7 +1971,7 @@ setMethod("hc_tree", "STGrid",
                    lab_barsize=2,
                    geom_label=c('text', 'label', 'shadowtext'),
                    no_legend=FALSE,
-                   return_tree=FALSE
+                   return_list=FALSE
                    ) {
 
             method <- match.arg(method)
@@ -2007,8 +2007,10 @@ setMethod("hc_tree", "STGrid",
               bin_mat(object, del_bin = TRUE)
 
             print_this_msg("Computing hierarchical clustering.", msg_type="DEBUG")
-            hc_clust <- stats::hclust(stats::as.dist((1 - stats::cor(bin_mat,
-                                                method = dist_method)) / 2),
+            cor_mat <- stats::cor(bin_mat,
+                                  method = dist_method)
+            dist_mat <- (1 - cor_mat) / 2
+            hc_clust <- stats::hclust(stats::as.dist(dist_mat),
                                method = method)
 
             print_this_msg("Preparing colors.", msg_type="DEBUG")
@@ -2099,14 +2101,19 @@ setMethod("hc_tree", "STGrid",
                                      angle='auto',
                                      barsize=lab_barsize,
                                      fontsize=lab_fontsize)
-              p <- p + scale_color_manual(values=colors)
+              p <- p + ggplot2::scale_color_manual(values=colors)
             }
 
             if(no_legend)
-              p <- p + theme(legend.position="none")
+              p <- p + ggplot2::theme(legend.position="none")
 
-            if(return_tree){
-              return(list(hc_clust, tree_classes, annotation, p))
+            if(return_list){
+              return(list(hc_clust=hc_clust,
+                          tree_classes=split(names(tree_classes), tree_classes),
+                          annotation=annotation,
+                          p=p,
+                          cor_mat=cor_mat,
+                          dist_mat=dist_mat))
             }else{
               return(p + st_gg_theming())
             }
