@@ -1,5 +1,7 @@
 # Changelog
 
+* in hc_tree() argument return_tree is now return_list
+
 ## v0.1.0
 
 * multi_gene_contrast() has been renamed multi_feat_contrast()
