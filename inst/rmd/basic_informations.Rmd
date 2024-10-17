@@ -1,0 +1,245 @@
+---
+title: "`r params$title`"
+subtitle: "`r params$subtitle`"
+params:
+  date : date
+  title : title
+  authors: authors
+  subtitle: subtitle
+  st_grid: st_grid
+  sample_info: sample_info
+  image_height: image_height
+  corrplot_text_size: corrplot_text_size
+  hc_tree_params: hc_tree_params
+  spatial_image_params: spatial_image_params
+  cmp_counts_st_params: cmp_counts_st_params
+output:
+  html_document:
+    fig_caption: yes
+    highlight: zenburn
+    theme: cerulean
+    toc: no
+    toc_depth: 3
+    toc_float: yes
+  beamer_presentation:
+    colortheme: dolphin
+    fig_caption: yes
+    fig_height: 6
+    fig_width: 7
+    fonttheme: structurebold
+    highlight: tango
+    incremental: no
+    keep_tex: no
+    slide_level: 2
+    theme: Montpellier
+    toc: yes
+  pdf_document:
+    fig_caption: yes
+    highlight: zenburn
+    toc: yes
+    toc_depth: 3
+  slidy_presentation:
+    fig_caption: yes
+    fig_height: 6
+    fig_width: 7
+    highlight: tango
+    incremental: yes
+    keep_md: yes
+    smaller: yes
+    theme: cerulean
+    toc: yes
+    widescreen: yes
+
+---
+
+```{r include=FALSE, echo=FALSE, eval=TRUE}
+STarlight::set_verb_level(0)
+library(knitr)
+options(width=300)
+
+knitr::opts_chunk$set(
+  fig.path='figures',
+  fig.align = "center", 
+  size = "tiny", 
+  echo = TRUE, eval=TRUE, 
+  warning = FALSE, message = FALSE, 
+  results = TRUE, comment = ""
+)
+
+```
+
+
+
+```{r get_params, echo=FALSE, eval=TRUE}
+spatial_image_params <- params$spatial_image
+params_hc <- params$hc_tree_params
+cmp_counts_st_params <- params$cmp_counts_st_params
+st_grid <- params$st_grid
+fig_h <- round(STarlight::nb_feat(st_grid)/7, 0)
+```
+
+
+#  {.tabset}
+
+## Experiment {.tabset}
+
+### Authors
+
+```{r authors, echo=FALSE, eval=TRUE}
+author_df <- as.data.frame(do.call("rbind", params$authors))
+knitr::kable(author_df) %>% kableExtra::row_spec(1, bold = TRUE) %>% 
+  kableExtra::kable_styling(full_width = FALSE, position = "left")
+```
+---
+
+### Sample information  
+
+
+```{r sample, echo=FALSE, eval=TRUE}
+sample_info <- as.data.frame(do.call("rbind", list(params$sample_info)))
+knitr::kable(sample_info) %>% kableExtra::row_spec(1, bold = TRUE) %>% 
+  kableExtra::kable_styling(full_width = FALSE, position = "left")
+```
+
+### Parameters  
+
+
+```{r parameters, echo=FALSE, eval=TRUE}
+
+t1 <- rbind(c("Date: ", params$date),
+            c("Nb of modules: ", params_hc$nb_class),
+            c("Image height: ", params$image_height)
+            )
+
+knitr::kable(t1) %>% kableExtra::column_spec(1, bold = TRUE)
+```
+
+
+## Object information 
+
+```{r information, echo=FALSE, eval=TRUE}
+
+t1 <- rbind(c("type:", class(st_grid)),
+            c("Nb_feature:", STarlight::nb_feat(st_grid)),
+            c("Number of counts:", STarlight::nb_items(st_grid)),
+            c("Bin size:", STarlight::bin_size(st_grid)),
+            c("Number of bins (x axis):", STarlight::nbin_x(st_grid)),
+            c("Number of bins (y axis):", STarlight::nbin_y(st_grid))
+            )
+
+t2 <- rbind(c("Min value (x axis):", st_grid@x_min),
+            c("Max value (x axis):", st_grid@x_max),
+            c("Min value (y axis):", st_grid@y_min),
+            c("Max value (y axis):", st_grid@y_max))
+
+knitr::kable(t1) %>% kableExtra::column_spec(1, bold = TRUE) %>% 
+  kableExtra::kable_styling(full_width = FALSE, position = "float_left")
+knitr::kable(t2) %>% kableExtra::column_spec(1, bold = TRUE) %>% 
+  kableExtra::kable_styling(full_width = FALSE, position = "left")
+```
+```{r}
+
+```
+
+---
+
+## Feature counts {.tabset}
+
+### Count table
+
+```{r count_table, echo=FALSE, eval=TRUE,}
+counts <- as.data.frame(table_st(st_grid))
+colnames(counts) <- c("Feature", "Counts")
+DT::datatable(as.data.frame(counts))
+```
+
+### Count barplot
+
+```{r cmp_counts_st, echo=FALSE, eval=TRUE, fig.width = 7, fig.height=fig_h}
+
+ifelse(fig_h < 2, 2, fig_h)
+cmp_counts_st_params$st_grid <- st_grid
+cmp_counts_st_params$features <- STarlight::feat_names(st_grid)
+
+do.call(eval(parse(text="STarlight::cmp_counts_st")), 
+        cmp_counts_st_params) + ggplot2::coord_flip()
+
+```
+
+
+
+## Feature spatial density {.tabset}
+
+### Ripley's K function
+
+This section contains the result of K Ripley's function to evaluate molecule density. 
+
+```{r ripley, echo=FALSE, eval=TRUE, fig.width = 7, fig.height = 5}
+STarlight::set_verb_level(0)
+st_grid <- STarlight::compute_k_ripley(st_grid, verbose=FALSE)
+STarlight::plot_rip_k(st_grid)
+
+```
+
+### Moran's Index
+
+## Spatial distribution {.tabset}
+
+### Spatial distribution of counts
+
+```{r Spatial_distribution_of_counts, echo=FALSE, eval=TRUE, out.width="100%", fig.dpi=300}
+spatial_image(object = st_grid, 
+          features = "count_sum") + ggplot2::coord_fixed()
+```
+
+### Rasterized images of features
+
+```{r Rasterized_images_of_features, echo=FALSE, eval=TRUE, out.width="100%", fig.dpi=300, fig.height=round(length(spatial_image_params$features)/spatial_image_params$ncol, 0) * params$image_height}
+
+spatial_image_params$object <- st_grid
+do.call(eval(parse(text="STarlight::spatial_image")), 
+        spatial_image_params) + ggplot2::coord_fixed()
+
+```
+
+## Feature correlations {.tabset}
+
+### Correlations
+
+```{r corrplot, echo=FALSE, eval=TRUE, out.width="100%", fig.dpi=300}
+hc_tree_params <- params$hc_tree_params
+hc_tree_params$object <- st_grid
+hc_tree_params$return_list <- TRUE
+hc <- do.call(eval(parse(text="STarlight::hc_tree")),
+              hc_tree_params)
+
+cor_mat <- hc$cor_mat[hc$hc_clust$order, hc$hc_clust$order]
+corrplot::corrplot(cor_mat, type="upper", order="original",
+                   col=RColorBrewer::brewer.pal(n=8, name="RdYlBu"),
+                   tl.cex=params$corrplot_text_size, diag = FALSE)
+```
+
+### Tree
+
+```{r display_tree, echo=FALSE, eval=TRUE}
+print(hc$p + Seurat::NoLegend()) 
+```
+
+
+### Modules
+
+```{r modules, echo=FALSE, eval=TRUE, out.width="100%", fig.dpi=300, fig.height=round(length(hc$tree_classes)/spatial_image_params$ncol, 0) * params$image_height}
+
+st_grid <- compute_module_score(st_grid, 
+                                modules = hc$tree_classes)
+mn <- meta_names(st_grid)
+
+this_params <- spatial_image_params
+this_params$features <- mn[grep("MOD[0-9]+", mn, perl = TRUE)]
+this_params$object <- st_grid
+
+do.call(eval(parse(text="STarlight::spatial_image")), 
+        this_params) + ggplot2::coord_fixed()
+
+```
+
