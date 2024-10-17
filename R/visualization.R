@@ -595,17 +595,17 @@ cmp_counts_st <- function(...,
 
   st_list <- st_list[features, , drop = FALSE]
 
-  count_per_gene <- reshape2::melt(as.matrix(st_list))
+  count_per_feat <- reshape2::melt(as.matrix(st_list))
 
-  colnames(count_per_gene) <- c("Gene", "Conditions", "value")
-  count_per_gene$Conditions <- factor(count_per_gene$Conditions,
+  colnames(count_per_feat) <- c("Feature", "Conditions", "value")
+  count_per_feat$Conditions <- factor(count_per_feat$Conditions,
                                       levels = names,
                                       ordered = TRUE)
 
-  count_per_gene$Gene <- factor(count_per_gene$Gene, levels = features, ordered = TRUE)
+  count_per_feat$Gene <- factor(count_per_feat$Feature, levels = features, ordered = TRUE)
 
   if (!is.null(fill_color)) {
-    if (length(fill_color) < length(unique(count_per_gene$Conditions))) {
+    if (length(fill_color) < length(unique(count_per_feat$Conditions))) {
       print_this_msg("Not enough color provided. Using default palette...",
                      msg_type = "WARNING")
       fill_color <- NULL
@@ -614,22 +614,25 @@ cmp_counts_st <- function(...,
 
   if (transform == "log2") {
     y_label <- "Log2(counts)"
-    count_per_gene$value <- log2(count_per_gene$value)
+    count_per_feat$value <- log2(count_per_feat$value)
   } else if (transform ==  "log10") {
     y_label <- "Log10(counts)"
-    count_per_gene$value <- log10(count_per_gene$value)
+    count_per_feat$value <- log10(count_per_feat$value)
   } else if (transform ==  "log") {
     y_label <- "Log(counts)"
-    count_per_gene$value <- log(count_per_gene$value)
+    count_per_feat$value <- log(count_per_feat$value)
   } else{
     y_label <- "Counts"
   }
 
-  Gene <- value <- Conditions <- NULL
+  Feature <- value <- Conditions <- NULL
+  count_per_feat$Feature <- factor(count_per_feat$Feature,
+                                   ordered = TRUE,
+                                   levels = count_per_feat$Feature[order(count_per_feat$value)])
 
   if (type == "barplot") {
-    p <- ggplot2::ggplot(data = count_per_gene,
-                         mapping = ggplot2::aes(x = Gene, y = value, fill = Conditions)) +
+    p <- ggplot2::ggplot(data = count_per_feat,
+                         mapping = ggplot2::aes(x = Feature, y = value, fill = Conditions)) +
       ggplot2::geom_col(position = "dodge2")
 
   } else if (type == "radar") {
@@ -767,12 +770,12 @@ dist_st <- function(...,
     }
 
   }
-  count_per_gene <- reshape2::melt(st_list)
+  count_per_feat <- reshape2::melt(st_list)
 
-  colnames(count_per_gene) <- c("Gene", "Conditions", "value")
+  colnames(count_per_feat) <- c("Gene", "Conditions", "value")
 
   if (!is.null(fill_color)) {
-    if (length(fill_color) < length(unique(count_per_gene$Conditions))) {
+    if (length(fill_color) < length(unique(count_per_feat$Conditions))) {
       print_this_msg("Not enough color provided. Using default palette...",
                      msg_type = "WARNING")
       fill_color <- NULL
@@ -781,32 +784,32 @@ dist_st <- function(...,
 
   if (transform == "log2") {
     x_label <- "Log2(counts)"
-    count_per_gene$value <- log2(count_per_gene$value)
+    count_per_feat$value <- log2(count_per_feat$value)
   } else if (transform ==  "log10") {
     x_label <- "Log10(counts)"
-    count_per_gene$value <- log10(count_per_gene$value)
+    count_per_feat$value <- log10(count_per_feat$value)
   } else if (transform ==  "log") {
     x_label <- "Log(counts)"
-    count_per_gene$value <- log(count_per_gene$value)
+    count_per_feat$value <- log(count_per_feat$value)
   } else{
     x_label <- "Counts"
   }
 
   if (type == "hist") {
-    p <- ggplot2::ggplot(data = count_per_gene,
+    p <- ggplot2::ggplot(data = count_per_feat,
                          mapping = ggplot2::aes(x = value, fill = Conditions)) +
       ggplot2::geom_histogram(color = border_color)
 
   } else if (type == "boxplot") {
     p <- ggplot2::ggplot(
-      data = count_per_gene,
+      data = count_per_feat,
       mapping = ggplot2::aes(x = Conditions, y = value, fill =
                                Conditions)
     ) +
       ggplot2::geom_boxplot(color = border_color)
 
   } else if (type == "density") {
-    p <- ggplot2::ggplot(data = count_per_gene,
+    p <- ggplot2::ggplot(data = count_per_feat,
                          mapping = ggplot2::aes(x = value, fill = Conditions)) +
       ggplot2::geom_density(color = border_color)
 
@@ -815,7 +818,7 @@ dist_st <- function(...,
 
   } else if (type == "boxjitter") {
     p <- ggplot2::ggplot(
-      data = count_per_gene,
+      data = count_per_feat,
       mapping = ggplot2::aes(x = Conditions, y = value, fill = Conditions)
     ) +
       ggpol::geom_boxjitter(color = border_color)
