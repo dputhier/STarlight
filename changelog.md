@@ -1,6 +1,7 @@
 # Changelog
 
 * in hc_tree() argument return_tree is now return_list
+* In cmp_counts_st() change axis names from gene to feature
 
 ## v0.1.0
 
