@@ -1,5 +1,11 @@
 # Changelog
 
+* Added a report for a single sample (i.e. STGrid object) that can be called with reporting().
+* plot_rip_k() can now be used with theorical values for a single feature.
+* Changed argument return_tree to return_list in hc_tree().
+* Added computation of L-function (normalized version of K-function).
+* Implemented moran_index(), order_feat_by_moran_index(), plot_moran_i(), compute_moran_index().
+* Moran's Index is now stored in the STGrid objects.
 * in hc_tree() argument return_tree is now return_list
 * In cmp_counts_st() change axis names from gene to feature
 

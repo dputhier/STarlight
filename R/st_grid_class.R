@@ -42,6 +42,7 @@ setClass(
     bin_x = "character",
     bin_y = "character",
     ripley_k_function = "data.frame",
+    moran_index = "data.frame",
     control = "character"
   ),
   prototype = list(
@@ -58,6 +59,7 @@ setClass(
     bin_x = character(),
     bin_y = character(),
     ripley_k_function = data.frame(),
+    moran_index = data.frame(),
     control = character()
   )
 )
@@ -414,9 +416,9 @@ setMethod("bin_mat", "STGrid",
             }
 
             if (del_bin) {
-              this_bin_mat <- this_bin_mat[, feat_list]
+              this_bin_mat <- this_bin_mat[, feat_list, drop=FALSE]
             } else{
-              this_bin_mat <- this_bin_mat[, c("bin_x", "bin_y", feat_list)]
+              this_bin_mat <- this_bin_mat[, c("bin_x", "bin_y", feat_list), drop=FALSE]
             }
 
             if (as_factor) {
@@ -816,7 +818,6 @@ setGeneric("ripley_k_function",
 #'  Get Ripley's K function slot from a STGrid object.
 #' @param x The STGrid object
 #' @export bin_size
-#' @keywords internal
 #' @examples
 #' example_dataset()
 #' Xenium_Mouse_Brain_Coronal_7g <- compute_k_ripley(Xenium_Mouse_Brain_Coronal_7g, verbose=FALSE)
@@ -826,6 +827,33 @@ setMethod("ripley_k_function", "STGrid",
           function(object)
             object@ripley_k_function)
 
+
+#' @title  Get Moran's index values from corresponding slot from a STGrid object.
+#' @description
+#'   Get Moran's index values from corresponding slot from a STGrid object.
+#' @param x The STGrid object
+#' @keywords internal
+#' @examples
+#' example_dataset()
+#' Xenium_Mouse_Brain_Coronal_7g <- compute_k_ripley(Xenium_Mouse_Brain_Coronal_7g, verbose=FALSE)
+#' head(moran_index(Xenium_Mouse_Brain_Coronal_7g))
+#' @export
+setGeneric("moran_index",
+           function(object)
+             standardGeneric("moran_index"))
+
+#' @title  Get Moran's index values from corresponding slot from a STGrid object.
+#' @description
+#'   Get Moran's index values from corresponding slot from a STGrid object.
+#' @param x The STGrid object
+#' @examples
+#' example_dataset()
+#' Xenium_Mouse_Brain_Coronal_7g <- compute_k_ripley(Xenium_Mouse_Brain_Coronal_7g, verbose=FALSE)
+#' head(moran_index(Xenium_Mouse_Brain_Coronal_7g))
+#' @export
+setMethod("moran_index", "STGrid",
+          function(object)
+            object@moran_index)
 
 # -------------------------------------------------------------------------
 ##    REDEFINE SHOW() METHOD FOR CLASS OBJECT : STGrid
@@ -951,6 +979,7 @@ setMethod("[", signature(x = "STGrid"),
             n_bin_x <- x@bin_x
             n_bin_y <- x@bin_y
             n_ripley_k_function <- x@ripley_k_function
+            n_moran_index <- x@moran_index
             n_control <- x@control
 
             if (missing(j)) {
@@ -963,6 +992,8 @@ setMethod("[", signature(x = "STGrid"),
                     n_bin_mat[, colnames(n_bin_mat) %in% c("bin_x", "bin_y", i)]
                   n_ripley_k_function <-
                     n_ripley_k_function[n_ripley_k_function$feature %in% i, ]
+                  n_moran_index <-
+                    n_moran_index[n_moran_index$feature %in% i, ]
 
                 } else {
                   n_coord <- n_coord[n_coord$bin_x %in% i, ]
@@ -997,7 +1028,6 @@ setMethod("[", signature(x = "STGrid"),
                   n_meta <- n_meta[test, ,drop=FALSE]
                   feat_left <- unique(n_coord$feature)
 
-
                   n_bin_mat <-
                       n_bin_mat[, colnames(n_bin_mat) %in% c("bin_x", "bin_y", feat_left)]
 
@@ -1023,6 +1053,8 @@ setMethod("[", signature(x = "STGrid"),
             STGrid_obj@bin_y <-
               x@bin_y[x@bin_y %in% n_bin_mat$bin_y]
             STGrid_obj@control <- n_control
+            STGrid_obj@ripley_k_function <- n_ripley_k_function
+            STGrid_obj@moran_index <- n_moran_index
 
             return(STGrid_obj)
 
@@ -1156,6 +1188,7 @@ setMethod (f = '[[<-',
 #' @param ratio Logical. If TRUE, the numerator and denominator of each edge-corrected estimate will also be saved, for use in analyzing replicated point patterns.
 #' @param sampling_rate By default a subset of molecules is sampled. Set sampling_rate to 1 to keep all molecules.
 #' @param seed The seed for sampling_rate.
+#' @param method Whether to to compute Ripley's K-function or an estimate of the L-function.
 #' @param verbose Whether to print porgress bar.
 #' @return An updated object of class "STGrid" with the Ripley's K function estimates stored in the slot 'ripley_k_function'.
 #'
@@ -1172,6 +1205,7 @@ setGeneric("compute_k_ripley",
                     ratio = FALSE,
                     sampling_rate=0.25,
                     seed=123,
+                    method=c("K", "L"),
                     verbose = TRUE)
              standardGeneric("compute_k_ripley"))
 
@@ -1186,6 +1220,7 @@ setGeneric("compute_k_ripley",
 #' @param ratio Logical. If TRUE, the numerator and denominator of each edge-corrected estimate will also be saved, for use in analyzing replicated point patterns.
 #' @param sampling_rate By default a subset of molecules is sampled. Set sampling_rate to 1 to keep all molecules.
 #' @param seed The seed for sampling_rate.
+#' @param method Whether to to compute Ripley's K-function or an estimate of the L-function.
 #' @param verbose Whether to print porgress bar.
 #' @return An updated object of class "STGrid" with the Ripley's K function estimates stored in the slot 'ripley_k_function'.
 #'
@@ -1204,7 +1239,10 @@ setMethod("compute_k_ripley", signature("STGrid"),
                    ratio = FALSE,
                    sampling_rate=0.25,
                    seed=123,
+                   method=c("K", "L"),
                    verbose = TRUE) {
+
+            method <- match.arg(method)
 
             molecules <- coord(object)[, c("x", "y", "feature")]
 
@@ -1277,13 +1315,24 @@ setMethod("compute_k_ripley", signature("STGrid"),
                                                                    c(min(is_g$y),
                                                                      max(is_g$y))))
 
-              u <- spatstat.explore::Kest(
-                X,
-                rmax = rmax,
-                nlarge = nlarge,
-                var.approx = var.approx,
-                ratio = ratio
-              )
+              if(method == "K"){
+                u <- spatstat.explore::Kest(
+                  X,
+                  rmax = rmax,
+                  nlarge = nlarge,
+                  var.approx = var.approx,
+                  ratio = ratio
+                )
+              }else{
+                u <- spatstat.explore::Lest(
+                  X,
+                  rmax = rmax,
+                  nlarge = nlarge,
+                  var.approx = var.approx,
+                  ratio = ratio
+                )
+              }
+
 
               u <- as.data.frame(as.matrix(u))
               u$feature <- g
@@ -2392,7 +2441,7 @@ setMethod("as_matrix", "STGrid",
 
 
 # -------------------------------------------------------------------------
-#      Find contiguous cells
+#      Find contiguous cells/bins
 # -------------------------------------------------------------------------
 #' @title Find contiguous cells using Queen criterion (internal).
 #' @description
@@ -2652,3 +2701,125 @@ setMethod("connected_components",
   return(object)
 })
 
+
+# -------------------------------------------------------------------------
+#      Compute Moran's Index
+# -------------------------------------------------------------------------
+
+setGeneric("compute_moran_index",
+           function(object=NULL,
+                    queen_or_rook = c("queen", "rook"),
+                    scaling=TRUE)
+             standardGeneric("compute_moran_index"))
+
+#' @title Compute Moran's Index.
+#' @description
+#' Compute Moran's Index.
+#' @param queen_or_rook Method for neighborhood computation. Default to 'rook'. May also be queen.
+#' @param  scaling	Whether to scale so that the sum of counts equals to 100 for each feature. Default TRUE.
+#' @importFrom spdep cell2nb moran nb2listw Szero
+#' @examples
+#' example_dataset()
+#' xen <- Xenium_Mouse_Brain_Coronal_7g
+#' xen <- moran_index(re_bin(xen, bin_size = 400))
+#' print(xen@moran_index)
+#' @export
+setMethod("compute_moran_index",
+          "STGrid",
+          function(object=NULL,
+                   queen_or_rook = c("queen", "rook"),
+                   scaling=TRUE){
+
+            print_this_msg("Starting computation of Moran's index...Please be patient")
+
+            queen_or_rook <- match.arg(queen_or_rook)
+
+            nbin_x <- nbin_x(object)
+            nbin_y <- nbin_y(object)
+
+            if(nbin_y * nbin_x > 10000){
+              print_this_msg("The number of bins (x * y) is greater than 1e4.")
+              print_this_msg("Computing Moran's Index may be time consuming.")
+              print_this_msg("Please consider increasing bin size or selecting a sub-region.")
+            }
+
+            xygrid <- expand.grid(x = 1:nbin_x,
+                                  y = 1:nbin_y)
+
+            print_this_msg("Computing neighborhood.")
+
+            neighborhood <- spdep::cell2nb(nrow = nbin_y,
+                                  ncol = nbin_x,
+                                  type = queen_or_rook,
+                                  legacy = FALSE)
+
+            print_this_msg("Calling adespatial::moran.randtest().")
+            nb_as_list <- spdep::nb2listw(neighborhood)
+
+            # moran_index <- moran.randtest(bin_mat(object = object,
+            #                                   del_bin = TRUE,
+            #                                   feat_list = feat_names(object)),
+            #                           nb_as_list)
+
+            bin_mat <- bin_mat(object = object,
+                               del_bin = TRUE,
+                               feat_list = feat_names(object), )
+
+            moran_index <- data.frame(row.names=feat_names(object))
+            tmp_i <- vector()
+            tmp_k <- vector()
+
+            for(i in 1:length(feat_names(object))){
+               bm <- bin_mat[,i]
+
+               if(scaling){
+                bm <- bin_mat[,i] / sum(bin_mat[,i]) * 100
+              }
+
+              tmp <- spdep::moran(bm,
+                                     nb_as_list,
+                                     length(neighborhood),
+                                     spdep::Szero(nb_as_list))
+              tmp_i[i] <- tmp$I
+              tmp_k[i] <- tmp$K
+            }
+
+            moran_index$I <- tmp_i
+            moran_index$K <- tmp_k
+
+
+            object@moran_index <- moran_index
+
+            return(object)
+})
+
+# -------------------------------------------------------------------------
+#      Get the min / max value from Moran's Index
+# -------------------------------------------------------------------------
+#' Returns features ordered by Moran's Index
+#'
+#' This method returns features ordered by Moran's Index values stored in
+#' an \code{STGrid}.
+#' @param object An \code{STGrid} object.
+#' @keywords internal
+#' @export
+setGeneric("order_feat_by_moran_index",
+           function(object)
+             standardGeneric("order_feat_by_moran_index"))
+
+#' Returns features ordered by Moran's Index
+#' This method returns features ordered by Moran's Index values stored in
+#' an \code{STGrid}.
+#' @param object An \code{STGrid} object.
+#' @export
+setMethod("order_feat_by_moran_index", "STGrid",
+          function(object){
+            features <- feat_names(object)
+            if(nrow(object@moran_index) == 0){
+              print_this_msg("No moran_index slot available in the object",
+                        msg_type = "WARNING")
+              return(features)
+            }else{
+              return(features[order(object@moran_index$I)])
+            }
+})

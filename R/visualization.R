@@ -1116,61 +1116,85 @@ setMethod("cmp_volcano", signature("STCompR"), function(object,
 #' Plot the results from the Ripley's k function stored in the STGrid object.
 #' @param object A STCompR object.
 #' @param correction kind of correction should be displayed.
+#' @param feature The feature to be displayed. If NULL, display all.
 #' @param max_feat_label The maximum number of features to display.
 #' The features with the highest value (whatever the radius)
 #' are displayed
 #' @param color The colors for the features to be displayed.
 #' @param size The size of the labels.
+#' @param ncol If features is not NULL, the number of column in the facetted diagram.
+#' @examples
+#' example_dataset()
+#' plot_rip_k(compute_k_ripley(Xenium_Mouse_Brain_Coronal_7g[c("Ano1", "Chat", "Ebf3")]))
+#' plot_rip_k(compute_k_ripley(Xenium_Mouse_Brain_Coronal_7g[c("Ano1", "Chat", "Ebf3")]),
+#' feature=c("Ano1", "Chat"))
 #' @keywords internal
+#' @export plot_rip_k
 setGeneric("plot_rip_k", function(object,
                                   correction = c("border", "isotropic", "Ripley", "translate"),
+                                  feature=NULL,
                                   max_feat_label = 8,
                                   color = NULL,
-                                  size = 4)
+                                  size = 4,
+                                  ncol=4)
   standardGeneric("plot_rip_k"))
 
-#' @title Call the Ripley's k function.
+#' @title Plot the results from the Ripley's k function stored in the STGrid object.
 #' @description
-#' Call the Ripley's k function.
+#' Plot the results from the Ripley's k function stored in the STGrid object.
 #' @param object A STCompR object.
 #' @param correction kind of correction should be displayed.
+#' @param feature The feature to be displayed. If NULL, display all.
 #' @param max_feat_label The maximum number of features to display.
 #' The features with the highest correction value (whatever the radius)
 #' are displayed.
 #' @param color The colors for the features to be displayed.
 #' @param size The size of the labels.
+#' @param ncol If features is not NULL, the number of column in the facetted diagram.
 #' @import magrittr
 #' @importFrom dplyr group_by filter arrange
 #' @examples
 #' example_dataset()
 #' plot_rip_k(compute_k_ripley(Xenium_Mouse_Brain_Coronal_7g[c("Ano1", "Chat", "Ebf3")]))
-#'
+#' plot_rip_k(compute_k_ripley(Xenium_Mouse_Brain_Coronal_7g[c("Ano1", "Chat", "Ebf3")]),
+#' feature=c("Ano1", "Chat"))
 #' @export plot_rip_k
 setMethod("plot_rip_k", signature("STGrid"), function(object,
                                                       correction = c("border", "isotropic", "Ripley", "translate"),
+                                                      feature=NULL,
                                                       max_feat_label = 8,
                                                       color = NULL,
-                                                      size = 4) {
+                                                      size = 4,
+                                                      ncol=4) {
+
+
+  correction <- match.arg(correction)
+  print_this_msg("Correction used is: ", correction)
+
+  check_st_list(list(object), feat_list = feature)
+
   gg_color_hue <- function(n) {
     hues <-  seq(15, 375, length = n + 1)
     grDevices::hcl(h = hues, l = 65, c = 100)[1:n]
   }
 
-
   if (is.null(color)) {
-    color <- gg_color_hue(max_feat_label)
-  }
+    if(is.null(feature)){
+      color <- gg_color_hue(max_feat_label)
+    }else{
+      color <- gg_color_hue(2)
+    }
 
+  }
 
   if (nrow(ripley_k_function(object)) == 0) {
     print_this_msg("Please run ripley_k_function() first.", msg_type = "STOP")
   }
 
-  correction <- match.arg(correction)
   ripk <- ripley_k_function(object)
 
   if (max_feat_label > nrow(ripk))
-    print_this_msg("Too much selected gehes...", msg_type = "STOP")
+    print_this_msg("Too much selected genes...", msg_type = "STOP")
 
   voi <- ripk %>%
     dplyr::group_by(feature) %>%
@@ -1185,44 +1209,116 @@ setMethod("plot_rip_k", signature("STGrid"), function(object,
 
   ripk_sub <- ripk[ripk$feature %in% goi, ]
 
-  r <- border <- feature <- NULL
-  p <- ggplot2::ggplot(data = ripk) +
-    ggplot2::geom_line(mapping = ggplot2::aes(x = r, y = border, group = feature),
-                       color = "black") +
-    ggplot2::theme_bw() +
-    ggplot2::theme(
-      legend.text = ggplot2::element_text(size = 4),
-      legend.position = "none",
-      panel.grid.minor =  ggplot2::element_blank()
-    ) +
-    ggplot2::geom_line(
-      data = ripk_sub,
-      mapping = ggplot2::aes(
-        x = r,
-        y = border,
-        group = feature,
-        color = feature
-      ),
-      inherit.aes = FALSE
-    ) +
-    ggrepel::geom_label_repel(
-      data = voi,
-      mapping = ggplot2::aes(
-        x = r,
-        y = border,
-        label = feature,
-        color = feature
-      ),
-      inherit.aes = FALSE,
-      size = size,
-      force = 20
-    ) +
-    ggplot2::ylab(paste0("Ripley's K function (correction=", correction, ")")) +
-    ggplot2::scale_color_manual(values = color)
+
+  r <- border <- theo <- NULL
+
+  if(is.null(feature)){
+    p <- ggplot2::ggplot(data = ripk)
+     p <- p +
+      ggplot2::geom_line(mapping = ggplot2::aes(x = r, y = border, group = feature),
+                         color = "black")  +
+      ggplot2::geom_line(
+        data = ripk_sub,
+        mapping = ggplot2::aes(
+          x = r,
+          y = border,
+          group = feature,
+          color = feature
+        ),
+        inherit.aes = FALSE
+      ) +
+      ggrepel::geom_label_repel(
+        data = voi,
+        mapping = ggplot2::aes(
+          x = r,
+          y = border,
+          label = feature,
+          color = feature
+        ),
+        inherit.aes = FALSE,
+        size = size,
+        force = 20
+      ) +
+      ggplot2::ylab(paste0("Ripley's K function (correction=", correction, ")")) +
+      ggplot2::scale_color_manual(values = color)
+  }else{
+    print_this_msg("User provided features...", msg_type = "DEBUG")
+
+    ripk <-  reshape2::melt(ripk[,c("r",
+                                    "theo",
+                                    "feature",
+                                    correction)],
+                            measure.vars=c("theo", correction))
+
+    p <- ggplot2::ggplot(data = ripk)
+    p <- p + ggplot2::geom_line(mapping = ggplot2::aes(x = r,
+                                                      y = value,
+                                                      group = variable,
+                                                      color=variable)) +
+     ggplot2::facet_wrap(~feature, ncol = ncol) +
+     ggplot2::scale_color_manual(values = color)
+
+  }
+
+  p <- p + ggplot2::theme_bw() +
+          ggplot2::theme(legend.text = ggplot2::element_text(size = 4),
+                         panel.grid.minor =  ggplot2::element_blank()
+    )
 
   return(p + st_gg_theming())
 })
 
+
+
+
+# -------------------------------------------------------------------------
+##    Display the results of Moran's index computation
+# -------------------------------------------------------------------------
+
+#' @title Plot the results from Moran's index computation stored in the STGrid object.
+#' @description
+#' Plot the results from Moran's index computation stored in the STGrid object.
+#' @param object A STCompR object.
+#' @param fill_color Bar color.
+#' @param border_color Bar border color.
+#' @keywords internal
+#' @export
+setGeneric("plot_moran_i", function(object,
+                                    fill_color="Blue",
+                                    border_color="black")
+  standardGeneric("plot_moran_i"))
+
+
+#' @title Plot the results from Moran's index computation stored in the STGrid object.
+#' @description
+#' Plot the results from Moran's index computation stored in the STGrid object.
+#' @param object A STCompR object.
+#' @param fill_color Bar color.
+#' @param border_color Bar border color.
+#' @export
+setMethod("plot_moran_i", signature("STGrid"),
+          function(object,
+                   fill_color="Blue",
+                   border_color="white") {
+
+  if(nrow(object@moran_index) == 0){
+    print_this_msg("No moran_index slot available in the object",
+              msg_type = "STOP")
+  }
+
+  I <- Features <- NULL
+  data_set <- object@moran_index
+  data_set$Features <- row.names(data_set)
+  data_set$Features <- factor(data_set$Features,
+                              ordered = TRUE,
+                              levels = order_feat_by_moran_index(object))
+
+  ggplot2::ggplot(data_set,
+                  mapping=ggplot2::aes(x=I, y=Features)) +
+    ggplot2::geom_col(fill=fill_color,
+                      color=border_color) + ggplot2::theme_bw()
+
+})
 
 # -------------------------------------------------------------------------
 ##    Compare Images

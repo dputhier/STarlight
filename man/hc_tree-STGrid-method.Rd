@@ -23,7 +23,7 @@
   lab_barsize = 2,
   geom_label = c("text", "label", "shadowtext"),
   no_legend = FALSE,
-  return_tree = FALSE
+  return_list = FALSE
 )
 }
 \arguments{
@@ -59,8 +59,8 @@
 
 \item{no_legend}{Whether to discard legend.}
 
-\item{return_tree}{Logical. Whether to return the tree not the plot. In fact a list with the tree
-and associated clusters.}
+\item{return_list}{Logical. Whether to return a list with the tree,
+associated clusters, distance and correlation matrices.}
 }
 \description{
 Create a tree from an STGrid object

@@ -12,6 +12,7 @@ compute_k_ripley(
   ratio = FALSE,
   sampling_rate = 0.25,
   seed = 123,
+  method = c("K", "L"),
   verbose = TRUE
 )
 }
@@ -29,6 +30,8 @@ compute_k_ripley(
 \item{sampling_rate}{By default a subset of molecules is sampled. Set sampling_rate to 1 to keep all molecules.}
 
 \item{seed}{The seed for sampling_rate.}
+
+\item{method}{Whether to to compute Ripley's K-function or an estimate of the L-function.}
 
 \item{verbose}{Whether to print porgress bar.}
 }

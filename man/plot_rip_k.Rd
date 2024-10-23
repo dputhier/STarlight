@@ -7,15 +7,19 @@
 plot_rip_k(
   object,
   correction = c("border", "isotropic", "Ripley", "translate"),
+  feature = NULL,
   max_feat_label = 8,
   color = NULL,
-  size = 4
+  size = 4,
+  ncol = 4
 )
 }
 \arguments{
 \item{object}{A STCompR object.}
 
 \item{correction}{kind of correction should be displayed.}
+
+\item{feature}{The feature to be displayed. If NULL, display all.}
 
 \item{max_feat_label}{The maximum number of features to display.
 The features with the highest value (whatever the radius)
@@ -24,8 +28,16 @@ are displayed}
 \item{color}{The colors for the features to be displayed.}
 
 \item{size}{The size of the labels.}
+
+\item{ncol}{If features is not NULL, the number of column in the facetted diagram.}
 }
 \description{
 Plot the results from the Ripley's k function stored in the STGrid object.
+}
+\examples{
+example_dataset()
+plot_rip_k(compute_k_ripley(Xenium_Mouse_Brain_Coronal_7g[c("Ano1", "Chat", "Ebf3")]))
+plot_rip_k(compute_k_ripley(Xenium_Mouse_Brain_Coronal_7g[c("Ano1", "Chat", "Ebf3")]),
+feature=c("Ano1", "Chat"))
 }
 \keyword{internal}
