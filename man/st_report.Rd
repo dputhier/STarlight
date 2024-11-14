@@ -5,25 +5,26 @@
 \title{Create a report from an STGrid object.}
 \usage{
 st_report(
-  st_grid = NULL,
+  st_grid_list = NULL,
   feat_list = NULL,
   title = "Spatial transcriptomics report",
   subtitle = "Sample 1",
-  output_format = c("html_document", "pdf_document", "beamer_presentation"),
   out_file = "/Users/puthier/Documents/basic_informations.html",
+  author = "Unknown",
   date = format(Sys.time(), "\%d \%B \%Y"),
-  authors = list(c(Firstname = "NA", Lastname = "NA", Laboratory = "NA", Affiliation =
-    "NA")),
-  sample_info = c(Species = NA, Age = NA),
+  experimenters = data.frame(Firstname = NA, Lastname = NA, Laboratory = NA, Affiliation
+    = NA),
+  sample_info = data.frame(Species = NA, Age = NA, row.names = row.names(st_grid_list)),
   ncol = 4,
-  image_height = 3,
-  rmd_path = file.path("/Users/puthier/Documents/git/project_dev/STarlight",
-    "inst/rmd/basic_informations.Rmd"),
-  corrplot_text_size = 0.5,
-  hc_tree_params = list(class_nb = 5, offset = 5),
+  image_height = 0.8,
+  qmd_dir = file.path("/Users/puthier/Documents/git/project_dev/STarlight/inst/rmd/"),
+  corrplot_text_size = 0.4,
+  hc_tree_params = list(class_nb = 5, offset = 8),
   plot_rip_k_params = list(ncol = 4),
-  spatial_image_params = list(ncol = 4, features = NULL),
-  cmp_counts_st_params = list(fill_color = "#7845FF", transform = "log10")
+  spatial_image_params = list(ncol = 3, features = NULL),
+  cmp_counts_st_params = list(fill_color = "#7845FF", transform = "log10"),
+  rm_tmpdir = TRUE,
+  as_job = FALSE
 )
 }
 \arguments{
@@ -34,5 +35,4 @@ Create a report from an STGrid object.
 }
 \examples{
 st_report(exp_1, spatial_image_params=list(ncol=4, features=feat_names(exp_1)[1:10]))
-
 }

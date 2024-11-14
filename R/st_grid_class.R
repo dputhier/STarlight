@@ -1251,8 +1251,6 @@ setMethod("compute_k_ripley", signature("STGrid"),
               r = NA,
               theo = NA,
               border = NA,
-              trans = NA,
-              iso = NA,
               feature = NA
             )
 
@@ -1318,6 +1316,7 @@ setMethod("compute_k_ripley", signature("STGrid"),
               if(method == "K"){
                 u <- spatstat.explore::Kest(
                   X,
+                  correction=c("border"),
                   rmax = rmax,
                   nlarge = nlarge,
                   var.approx = var.approx,
@@ -1349,7 +1348,7 @@ setMethod("compute_k_ripley", signature("STGrid"),
 
             return(object)
 
-          })
+})
 
 
 # -------------------------------------------------------------------------

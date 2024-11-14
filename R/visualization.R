@@ -725,7 +725,9 @@ dist_st <- function(...,
     border_color <- border_color[1]
 
 
-  features <- Reduce(intersect, lapply(st_list, feat_names))
+  features <- Reduce(intersect,
+                     lapply(st_list, feat_names))
+
   if (length(features) == 0)
     print_this_msg("No shared features between objects...", msg_type = "STOP")
 
@@ -733,24 +735,24 @@ dist_st <- function(...,
   check_st_list(st_list)
 
   if (is.null(names)) {
-    names <- paste("Condition_", 1:length(st_list), sep = "")
+    if(is.null(names(st_list))){
+      names(st_list) <- paste("Condition_", 1:length(st_list), sep = "")
+    }
+
   } else{
     if (length(names) != length(st_list))
       print_this_msg("The number of names should be same as the number of objects.",
                      msg_type = "STOP")
+    names(st_list) <- names
   }
 
   print_this_msg("Subsetting STGrid objects.", msg_type = "DEBUG")
 
-  names(st_list) <- names
+  st_list <- lapply(st_list, "[", features, )
 
-  get_feat <- function(x) {
-    coord(x)$feature
-  }
+  print_this_msg("Creating a count table.", msg_type = "DEBUG")
 
-  st_list <- lapply(st_list, get_feat)
-
-  st_list <- lapply(st_list, table)
+  st_list <- lapply(st_list, table_st)
 
   st_list <- do.call("cbind", st_list)
 
@@ -770,6 +772,7 @@ dist_st <- function(...,
     }
 
   }
+
   count_per_feat <- reshape2::melt(st_list)
 
   colnames(count_per_feat) <- c("Gene", "Conditions", "value")
@@ -797,20 +800,23 @@ dist_st <- function(...,
 
   if (type == "hist") {
     p <- ggplot2::ggplot(data = count_per_feat,
-                         mapping = ggplot2::aes(x = value, fill = Conditions)) +
+                         mapping = ggplot2::aes(x = value,
+                                                fill = Conditions)) +
       ggplot2::geom_histogram(color = border_color)
 
   } else if (type == "boxplot") {
     p <- ggplot2::ggplot(
       data = count_per_feat,
-      mapping = ggplot2::aes(x = Conditions, y = value, fill =
-                               Conditions)
+      mapping = ggplot2::aes(x = Conditions,
+                             y = value,
+                             fill = Conditions)
     ) +
       ggplot2::geom_boxplot(color = border_color)
 
   } else if (type == "density") {
     p <- ggplot2::ggplot(data = count_per_feat,
-                         mapping = ggplot2::aes(x = value, fill = Conditions)) +
+                         mapping = ggplot2::aes(x = value,
+                                                fill = Conditions)) +
       ggplot2::geom_density(color = border_color)
 
 
@@ -851,8 +857,8 @@ dist_st <- function(...,
       ggplot2::xlab("Conditions")
   }
 
-  return(p + ggplot2::theme(axis.text.x = element_text(size = 8),
-                 axis.text.y = element_text(size = 8)) +
+  return(p + ggplot2::theme(axis.text.x = ggplot2::element_text(size = 8),
+                            axis.text.y = ggplot2::element_text(size = 8)) +
            st_gg_theming())
 
 }

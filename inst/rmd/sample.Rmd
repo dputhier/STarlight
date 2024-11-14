@@ -6,7 +6,7 @@ params:
   title : title
   authors: authors
   subtitle: subtitle
-  st_grid: st_grid
+  st_grid_as_rds: st_grid_as_rds
   sample_info: sample_info
   image_height: image_height
   corrplot_text_size: corrplot_text_size
@@ -20,38 +20,8 @@ output:
     highlight: zenburn
     theme: cerulean
     toc: no
-    toc_depth: 3
-    toc_float: yes
-  beamer_presentation:
-    colortheme: dolphin
-    fig_caption: yes
-    fig_height: 6
-    fig_width: 7
-    fonttheme: structurebold
-    highlight: tango
-    incremental: no
-    keep_tex: no
-    slide_level: 2
-    theme: Montpellier
-    toc: yes
-  pdf_document:
-    fig_caption: yes
-    highlight: zenburn
-    toc: yes
-    toc_depth: 3
-  slidy_presentation:
-    fig_caption: yes
-    fig_height: 6
-    fig_width: 7
-    highlight: tango
-    incremental: yes
-    keep_md: yes
-    smaller: yes
-    theme: cerulean
-    toc: yes
-    widescreen: yes
-
 ---
+
 
 ```{r include=FALSE, echo=FALSE, eval=TRUE}
 STarlight::set_verb_level(0)
@@ -69,6 +39,10 @@ knitr::opts_chunk$set(
 
 ```
 
+```{r panel-setup, include = FALSE}
+xaringanExtra::use_panelset()
+xaringanExtra::style_panelset(font_family = "inherit")
+```
 
 
 ```{r get_params, echo=FALSE, eval=TRUE}
@@ -80,9 +54,10 @@ fig_h <- round(STarlight::nb_feat(st_grid)/7, 0)
 ```
 
 
-#  {.tabset}
+# Sample {.panelset}
 
-## Experiment {.tabset}
+
+## Experiment {.panelset}
 
 ### Authors
 
@@ -144,7 +119,7 @@ knitr::kable(t2) %>% kableExtra::column_spec(1, bold = TRUE) %>%
 
 ---
 
-## Feature counts {.tabset}
+## Feature counts {.panelset}
 
 ### Count table
 
@@ -168,7 +143,7 @@ do.call(eval(parse(text="STarlight::cmp_counts_st")),
 ```
 
 
-## Feature spatial density {.tabset}
+## Feature spatial density {.panelset}
 
 ### K function
 
@@ -205,6 +180,7 @@ do.call(eval(parse(text="STarlight::plot_rip_k")),
 ```
 
 ```{r ripley_l_by_gene, echo=FALSE, eval=TRUE, fig.width = 7, fig.height = round(length(feat_names(st_grid))/plot_rip_k_params$ncol, 0) * params$image_height / 2 }
+plot_rip_k_params$object <- st_grid
 plot_rip_k_params$feature <- feat_names(st_grid)
 do.call(eval(parse(text="STarlight::plot_rip_k")), 
         plot_rip_k_params) 
@@ -221,7 +197,7 @@ st_grid <- STarlight::compute_moran_index(st_grid)
 STarlight::plot_moran_i(st_grid)
 ```
 
-## Spatial distribution {.tabset}
+## Spatial distribution {.panelset}
 
 ### Spatial distribution of counts
 
@@ -240,7 +216,7 @@ do.call(eval(parse(text="STarlight::spatial_image")),
 
 ```
 
-## Feature correlations {.tabset}
+## Feature correlations {.panelset}
 
 ### Correlations
 
@@ -264,6 +240,8 @@ print(hc$p + Seurat::NoLegend())
 ```
 
 
+
+
 ### Modules
 
 ```{r modules, echo=FALSE, eval=TRUE, out.width="100%", fig.dpi=300, fig.height=round(length(hc$tree_classes)/spatial_image_params$ncol, 0) * params$image_height}
@@ -280,4 +258,3 @@ do.call(eval(parse(text="STarlight::spatial_image")),
         this_params) + ggplot2::coord_fixed()
 
 ```
-

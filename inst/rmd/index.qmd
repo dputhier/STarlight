@@ -1,2 +1,137 @@
-Some text...
+---
+format: html
+params:
+  rds: "RDS_PATH"
+  fig_path: "FIG_PATH"
+fig-dpi: 300
+knitr:
+  opts_chunk:
+    out.width: "100%"
+---
+
+
+```{r}
+#| label: start
+#| include: false
+#| echo: false
+#| eval: true
+
+STarlight::set_verb_level(0)
+library(knitr)
+options(width=400)
+
+knitr::opts_chunk$set(
+  fig.path=params$fig_path,
+  fig.align = "center", 
+  size = "tiny", 
+  comment = "",
+  fig.dpi=300,
+  out.width="100%"
+)
+
+```
+
+```{r}
+#| label: setparams
+#| include: false
+#| echo: false
+#| eval: true
+
+rds <- readRDS(params$rds)
+this_params <- list()
+this_params$st_grid_list <- rds$st_grid_list
+this_params$experimenters <- rds$experimenters
+this_params$sample_info <- rds$sample_info
+this_params$image_height <- rds$image_height
+this_params$fig_path <- rds$fig_path
+```
+
+# General information
+
+::: {.panel-tabset}
+
+## Experimenters
+
+```{r}
+#| label: experimenters
+#| echo: false
+#| eval: true
+
+knitr::kable(this_params$experimenters) %>% 
+  kableExtra::row_spec(1, bold = TRUE) %>% 
+  kableExtra::kable_styling(full_width = FALSE, position = "left")
+```
+
+## Sample information  
+
+
+```{r sample}
+#| label: sample
+#| echo: false
+#| eval: true
+
+knitr::kable(this_params$sample_info) %>% 
+  kableExtra::row_spec(1, bold = TRUE) %>% 
+  kableExtra::kable_styling(full_width = FALSE, position = "left")
+```
+
+## Workflow parameters  
+
+
+```{r}
+#| label: parameters
+#| echo: false
+#| eval: true
+
+t1 <- rbind(c("Date: ", this_params$date),
+            c("Nb of modules: ", this_params$hc_tree_params$nb_class),
+            c("Image height: ", this_params$image_height)
+            )
+
+knitr::kable(t1) %>% kableExtra::column_spec(1, bold = TRUE)
+```
+
+::: 
+
+# Count distributions
+
+::: {.panel-tabset}
+
+## Raw linear
+
+```{r}
+#| label: distributions_raw
+#| echo: false
+#| eval: true
+STarlight::dist_st(this_params$st_grid_list) + Seurat::NoLegend()
+```
+
+## Raw log (log10)
+
+```{r}
+#| label: distributions_log
+#| echo: false
+#| eval: true
+STarlight::dist_st(this_params$st_grid_list, transform="log10") + Seurat::NoLegend()
+```
+
+## Normalized (log10)
+
+```{r}
+#| label: distributions_norm
+#| echo: false
+#| eval: true
+STarlight::dist_st(this_params$st_grid_list, 
+                   transform="log10", 
+                   normalized = TRUE) + Seurat::NoLegend()
+```
+:::
+
+
+# Comparisons
+
+## 
+
+
+
 
