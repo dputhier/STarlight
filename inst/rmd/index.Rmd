@@ -4,7 +4,17 @@ subtitle: "REPORT_SUBTITLE"
 author: "REPORT_AUT"
 date: "REPORT_DATE"
 site: bookdown::bookdown_site
-output: bookdown::gitbook
+output:
+  bookdown::gitbook:
+    number_sections: false
+    config:
+      toc:
+        collapse: section
+    sharing:
+        github: no
+        facebook: no
+        twitter: no
+        all: no
 documentclass: book
 params:
   all: null
