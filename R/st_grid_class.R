@@ -1336,7 +1336,9 @@ setMethod("compute_k_ripley", signature("STGrid"),
               u <- as.data.frame(as.matrix(u))
               u$feature <- g
 
-              data_out <- rbind(data_out, u)
+              data_out <- rbind(data_out,
+                                u[, c("r", "theo",
+                                      "border", "feature")])
             }
 
             if (verbose)

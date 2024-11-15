@@ -17,7 +17,7 @@ st_report(
   sample_info = data.frame(Species = NA, Age = NA, row.names = row.names(st_grid_list)),
   ncol = 4,
   image_height = 0.8,
-  qmd_dir = file.path("/Users/puthier/Documents/git/project_dev/STarlight/inst/rmd/"),
+  rmd_dir = file.path("/Users/puthier/Documents/git/project_dev/STarlight/inst/rmd/"),
   corrplot_text_size = 0.4,
   hc_tree_params = list(class_nb = 5, offset = 8),
   plot_rip_k_params = list(ncol = 4),
