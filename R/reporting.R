@@ -8,7 +8,7 @@
 st_report <- function(st_grid_list = NULL,
                       feat_list = NULL,
                       title = "Spatial transcriptomics report",
-                      subtitle = "Sample 1",
+                      subtitle = "An example experiment",
                       out_file = "/Users/puthier/Documents/basic_informations.html",
                       author = "Unknown",
                       date = format(Sys.time(), '%d %B %Y'),
@@ -34,7 +34,8 @@ st_report <- function(st_grid_list = NULL,
                       cmp_counts_st_params = list(fill_color = "#7845FF", transform =
                                                     "log10"),
                       rm_tmpdir = TRUE,
-                      as_job = FALSE) {
+                      as_job = FALSE,
+                      quiet=FALSE) {
 
   verb_level <- get_verb_level()
 
@@ -88,8 +89,8 @@ st_report <- function(st_grid_list = NULL,
 
   all_knited_files <- mapply(
     function(x, n, sample_name) {
-      print_this_msg("Preparing rmd files for objects", n, msg_type = "DEBUG")
 
+      print_this_msg("Preparing rmd files for objects", n, msg_type = "DEBUG")
       fig_path <- paste0("figure_", n, "_")
 
       cur_rmd <- gsub(".rmd$" , paste0("_", sprintf("%04d", n), ".rmd"), sample_rmd)
@@ -97,55 +98,18 @@ st_report <- function(st_grid_list = NULL,
       print_this_msg("file : ", cur_rmd, msg_type = "DEBUG")
 
       code_rmd  <- readLines(sample_rmd)
-      #code_rmd  <- gsub("RDS_PATH", params_as_rds, x = code_rmd)
-      #code_rmd  <- gsub("FIG_PATH", fig_path, x = code_rmd)
-
+      code_rmd  <- gsub("ST_GRID", paste0("st_grid_list[[", n, "]]"), x = code_rmd)
+      code_rmd  <- gsub("SAMPLE_NAME", sample_name, x = code_rmd)
+      code_rmd  <- gsub("FIG_PATH", fig_path, x = code_rmd)
+      code_rmd  <- gsub("SMP_NUMBER", n, x = code_rmd)
       writeLines(code_rmd, con = cur_rmd)
 
-      print_this_msg("Preparation of rmd files for objects",
-                     n,
-                     "finished.",
-                     msg_type = "DEBUG")
+      print_this_msg("Preparation of rmd files for objects", n, "finished.", msg_type = "DEBUG")
 
       n <- n + 1
 
-      knited_file <- gsub(".rmd$" , ".knit.md", cur_rmd)
-      knited_file_rmd <- gsub(".knit.md$" , ".knit.Rmd", knited_file)
-
-      rmarkdown::render(
-        input = cur_rmd,
-        output_file = knited_file_rmd,
-        params = list(
-          all = list(
-            st_grid = x,
-            sample_name = sample_name,
-            date = date,
-            sample_info = sample_info,
-            image_height = image_height,
-            corrplot_text_size = corrplot_text_size,
-            hc_tree_params = hc_tree_params,
-            spatial_image_params = spatial_image_params,
-            cmp_counts_st_params = cmp_counts_st_params,
-            plot_rip_k_params = plot_rip_k_params,
-            fig_path = fig_path
-          )
-        ),
-        encoding     = 'UTF-8',
-        run_pandoc = FALSE,
-        quiet = TRUE
-      )
-
-      set_verb_level(verb_level)
-
-      unlink(cur_rmd)
-
-
-
-
-      file.rename(knited_file, knited_file_rmd)
-
       # return our new file name
-      return(basename(knited_file_rmd))
+      return(basename(cur_rmd))
 
     },
     x = st_grid_list,
@@ -167,27 +131,6 @@ st_report <- function(st_grid_list = NULL,
   code_rmd  <- gsub("FIG_PATH", "all_", x = code_rmd)
   writeLines(code_rmd, con = file.path(tmp_dir, "index.Rmd"))
 
-  rmarkdown::render(
-    input = file.path(tmp_dir, "index.Rmd"),
-    output_file = file.path(tmp_dir, "index.knit.md"),
-    params = list(
-      all = list(
-        st_grid_list = st_grid_list,
-        experimenters = experimenters,
-        sample_info = sample_info
-      )
-    ),
-    encoding = 'UTF-8',
-    run_pandoc = FALSE,
-    quiet = TRUE,
-    knit_root_dir=tmp_dir
-  )
-
-  set_verb_level(verb_level)
-
-  unlink(file.path(tmp_dir, "index.Rmd"))
-
-  file.rename(file.path(tmp_dir, "index.knit.md"), file.path(tmp_dir, "index.Rmd"))
 
   print_this_msg("preparing _bookdown.yml")
 
@@ -208,21 +151,8 @@ st_report <- function(st_grid_list = NULL,
   writeLines(code_yml, con = file.path(tmp_dir, "_bookdown.yml"))
   code_yml  <- readLines(file.path(tmp_dir, "_bookdown.yml"), warn = FALSE)
 
-  panel_set_code <- paste(readLines(file.path(tmp_dir,
-                                              "panel_set_code.txt"),
-                                    warn = FALSE),
-                          collapse = "\n")
-
-  print_this_msg("preparing panelsets")
-
-  code_rmd <- readLines(file.path(tmp_dir, "index.Rmd"))
-  code_rmd  <- gsub("PANELSET_CODE",  panel_set_code, x = code_rmd)
-  writeLines(code_rmd, con = file.path(tmp_dir, "index.Rmd"))
-
-
   options(knitr.duplicate.label = "allow")
 
-  bookdown::render_book(tmp_dir, quiet=TRUE)
-
+  bookdown::render_book(tmp_dir, quiet=quiet)
   set_verb_level(verb_level)
 }

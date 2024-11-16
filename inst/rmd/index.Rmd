@@ -6,6 +6,7 @@ date: "REPORT_DATE"
 site: bookdown::bookdown_site
 output:
   bookdown::gitbook:
+    css: style.css
     number_sections: false
     config:
       toc:
@@ -17,8 +18,12 @@ output:
         all: no
 documentclass: book
 params:
-  all: null
+  fig_path: "all_"
 ---
+
+
+<!-- UPPERCASE variable are text to be replaced. -->
+<!-- There are several global variables obtained from st_report() function. -->
 
 
 ```{r start, include=FALSE, echo=FALSE, eval=TRUE}
@@ -34,14 +39,10 @@ knitr::opts_chunk$set(
   fig.dpi=300,
   out.width="100%"
 )
-
+library(DT)
 ```
 
-```{r setparams, include=FALSE, echo=FALSE, eval=TRUE}
-this_params <- params$all
-```
-
-# bla
+# Présentation
 
 ```{r panel_setup_final, include = FALSE}
 xaringanExtra::use_panelset()
@@ -49,17 +50,13 @@ xaringanExtra::style_panelset(font_family = "inherit")
 xaringanExtra::style_panelset_tabs(foreground = "honeydew", background = "seagreen")
 ```
 
-
-PANELSET_CODE
-
-
 # General information {.panelset}
 
 ## Experimenters
 
 ```{r experimenters, echo=FALSE, eval=TRUE}
 
-knitr::kable(this_params$experimenters) %>% 
+knitr::kable(experimenters) %>% 
   kableExtra::row_spec(1, bold = TRUE) %>% 
   kableExtra::kable_styling(full_width = FALSE, position = "left") %>%
   kableExtra::kable_styling() %>%
@@ -71,7 +68,7 @@ knitr::kable(this_params$experimenters) %>%
 
 ```{r sample, echo=FALSE, eval=TRUE}
 
-knitr::kable(this_params$sample_info) %>% 
+knitr::kable(sample_info) %>% 
   kableExtra::row_spec(1, bold = TRUE) %>% 
   kableExtra::kable_styling(full_width = FALSE, position = "left") %>%
   kableExtra::kable_styling() %>%
@@ -83,9 +80,9 @@ knitr::kable(this_params$sample_info) %>%
 
 ```{r parameters, echo=FALSE, eval=TRUE}
 
-t1 <- rbind(c("Date: ", this_params$date),
-            c("Nb of modules: ", this_params$hc_tree_params$nb_class),
-            c("Image height: ", this_params$image_height)
+t1 <- rbind(c("Date: ", date),
+            c("Nb of modules: ", hc_tree_params[['class_nb']]),
+            c("Image height: ", image_height)
             )
 
 knitr::kable(t1) %>% kableExtra::column_spec(1, bold = TRUE) %>%
@@ -100,21 +97,21 @@ knitr::kable(t1) %>% kableExtra::column_spec(1, bold = TRUE) %>%
 
 ```{r distributions_raw, echo=FALSE, eval=TRUE}
 
-STarlight::dist_st(this_params$st_grid_list) + Seurat::NoLegend()
+STarlight::dist_st(st_grid_list) + Seurat::NoLegend()
 ```
 
 ## Raw log (log10)
 
 ```{r distributions_log, echo=FALSE, eval=TRUE}
 
-STarlight::dist_st(this_params$st_grid_list, transform="log10") + Seurat::NoLegend()
+STarlight::dist_st(st_grid_list, transform="log10") + Seurat::NoLegend()
 ```
 
 ## Normalized (log10)
 
 ```{r distributions_norm, echo=FALSE, eval=TRUE}
 
-STarlight::dist_st(this_params$st_grid_list, 
+STarlight::dist_st(st_grid_list, 
                    transform="log10", 
                    normalized = TRUE) + Seurat::NoLegend()
 ```
@@ -122,4 +119,6 @@ STarlight::dist_st(this_params$st_grid_list,
 # Comparisons
 
 ## todo
+
+ezretr
 
