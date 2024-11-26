@@ -7,7 +7,6 @@
 cmp_counts_st(
   ...,
   features = NULL,
-  normalized = FALSE,
   type = c("barplot"),
   names = NULL,
   transform = c("None", "log2", "log10", "log"),
@@ -19,8 +18,6 @@ cmp_counts_st(
 \item{...}{A set of STGrid objects.}
 
 \item{features}{A character vector specifying the features (e.g., genes) to compare. Default is NULL.}
-
-\item{normalized}{Logical indicating whether the counts should be normalized. Default is FALSE.}
 
 \item{type}{Type of plot to generate. Currently only barplot is supported.}
 

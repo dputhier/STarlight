@@ -4,10 +4,12 @@
 \alias{table_st}
 \title{The number of items (e.g molecules) per feature of an STGrid object.}
 \usage{
-table_st(x)
+table_st(x, meta = FALSE)
 }
 \arguments{
 \item{x}{The STGrid object}
+
+\item{meta}{Whether to add meta features.}
 }
 \description{
 Returns the number of items (e.g molecules) per feature of an STGrid object.

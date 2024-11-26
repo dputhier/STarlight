@@ -495,7 +495,6 @@ setMethod("cmp_bar_plot", signature("STCompR"), function(object,
 #'
 #' @param ... A set of STGrid objects.
 #' @param features A character vector specifying the features (e.g., genes) to compare. Default is NULL.
-#' @param normalized Logical indicating whether the counts should be normalized. Default is FALSE.
 #' @param type Type of plot to generate. Currently only barplot is supported.
 #' @param names Optional character vector specifying names for each STGrid object. If NULL, default names will be assigned.
 #' @param transform Transformation method for the counts. Options are "None" (default), "log2", "log10", or "log".
@@ -525,7 +524,6 @@ setMethod("cmp_bar_plot", signature("STCompR"), function(object,
 #' @export
 cmp_counts_st <- function(...,
                           features = NULL,
-                          normalized = FALSE,
                           type = c("barplot"),
                           names = NULL,
                           transform = c("None", "log2", "log10", "log"),
@@ -545,55 +543,44 @@ cmp_counts_st <- function(...,
 
   check_st_list(st_list, feat_list = features)
 
-  all_features <- Reduce(intersect, lapply(st_list, feat_names))
+  all_features <- Reduce(intersect, lapply(st_list, feat_names, meta = TRUE))
 
   if (length(all_features) == 0) {
     print_this_msg("No shared features between objects...", msg_type = "STOP")
   }
 
+  if(!all(features %in% all_features)){
+    print_this_msg("Some features were not found in the objects...", msg_type = "STOP")
+  }
+
   if (is.null(names)) {
-    names <- paste("Condition_", 1:length(st_list), sep = "")
+    if(is.null(names(st_list))){
+      names <- paste("Condition_", 1:length(st_list), sep = "")
+    }else{
+      names <- names(st_list)
+    }
+
   } else{
     if (length(names) != length(st_list))
       print_this_msg("The number of names should be same as the number of objects.",
                      msg_type = "STOP")
   }
 
-
   print_this_msg("Naming objects.", msg_type = "DEBUG")
 
   names(st_list) <- names
 
-  print_this_msg("Getting 'coords' slot.", msg_type = "DEBUG")
+  print_this_msg("Counting...", msg_type = "DEBUG")
 
-  st_list <- lapply(st_list, coord)
+  st_list <- lapply(st_list, table_st, meta = TRUE)
 
   print_this_msg("Subsetting STGrid objects.", msg_type = "DEBUG")
 
-  st_list <- lapply(st_list, "[[", "feature")
-
-  print_this_msg("Counting...", msg_type = "DEBUG")
-
-  st_list <- lapply(st_list, table)
+  st_list <- lapply(st_list, "[", features)
 
   print_this_msg("Merging...", msg_type = "DEBUG")
 
   st_list <- do.call("cbind", st_list)
-
-  if (normalized) {
-    exp_design <- data.frame(condition = as.factor(rep("condition_1", ncol(st_list))),
-                             row.names = colnames(st_list))
-
-    dds0 <- DESeq2::DESeqDataSetFromMatrix(countData = st_list,
-                                           colData = exp_design,
-                                           design = ~ 1)
-
-    dds.norm <-  DESeq2::estimateSizeFactors(dds0)
-    st_list <- DESeq2::counts(dds.norm, normalized = TRUE)
-
-  }
-
-  st_list <- st_list[features, , drop = FALSE]
 
   count_per_feat <- reshape2::melt(as.matrix(st_list))
 
@@ -625,15 +612,24 @@ cmp_counts_st <- function(...,
     y_label <- "Counts"
   }
 
+  print_this_msg("Ordering factor...", msg_type = "DEBUG")
+
   Feature <- value <- Conditions <- NULL
   count_per_feat$Feature <- factor(count_per_feat$Feature,
                                    ordered = TRUE,
-                                   levels = count_per_feat$Feature[order(count_per_feat$value)])
+                                   levels = unique(count_per_feat$Feature[order(count_per_feat$value)]))
+
+  count_per_feat$Conditions <- factor(count_per_feat$Conditions,
+                                      ordered = FALSE,
+                                      levels = names)
+
+  print_this_msg("Creating diagram...", msg_type = "DEBUG")
 
   if (type == "barplot") {
     p <- ggplot2::ggplot(data = count_per_feat,
-                         mapping = ggplot2::aes(x = Feature, y = value, fill = Conditions)) +
-      ggplot2::geom_col(position = "dodge2")
+                         mapping = ggplot2::aes(x = Conditions, y = value, fill = Conditions)) +
+      ggplot2::geom_col(position = "dodge2") +
+      ggplot2::facet_grid(~Feature)
 
   } else if (type == "radar") {
     print_this_msg("Not implemented yet. Sry", msg = "STOP")
@@ -657,7 +653,7 @@ cmp_counts_st <- function(...,
     )
 
   p <- p + ggplot2::ylab(y_label) +
-    ggplot2::xlab("Conditions")
+    ggplot2::xlab("Conditions") + Seurat::NoLegend()
 
   return(p)
 

@@ -9,6 +9,7 @@ output:
     css: style.css
     number_sections: false
     config:
+      toc_depth: 1
       toc:
         collapse: section
     sharing:
@@ -42,7 +43,7 @@ knitr::opts_chunk$set(
 library(DT)
 ```
 
-# Présentation
+# {-}
 
 ```{r panel_setup_final, include = FALSE}
 xaringanExtra::use_panelset()
@@ -51,6 +52,22 @@ xaringanExtra::style_panelset_tabs(foreground = "honeydew", background = "seagre
 ```
 
 # General information {.panelset}
+
+## Experiment 
+
+
+```{r parameters, echo=FALSE, eval=TRUE}
+
+t1 <- rbind(c("Title: ", "REPORT_TITLE"),
+            c("Subtitle: ", "REPORT_SUBTITLE"),
+            c("Author", "REPORT_AUT"),
+            c("Date", "REPORT_DATE")
+            )
+
+knitr::kable(t1) %>% kableExtra::column_spec(1, bold = TRUE) %>%
+  kableExtra::kable_styling() %>%
+  kableExtra::scroll_box(width = "100%", box_css = "border: 0px;")
+```
 
 ## Experimenters
 
@@ -80,8 +97,7 @@ knitr::kable(sample_info) %>%
 
 ```{r parameters, echo=FALSE, eval=TRUE}
 
-t1 <- rbind(c("Date: ", date),
-            c("Nb of modules: ", hc_tree_params[['class_nb']]),
+t1 <- rbind(c("Nb of modules: ", hc_tree_params[['class_nb']]),
             c("Image height: ", image_height)
             )
 
@@ -90,27 +106,38 @@ knitr::kable(t1) %>% kableExtra::column_spec(1, bold = TRUE) %>%
   kableExtra::scroll_box(width = "100%", box_css = "border: 0px;")
 ```
 
+# Counts {.panelset}
+
+## Raw linear
+
+```{r distributions_raw, echo=FALSE, eval=TRUE, fig.height=4.5}
+STarlight::cmp_counts_st(st_grid_list, features=c("count_sum"))
+```
+
+## Raw log (log10)
+
+```{r distributions_log, echo=FALSE, eval=TRUE, fig.height=4.5}
+STarlight::cmp_counts_st(st_grid_list, features=c("count_sum"), 
+                         transform = "log10")
+```
 
 # Count distributions {.panelset}
 
 ## Raw linear
 
-```{r distributions_raw, echo=FALSE, eval=TRUE}
-
+```{r distributions_raw, echo=FALSE, eval=TRUE, fig.height=4.5}
 STarlight::dist_st(st_grid_list) + Seurat::NoLegend()
 ```
 
 ## Raw log (log10)
 
-```{r distributions_log, echo=FALSE, eval=TRUE}
-
+```{r distributions_log, echo=FALSE, eval=TRUE, fig.height=4.5}
 STarlight::dist_st(st_grid_list, transform="log10") + Seurat::NoLegend()
 ```
 
 ## Normalized (log10)
 
-```{r distributions_norm, echo=FALSE, eval=TRUE}
-
+```{r distributions_norm, echo=FALSE, eval=TRUE, fig.height=4.5}
 STarlight::dist_st(st_grid_list, 
                    transform="log10", 
                    normalized = TRUE) + Seurat::NoLegend()

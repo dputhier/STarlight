@@ -30,7 +30,7 @@ fig_h <- round(STarlight::nb_feat(ST_GRID)/7, 0) + 2
 This section provides a general overview of the STGrid object representing the sample. Details such as feature count, grid dimensions, and spatial bin configurations are presented. 
 
 
-## General information  {.panelset}
+## Object information  {.panelset}
 
 ```{css echo=FALSE}
 .panelset .panel-active {
@@ -119,7 +119,7 @@ This section contains the result of K Ripley's function to evaluate molecule den
 STarlight::set_verb_level(0)
 ST_GRID <- STarlight::compute_k_ripley(ST_GRID, verbose=FALSE)
 plot_rip_k_params$object <- ST_GRID
-plot_rip_k_params$feature <- STarlight::feat_names(ST_GRID)
+plot_rip_k_params$feature <- NULL
 do.call(eval(parse(text="STarlight::plot_rip_k")), 
         plot_rip_k_params) 
 ```
@@ -179,11 +179,9 @@ cor_mat <- hc$cor_mat[hc$hc_clust$order, hc$hc_clust$order]
 This subsection delves into the correlations among selected features within the sample. By examining the pairwise relationships, we can identify strong positive or negative correlations, which may indicate underlying biological or spatial interactions.
 
 ```{r corrplot_SMP_NUMBER, echo=FALSE, eval=TRUE, fig.width=7}
-
-corrplot::corrplot(cor_mat, type="upper", order="original",
-                   col=RColorBrewer::brewer.pal(n=8, name="RdYlBu"),
-                   tl.cex=corrplot_text_size, diag = FALSE)
-
+corrplot_params$corr <- cor_mat
+do.call(eval(parse(text="corrplot::corrplot")),
+              corrplot_params)
 ```
 
 ### Tree
@@ -240,18 +238,17 @@ This subsection presents rasterized images of individual features, translating s
 spatial_image_params$object <- ST_GRID
 spatial_image_params$features <- STarlight::feat_names(ST_GRID)
 do.call(eval(parse(text="STarlight::spatial_image")), 
-        spatial_image_params) 
-
+        spatial_image_params)
 ```
 
 ### Spatial distribution of counts
 
 This subsection examines the spatial distribution of the sum of feature counts across binned region of the sample. 
 
-
-```{r Spatial_distribution_of_counts_SMP_NUMBER, echo=FALSE, eval=TRUE, fig.width=5, fig.align='center'}
+<div class="topalign">
+```{r Spatial_distribution_of_counts_SMP_NUMBER, out.width="50%", echo=FALSE, eval=TRUE, fig.width=2.5, fig.align='center'}
 knitr::opts_chunk$set(out.width="25%")
 STarlight::spatial_image(object = ST_GRID, 
           features = "count_sum")
 ```
-
+</div>

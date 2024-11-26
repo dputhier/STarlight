@@ -8,31 +8,73 @@ st_report(
   st_grid_list = NULL,
   feat_list = NULL,
   title = "Spatial transcriptomics report",
-  subtitle = "Sample 1",
-  out_file = "/Users/puthier/Documents/basic_informations.html",
+  subtitle = "An example experiment",
+  out_dir = file.path(fs::path_home(), "st_book"),
   author = "Unknown",
   date = format(Sys.time(), "\%d \%B \%Y"),
   experimenters = data.frame(Firstname = NA, Lastname = NA, Laboratory = NA, Affiliation
     = NA),
   sample_info = data.frame(Species = NA, Age = NA, row.names = row.names(st_grid_list)),
-  ncol = 4,
-  image_height = 0.8,
-  rmd_dir = file.path("/Users/puthier/Documents/git/project_dev/STarlight/inst/rmd/"),
-  corrplot_text_size = 0.4,
-  hc_tree_params = list(class_nb = 5, offset = 8),
+  image_height = 3,
+  rmd_dir = file.path(system.file(package = "STarlight"), "rmarkdown"),
+  corrplot_params = list(type = "upper", order = "original", col =
+    RColorBrewer::brewer.pal(n = 8, name = "RdYlBu"), tl.cex = 0.4, diag = FALSE),
+  hc_tree_params = list(class_nb = 20, offset = 8),
   plot_rip_k_params = list(ncol = 4),
-  spatial_image_params = list(ncol = 3, features = NULL),
+  spatial_image_params = list(ncol = 5, features = NULL),
   cmp_counts_st_params = list(fill_color = "#7845FF", transform = "log10"),
   rm_tmpdir = TRUE,
-  as_job = FALSE
+  quiet = FALSE
 )
 }
 \arguments{
-\item{corrplot_text_size}{Numeric, for the size of text label (variable names) for the coorplot diagram.}
+\item{st_grid_list}{A list of feat_list to restrict the analysis.}
+
+\item{title}{A title for the report.}
+
+\item{subtitle}{A subtitle for the report.}
+
+\item{out_dir}{A directory where to store the bookdown output.}
+
+\item{author}{A character string corresponding to one or severe al authors.}
+
+\item{date}{A date.}
+
+\item{experimenters}{A data.frame giving informations about experimenters (any number of row/columns accepted).}
+
+\item{sample_info}{A data.frame giving informations about samples (any number of row/columns accepted).}
+
+\item{image_height}{A multiplier for image size.}
+
+\item{rmd_dir}{A path where to find the templates for creating the book.}
+
+\item{corrplot_params}{Parameters for corrplot() function.}
+
+\item{hc_tree_params}{Parameters for hc_tree() function.}
+
+\item{plot_rip_k_params}{Parameters for plot_rip_k() function.}
+
+\item{spatial_image_params}{Parameters for spatial_image() function.}
+
+\item{cmp_counts_st_params}{Parameters for cmp_counts_st() function.}
+
+\item{rm_tmpdir}{Whether to delete temporary directory.}
+
+\item{quiet}{Whether to run bookdown::render_book() quietly.}
 }
 \description{
 Create a report from an STGrid object.
 }
 \examples{
-st_report(exp_1, spatial_image_params=list(ncol=4, features=feat_names(exp_1)[1:10]))
+example_dataset()
+xen <- Xenium_Mouse_Brain_Coronal_7g
+x_bins <-  bin_x(xen)[181:nbin_x(xen)]
+y_bins <-  bin_y(xen)[101:nbin_y(xen)]
+xen_1 <- xen[x_bins, y_bins]
+x_bins <-  bin_x(xen)[61:101]
+y_bins <-  bin_y(xen)[101:nbin_y(xen)]
+xen_2 <- xen[x_bins, y_bins]
+st_list <- list(xen_1=xen_1, xen_2=xen_2)
+st_report(st_list)
+
 }

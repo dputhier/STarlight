@@ -4,12 +4,14 @@
 \alias{feat_names,STGrid-method}
 \title{The features stored in an STGrid object}
 \usage{
-\S4method{feat_names}{STGrid}(object, del_control = FALSE)
+\S4method{feat_names}{STGrid}(object, del_control = FALSE, meta = FALSE)
 }
 \arguments{
 \item{object}{The STGrid object.}
 
 \item{del_control}{Whether to delete controls.}
+
+\item{meta}{Whether to include meta features.}
 }
 \description{
 The features stored in a STGrid object

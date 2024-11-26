@@ -4,12 +4,14 @@
 \alias{feat_names}
 \title{The features stored in a STGrid object}
 \usage{
-feat_names(object, del_control = FALSE)
+feat_names(object, del_control = FALSE, meta = FALSE)
 }
 \arguments{
 \item{object}{The STCompR object}
 
 \item{del_control}{Whether to delete controls.}
+
+\item{meta}{Whether to include meta features.}
 }
 \description{
 The features stored in a STGrid object

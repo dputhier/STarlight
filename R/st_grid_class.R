@@ -612,6 +612,7 @@ setMethod("write_coord", signature(object = "STGrid"),
 #' The features stored in a STGrid object
 #' @param object The STGrid object
 #' @param del_control Whether to delete controls.
+#' @param meta Whether to include meta features.
 #' @keywords internal
 #' @examples
 #' example_dataset()
@@ -619,7 +620,8 @@ setMethod("write_coord", signature(object = "STGrid"),
 #' @export
 setGeneric("feat_names",
            function(object,
-                    del_control = FALSE)
+                    del_control = FALSE,
+                    meta=FALSE)
              standardGeneric("feat_names"))
 
 #' @title The features stored in an STGrid object
@@ -627,13 +629,15 @@ setGeneric("feat_names",
 #' The features stored in a STGrid object
 #' @param object The STGrid object.
 #' @param del_control Whether to delete controls.
+#' @param meta Whether to include meta features.
 #' @examples
 #' example_dataset()
 #' feat_names(Xenium_Mouse_Brain_Coronal_7g)
 #' @export
 setMethod("feat_names", signature(object = "STGrid"),
           function(object,
-                   del_control = FALSE) {
+                   del_control = FALSE,
+                   meta=FALSE) {
 
             fn <- grep(
                 "^bin_[xy]$",
@@ -649,7 +653,13 @@ setMethod("feat_names", signature(object = "STGrid"),
                 fn[!fn %in% grep(object@control, fn, value = TRUE)]
             }
 
-            fn
+            if(meta){
+              meta_names <- meta_names(object)
+              return(c(fn, meta_names))
+            }else{
+              return(fn)
+            }
+
           })
 
 #' @title The names of meta informations stored in a STGrid object
@@ -775,26 +785,32 @@ setMethod("rm_controls", "STGrid",
 #' @description
 #' Returns the number of items (e.g molecules) per feature of an STGrid object.
 #' @param x The STGrid object
+#' @param meta Whether to add meta features.
 #' @examples
 #' example_dataset()
 #' table_st(Xenium_Mouse_Brain_Coronal_7g)
 #' @keywords internal
 #' @export
 setGeneric("table_st",
-           function(x)
+           function(x, meta=FALSE)
              standardGeneric("table_st"))
 
 #' @title The number of items (e.g molecules) per feature of an STGrid object.
 #' @description
 #' Returns the number of items (e.g molecules) per feature of an STGrid object.
 #' @param x The STGrid object
+#' @param meta Whether to add meta features.
 #' @examples
 #' example_dataset()
 #' table_st(Xenium_Mouse_Brain_Coronal_7g)
 #' @export
 setMethod("table_st", signature("STGrid"),
-          function(x){
-            table(coord(x)$feature)
+          function(x, meta=FALSE){
+            if(!meta){
+              table(coord(x)$feature)
+            }else{
+              c(table(coord(x)$feature), unlist(lapply(x@meta, sum)))
+            }
           }
 )
 
@@ -2778,9 +2794,9 @@ setMethod("compute_moran_index",
               }
 
               tmp <- spdep::moran(bm,
-                                     nb_as_list,
-                                     length(neighborhood),
-                                     spdep::Szero(nb_as_list))
+                                  nb_as_list,
+                                  length(neighborhood),
+                                  spdep::Szero(nb_as_list))
               tmp_i[i] <- tmp$I
               tmp_k[i] <- tmp$K
             }

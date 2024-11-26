@@ -1,15 +1,43 @@
 #' @title Create a report from an STGrid object.
 #' @description
 #' Create a report from an STGrid object.
-#' @param corrplot_text_size Numeric, for the size of text label (variable names) for the coorplot diagram.
+#' @param st_grid_list A list of STGrid objects.
+#' @param st_grid_list A list of feat_list to restrict the analysis.
+#' @param title A title for the report.
+#' @param subtitle A subtitle for the report.
+#' @param subtitle A subtitle for the report.
+#' @param out_dir A directory where to store the bookdown output.
+#' @param author A character string corresponding to one or severe al authors.
+#' @param date A date.
+#' @param experimenters A data.frame giving informations about experimenters (any number of row/columns accepted).
+#' @param sample_info A data.frame giving informations about samples (any number of row/columns accepted).
+#' @param image_height A multiplier for image size.
+#' @param rmd_dir A path where to find the templates for creating the book.
+#' @param corrplot_params Parameters for corrplot() function.
+#' @param hc_tree_params Parameters for hc_tree() function.
+#' @param plot_rip_k_params Parameters for plot_rip_k() function.
+#' @param spatial_image_params Parameters for spatial_image() function.
+#' @param cmp_counts_st_params Parameters for cmp_counts_st() function.
+#' @param rm_tmpdir Whether to delete temporary directory.
+#' @param quiet Whether to run bookdown::render_book() quietly.
 #' @examples
-#' st_report(exp_1, spatial_image_params=list(ncol=4, features=feat_names(exp_1)[1:10]))
+#' example_dataset()
+#' xen <- Xenium_Mouse_Brain_Coronal_7g
+#' x_bins <-  bin_x(xen)[181:nbin_x(xen)]
+#' y_bins <-  bin_y(xen)[101:nbin_y(xen)]
+#' xen_1 <- xen[x_bins, y_bins]
+#' x_bins <-  bin_x(xen)[61:101]
+#' y_bins <-  bin_y(xen)[101:nbin_y(xen)]
+#' xen_2 <- xen[x_bins, y_bins]
+#' st_list <- list(xen_1=xen_1, xen_2=xen_2)
+#' st_report(st_list)
+#'
 #' @export st_report
 st_report <- function(st_grid_list = NULL,
                       feat_list = NULL,
                       title = "Spatial transcriptomics report",
                       subtitle = "An example experiment",
-                      out_file = "/Users/puthier/Documents/basic_informations.html",
+                      out_dir = file.path(fs::path_home(), "st_book"),
                       author = "Unknown",
                       date = format(Sys.time(), '%d %B %Y'),
                       experimenters = data.frame(
@@ -21,20 +49,19 @@ st_report <- function(st_grid_list = NULL,
                       sample_info = data.frame(Species = NA,
                                                Age = NA,
                                                row.names = row.names(st_grid_list)),
-                      ncol = 4,
-                      image_height = 0.8,
-                      #rmd_dir = paste0(system.file(package = "mypackage"), "/rmd/template.Rmd"),
-                      rmd_dir = file.path("/Users/puthier/Documents/git/project_dev/STarlight/inst/rmd/"),
-
-                      corrplot_text_size = 0.4,
-                      hc_tree_params = list(class_nb = 5, offset = 8),
+                      image_height = 3,
+                      rmd_dir = file.path(system.file(package = "STarlight"), "rmarkdown"),
+                      corrplot_params = list(type="upper",
+                                             order="original",
+                                             col=RColorBrewer::brewer.pal(n=8, name="RdYlBu"),
+                                             tl.cex=0.4, diag = FALSE),
+                      hc_tree_params = list(class_nb = 20, offset = 8),
                       plot_rip_k_params = list(ncol = 4),
-                      spatial_image_params = list(ncol = 3, features =
+                      spatial_image_params = list(ncol = 5, features =
                                                     NULL),
                       cmp_counts_st_params = list(fill_color = "#7845FF", transform =
                                                     "log10"),
                       rm_tmpdir = TRUE,
-                      as_job = FALSE,
                       quiet=FALSE) {
 
   verb_level <- get_verb_level()
@@ -50,6 +77,9 @@ st_report <- function(st_grid_list = NULL,
   print_this_msg("Retrieving full list of features.")
   all_feat <- table(unlist(lapply(st_grid_list, feat_names)))
   all_feat <- names(all_feat)[all_feat == length(st_grid_list)]
+
+  if(hc_tree_params$class_nb > length(all_feat))
+    hc_tree_params$class_nb <- length(all_feat)
 
   if (length(all_feat) == 0)
     print_this_msg("There is no shared features between objets", msg_type = "WARNING")
@@ -75,8 +105,7 @@ st_report <- function(st_grid_list = NULL,
 
   out <- file.copy(rmd_dir, tmp_dir, recursive = TRUE)
 
-  tmp_dir <- file.path(tmp_dir, "rmd")
-
+  tmp_dir <- file.path(tmp_dir, "rmarkdown")
 
   # name of the parameterised report rmarkdown
   sample_rmd <- file.path(tmp_dir, "sample.rmd")
@@ -155,4 +184,13 @@ st_report <- function(st_grid_list = NULL,
 
   bookdown::render_book(tmp_dir, quiet=quiet)
   set_verb_level(verb_level)
+
+  dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+  file.copy(file.path(tmp_dir, "_book"), out_dir, recursive=TRUE)
+
+  print_this_msg("Results have been copied to:", out_dir)
+
+  if(rm_tmpdir)
+    unlink(tmp_dir, recursive=TRUE)
+
 }
