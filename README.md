@@ -16,7 +16,7 @@ STarlight is still in beta version.
 
 # STarlight
 
-STarlight: Exploratory analysis and reporting of cell or molecule coordinates.
+STarlight: creating reports in bookdown format from spatial transcriptomics experiments.
 
 <img src="https://github.com/dputhier/STarlight/assets/49205456/6b4da4b3-5be7-40de-95e3-80b851cce8db" style="float: center" class="logo" width="150">
 
