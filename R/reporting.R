@@ -49,7 +49,7 @@ st_report <- function(st_grid_list = NULL,
                       sample_info = data.frame(Species = NA,
                                                Age = NA,
                                                row.names = row.names(st_grid_list)),
-                      image_height = 3,
+                      image_height = 1,
                       rmd_dir = file.path(system.file(package = "STarlight"), "rmarkdown"),
                       corrplot_params = list(type="upper",
                                              order="original",
@@ -57,11 +57,20 @@ st_report <- function(st_grid_list = NULL,
                                              tl.cex=0.4, diag = FALSE),
                       hc_tree_params = list(class_nb = 20, offset = 8),
                       plot_rip_k_params = list(ncol = 4),
-                      spatial_image_params = list(ncol = 5, features =
-                                                    NULL),
-                      cmp_counts_st_params = list(fill_color = "#7845FF", transform =
-                                                    "log10"),
+                      spatial_image_params = list(ncol = 4,
+                                                  features = NULL),
+                      cmp_counts_st_params = list(fill_color = "#7845FF",
+                                                  transform = "log10"),
                       rm_tmpdir = TRUE,
+                      section=c("exp_info",
+                                "exp_count",
+                                "exp_count_dist",
+                                "smp_info",
+                                "smp_count",
+                                "smp_dens",
+                                "smp_corr",
+                                "smp_spdist"
+                                ),
                       quiet=FALSE) {
 
   verb_level <- get_verb_level()
@@ -193,4 +202,5 @@ st_report <- function(st_grid_list = NULL,
   if(rm_tmpdir)
     unlink(tmp_dir, recursive=TRUE)
 
+  set_verb_level(verb_level)
 }

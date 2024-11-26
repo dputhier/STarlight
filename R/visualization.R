@@ -626,10 +626,17 @@ cmp_counts_st <- function(...,
   print_this_msg("Creating diagram...", msg_type = "DEBUG")
 
   if (type == "barplot") {
-    p <- ggplot2::ggplot(data = count_per_feat,
-                         mapping = ggplot2::aes(x = Conditions, y = value, fill = Conditions)) +
-      ggplot2::geom_col(position = "dodge2") +
-      ggplot2::facet_grid(~Feature)
+    if(length(names) > 1){
+      p <- ggplot2::ggplot(data = count_per_feat,
+                           mapping = ggplot2::aes(x = Conditions, y = value, fill = Conditions)) +
+        ggplot2::geom_col(position = "dodge2") +
+        ggplot2::facet_grid(~Feature)
+    }else{
+      p <- ggplot2::ggplot(data = count_per_feat,
+                           mapping = ggplot2::aes(x = Feature, y = value, fill = Conditions)) +
+        ggplot2::geom_col(position = "dodge2")
+    }
+
 
   } else if (type == "radar") {
     print_this_msg("Not implemented yet. Sry", msg = "STOP")
@@ -1731,9 +1738,6 @@ setMethod("gene_contrast",
 
   }
 )
-
-
-
 
 
 # -------------------------------------------------------------------------

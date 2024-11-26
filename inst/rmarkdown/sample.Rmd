@@ -1,6 +1,6 @@
 
 <!-- UPPERCASE variable are text to be replaced. -->
-<!-- There are several global variables obtained from st_report() function. -->
+<!-- NB: There are several global variables obtained from st_report() function arguments. -->
 
 ```{r start_SMP_NUMBER, include=FALSE, echo=FALSE, eval=TRUE}
 
@@ -29,8 +29,10 @@ fig_h <- round(STarlight::nb_feat(ST_GRID)/7, 0) + 2
 
 This section provides a general overview of the STGrid object representing the sample. Details such as feature count, grid dimensions, and spatial bin configurations are presented. 
 
-
-## Object information  {.panelset}
+```{r, section_smp_info_1, eval="smp_info" %in% section, echo=FALSE, results = "asis"} 
+knitr::asis_output("## Object information  {.panelset}") 
+``` 
+ 
 
 ```{css echo=FALSE}
 .panelset .panel-active {
@@ -38,9 +40,11 @@ This section provides a general overview of the STGrid object representing the s
 }
 ```
 
-### STGrid object info 
+```{r, section_smp_info_2, eval="smp_info" %in% section, echo=FALSE, results = "asis"} 
+knitr::asis_output("### STGrid object info") 
+``` 
 
-```{r information_SMP_NUMBER, echo=FALSE, eval=TRUE }
+```{r information_SMP_NUMBER, echo=FALSE, eval="smp_info" %in% section }
 
 t1 <- rbind(c("type:", class(ST_GRID)),
             c("Nb_feature:", STarlight::nb_feat(ST_GRID)),
@@ -65,7 +69,9 @@ knitr::kable(t2) %>% kableExtra::column_spec(1, bold = TRUE) %>%
 ```
 <br>
 
-## Feature counts {.panelset}
+```{r, section_smp_cnt_1, eval="smp_count" %in% section, echo=FALSE} 
+knitr::asis_output("## Feature counts {.panelset}") 
+``` 
 
 ```{css echo=FALSE}
 .panelset .panel-active {
@@ -73,19 +79,27 @@ knitr::kable(t2) %>% kableExtra::column_spec(1, bold = TRUE) %>%
 }
 ```
 
-This section presents the feature counts of sample 'SAMPLE_NAME'. It includes a count table and barplot summarizing the number of occurrences for each feature.
+```{r, section_smp_cnt_2, eval="smp_count" %in% section, echo=FALSE} 
+knitr::asis_output("This section presents the feature counts of sample 'SAMPLE_NAME'. It includes a count table and barplot summarizing the number of occurrences for each feature.
+") 
+``` 
 
-### Count table 
+```{r, section_smp_cnt_3, eval="smp_count" %in% section, echo=FALSE} 
+knitr::asis_output("### Count table") 
+``` 
 
-```{r count_table_SMP_NUMBER, echo=FALSE, eval=TRUE}
+
+```{r count_table_SMP_NUMBER, echo=FALSE, eval="smp_count" %in% section}
 counts <- as.data.frame(STarlight::table_st(ST_GRID))
 colnames(counts) <- c("Feature", "Counts")
 DT::datatable(as.data.frame(counts))
 ```
 
-### Count barplot
+```{r, section_smp_cnt_4, eval="smp_count" %in% section, echo=FALSE} 
+knitr::asis_output("### Count barplot") 
+``` 
 
-```{r cmp_counts_st_SMP_NUMBER, echo=FALSE, eval=TRUE, fig.height=fig_h, fig.width=7}
+```{r cmp_counts_st_SMP_NUMBER, echo=FALSE, eval="smp_count" %in% section, fig.height=fig_h, fig.width=7}
 
 cmp_counts_st_params$st_grid <- ST_GRID
 cmp_counts_st_params$features <- STarlight::feat_names(ST_GRID)
@@ -95,27 +109,38 @@ do.call(eval(parse(text="STarlight::cmp_counts_st")),
 
 ```
 
-
-## Feature spatial density {.panelset}
-
-This section explores the spatial distribution of each feature across the area. By analyzing the density patterns of each feature, we can identify areas of higher or lower feature concentration. These insights help reveal underlying spatial homogeneity or heterogeneity.
-
+```{r, section_smp_dens_1, eval="smp_dens" %in% section, echo=FALSE} 
+knitr::asis_output("## Feature spatial density {.panelset}") 
+``` 
 
 
-### Moran's Index
+```{r, section_smp_dens_2, eval="smp_dens" %in% section, echo=FALSE} 
+knitr::asis_output("This section explores the spatial distribution of each feature across the area. By analyzing the density patterns of each feature, we can identify areas of higher or lower feature concentration. These insights help reveal underlying spatial homogeneity or heterogeneity.") 
+``` 
 
-```{r moran_i_SMP_NUMBER, echo=FALSE, eval=TRUE, fig.height=fig_h, fig.width=7}
+```{r, section_smp_dens_3, eval="smp_dens" %in% section, echo=FALSE} 
+knitr::asis_output("### Moran's Index") 
+``` 
+
+
+
+```{r moran_i_SMP_NUMBER, echo=FALSE, eval="smp_dens" %in% section, fig.height=fig_h, fig.width=7}
 STarlight::set_verb_level(0)
 ST_GRID <- STarlight::compute_moran_index(ST_GRID)
 STarlight::plot_moran_i(ST_GRID)
 ```
 
-### K function
+```{r, section_smp_dens_4, eval="smp_dens" %in% section, echo=FALSE} 
+knitr::asis_output("### K function") 
+``` 
 
-This section contains the result of K Ripley's function to evaluate molecule density. 
+```{r, section_smp_dens_5, eval="smp_dens" %in% section, echo=FALSE} 
+knitr::asis_output("This section contains the result of K Ripley's function to evaluate molecule density.") 
+``` 
 
-```{r ripley_SMP_NUMBER, echo=FALSE, eval=TRUE}
+ 
 
+```{r ripley_SMP_NUMBER, echo=FALSE, eval="smp_dens" %in% section}
 STarlight::set_verb_level(0)
 ST_GRID <- STarlight::compute_k_ripley(ST_GRID, verbose=FALSE)
 plot_rip_k_params$object <- ST_GRID
@@ -124,18 +149,22 @@ do.call(eval(parse(text="STarlight::plot_rip_k")),
         plot_rip_k_params) 
 ```
 
-```{r ripley_by_gene_SMP_NUMBER, echo=FALSE, eval=TRUE, fig.height=round(length(STarlight::feat_names(ST_GRID))/plot_rip_k_params$ncol, 0) * 1.5 + 1, fig.width=7 }
+```{r ripley_by_gene_SMP_NUMBER, echo=FALSE, eval="smp_dens" %in% section, fig.height=round(length(STarlight::feat_names(ST_GRID))/plot_rip_k_params$ncol, 0) * 1.5 + 1, fig.width=7 }
 
 plot_rip_k_params$feature <- STarlight::feat_names(ST_GRID)
 do.call(eval(parse(text="STarlight::plot_rip_k")), 
         plot_rip_k_params) 
 ```
 
-### L function
+```{r, section_smp_dens_6, eval="smp_dens" %in% section, echo=FALSE} 
+knitr::asis_output("### L function") 
+``` 
 
-This section contains the result of the normalized K Ripley's function (L) to evaluate molecule density.
+```{r, section_smp_dens_7, eval="smp_dens" %in% section, echo=FALSE} 
+knitr::asis_output("This section contains the result of the normalized K Ripley's function (L) to evaluate molecule density.") 
+``` 
 
-```{r ripley_l_SMP_NUMBER, echo=FALSE, eval=TRUE}
+```{r ripley_l_SMP_NUMBER, echo=FALSE, eval="smp_dens" %in% section}
 
 STarlight::set_verb_level(0)
 ST_GRID <- STarlight::compute_k_ripley(ST_GRID, 
@@ -147,7 +176,7 @@ do.call(eval(parse(text="STarlight::plot_rip_k")),
 
 ```
 
-```{r ripley_l_by_gene_SMP_NUMBER, echo=FALSE, eval=TRUE,  fig.height=round(length(STarlight::feat_names(ST_GRID))/plot_rip_k_params$ncol, 0) * 1.5 + 1, fig.width=7}
+```{r ripley_l_by_gene_SMP_NUMBER, echo=FALSE, eval="smp_dens" %in% section,  fig.height=round(length(STarlight::feat_names(ST_GRID))/plot_rip_k_params$ncol, 0) * 1.5 + 1, fig.width=7}
 
 plot_rip_k_params$object <- ST_GRID
 plot_rip_k_params$feature <- STarlight::feat_names(ST_GRID)
@@ -156,13 +185,16 @@ do.call(eval(parse(text="STarlight::plot_rip_k")),
 
 ```
 
+```{r, section_smp_corr_1, eval="smp_corr" %in% section, echo=FALSE} 
+knitr::asis_output("## Feature correlations {.panelset}") 
+``` 
 
-## Feature correlations {.panelset}
+```{r, section_smp_corr_2, eval="smp_corr" %in% section, echo=FALSE} 
+knitr::asis_output("In this section, feature correlations are analyzed to uncover relationships between different features. By calculating and visualizing these correlations, we gain a deeper understanding of how features co-vary across 2D space.") 
+``` 
 
-In this section, feature correlations are analyzed to uncover relationships between different features. By calculating and visualizing these correlations, we gain a deeper understanding of how features co-vary across the space.
 
-
-```{r prepare_hc_SMP_NUMBER, echo=FALSE, eval=TRUE}
+```{r prepare_hc_SMP_NUMBER, echo=FALSE, eval="smp_corr" %in% section}
 
 hc_tree_params$object <- ST_GRID
 hc_tree_params$return_list <- TRUE
@@ -173,31 +205,41 @@ cor_mat <- hc$cor_mat[hc$hc_clust$order, hc$hc_clust$order]
 
 ```
 
+```{r, section_smp_corr_3, eval="smp_corr" %in% section, echo=FALSE} 
+knitr::asis_output("### Correlations") 
+``` 
 
-### Correlations
+```{r, section_smp_corr_4, eval="smp_corr" %in% section, echo=FALSE} 
+knitr::asis_output("This subsection delves into the correlations among selected features within the sample. By examining the pairwise relationships, we can identify strong positive or negative correlations, which may indicate underlying biological or spatial interactions.") 
+``` 
 
-This subsection delves into the correlations among selected features within the sample. By examining the pairwise relationships, we can identify strong positive or negative correlations, which may indicate underlying biological or spatial interactions.
-
-```{r corrplot_SMP_NUMBER, echo=FALSE, eval=TRUE, fig.width=7}
+```{r corrplot_SMP_NUMBER, echo=FALSE, eval="smp_corr" %in% section, fig.width=7}
 corrplot_params$corr <- cor_mat
 do.call(eval(parse(text="corrplot::corrplot")),
               corrplot_params)
 ```
 
-### Tree
+```{r, section_smp_corr_5, eval="smp_corr" %in% section, echo=FALSE} 
+knitr::asis_output("### Tree") 
+``` 
 
-This subsection presents a hierarchical clustering tree (or dendrogram) to visualize the relationships among features based on their similarity. The tree structure allows us to see clusters of closely related features, offering insights into groups that share similar spatial or quantitative characteristics.
+```{r, section_smp_corr_6, eval="smp_corr" %in% section, echo=FALSE} 
+knitr::asis_output("This subsection presents a hierarchical clustering tree (or dendrogram) to visualize the relationships among features based on their similarity. The tree structure allows us to see clusters of closely related features, offering insights into groups that share similar spatial or quantitative characteristics.") 
+``` 
 
-```{r display_tree_SMP_NUMBER, echo=FALSE, eval=TRUE}
-
+```{r display_tree_SMP_NUMBER, echo=FALSE, eval="smp_corr" %in% section}
 print(hc$p + Seurat::NoLegend()) 
 ```
 
-### Modules 
+```{r, section_smp_corr_7, eval="smp_corr" %in% section, echo=FALSE} 
+knitr::asis_output("### Modules ") 
+``` 
 
-Modules represent clusters of features that exhibit similar spatial patterns or functional relationships, providing a modular perspective on the dataset.
+```{r, section_smp_corr_8, eval="smp_corr" %in% section, echo=FALSE} 
+knitr::asis_output("Modules represent clusters of features that exhibit similar spatial patterns or functional relationships, providing a modular perspective on the dataset.") 
+``` 
 
-```{r modules_SMP_NUMBER, echo=FALSE, eval=TRUE}
+```{r modules_SMP_NUMBER, echo=FALSE, eval="smp_corr" %in% section}
 
 ST_GRID <- STarlight::compute_module_score(ST_GRID, 
                                           modules = hc$tree_classes)
@@ -213,41 +255,72 @@ do.call(eval(parse(text="STarlight::spatial_image")),
 
 ```
 
-### Modules info
+```{r, section_smp_corr_9, eval="smp_corr" %in% section, echo=FALSE} 
+knitr::asis_output("### Modules info") 
+``` 
 
-```{r module_info_SMP_NUMBER, echo=FALSE, eval=TRUE}
 
+
+```{r module_info_SMP_NUMBER, echo=FALSE, eval="smp_corr" %in% section}
 mod_info <- reshape2::melt(hc$tree_classes)
 colnames(mod_info) <- c("Feature", "Module")
 DT::datatable(mod_info)
 ```
 
 
-## Spatial distribution {.panelset}
+```{r, section_smp_spdist_1, eval="smp_spdist" %in% section, echo=FALSE} 
+knitr::asis_output("## Spatial distribution {.panelset}") 
+``` 
 
-This section investigates the spatial arrangement of features across the sample, offering insights into how features are distributed within the spatial grid. 
+```{r, section_smp_spdist_2, eval="smp_spdist" %in% section, echo=FALSE} 
+knitr::asis_output("This section investigates the spatial arrangement of features across the sample, offering insights into how features are distributed within the spatial grid.") 
+``` 
 
+```{r, section_smp_spdist_3, eval="smp_spdist" %in% section, echo=FALSE} 
+knitr::asis_output("### Rasterized images of features") 
+```
 
+```{r, section_smp_spdist_4, eval="smp_spdist" %in% section, echo=FALSE} 
+knitr::asis_output("This subsection presents rasterized images of individual features, translating spatial data into binned representations.") 
+```
 
-### Rasterized images of features
+```{r compute_img_size_sp, echo=FALSE, eval="smp_spdist" %in% section}
 
-This subsection presents rasterized images of individual features, translating spatial data into binned representations.
+fig_width_sp <- 5
+img_ratio <- (ST_GRID@y_max - ST_GRID@y_min) / (ST_GRID@x_max - ST_GRID@x_min)
+img_ratio <- ifelse(img_ratio < 1, 1, img_ratio)
 
-```{r Rasterized_images_of_features_SMP_NUMBER, echo=FALSE, eval=TRUE, fig.align='center', fig.pos='top', fig.width=5, fig.height=((ST_GRID@y_max - ST_GRID@y_min)  * 10) / ((ST_GRID@x_max - ST_GRID@x_min) * 4) * 5.5 * image_height + 1}
+if(is.null(spatial_image_params$features)){
+  nb_line_sp <- round(length(feat_names(ST_GRID)) / spatial_image_params$ncol, 0)
+}else{
+  nb_line_sp <- round(length(feat_names(ST_GRID)) / spatial_image_params$ncol, 0)
+}
 
+nb_line_sp <- ifelse(nb_line_sp <= 0, 1, nb_line_sp)
+fig_height_sp <- img_ratio *  fig_width_sp * nb_line_sp * image_height / 5   
+fig_height_sp <- ifelse(fig_height_sp < fig_width_sp, fig_width_sp * img_ratio, fig_height_sp)
+
+fig_width_sp_sum <- 2.5
+```
+
+```{r Rasterized_images_of_features_SMP_NUMBER, echo=FALSE, eval="smp_spdist" %in% section, fig.align='center', fig.pos='top', fig.width=fig_width_sp, fig.height= fig_height_sp * image_height}
 spatial_image_params$object <- ST_GRID
 spatial_image_params$features <- STarlight::feat_names(ST_GRID)
 do.call(eval(parse(text="STarlight::spatial_image")), 
         spatial_image_params)
 ```
 
-### Spatial distribution of counts
+```{r, section_smp_spdist_5, eval="smp_spdist" %in% section, echo=FALSE} 
+knitr::asis_output("### Spatial distribution of counts") 
+```
 
-This subsection examines the spatial distribution of the sum of feature counts across binned region of the sample. 
+```{r, section_smp_spdist_5, eval="smp_spdist" %in% section, echo=FALSE} 
+knitr::asis_output("This subsection examines the spatial distribution of the sum of feature counts across binned region of the sample.") 
+```
 
 <div class="topalign">
-```{r Spatial_distribution_of_counts_SMP_NUMBER, out.width="50%", echo=FALSE, eval=TRUE, fig.width=2.5, fig.align='center'}
-knitr::opts_chunk$set(out.width="25%")
+```{r Spatial_distribution_of_counts_SMP_NUMBER, out.width="40%", echo=FALSE, eval="smp_spdist" %in% section, fig.width=fig_width_sp_sum, fig.align='center'}
+knitr::opts_chunk$set(out.width="40%")
 STarlight::spatial_image(object = ST_GRID, 
           features = "count_sum")
 ```

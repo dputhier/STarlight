@@ -51,12 +51,24 @@ xaringanExtra::style_panelset(font_family = "inherit")
 xaringanExtra::style_panelset_tabs(foreground = "honeydew", background = "seagreen")
 ```
 
-# General information {.panelset}
+```{r, section_gen_info_1, eval="exp_info" %in% section, echo=FALSE, results = "asis"} 
+knitr::asis_output("# Global ") 
+``` 
 
-## Experiment 
+```{r, section_gen_info_1, eval="exp_info" %in% section, echo=FALSE, results = "asis"} 
+knitr::asis_output("## Experiment {.panelset}") 
+``` 
 
 
-```{r parameters, echo=FALSE, eval=TRUE}
+```{r, section_gen_info_2, eval="exp_info" %in% section, echo=FALSE, results = "asis"} 
+knitr::asis_output("### General information ") 
+``` 
+
+```{r, section_gen_info_3, eval="exp_info" %in% section, echo=FALSE, results = "asis"} 
+knitr::asis_output("This table display metadata about the report (e.g., title, subtitle, author, and date).") 
+``` 
+
+```{r parameters, echo=FALSE, eval="exp_info" %in% section}
 
 t1 <- rbind(c("Title: ", "REPORT_TITLE"),
             c("Subtitle: ", "REPORT_SUBTITLE"),
@@ -69,9 +81,16 @@ knitr::kable(t1) %>% kableExtra::column_spec(1, bold = TRUE) %>%
   kableExtra::scroll_box(width = "100%", box_css = "border: 0px;")
 ```
 
-## Experimenters
+```{r, section_gen_info_4, eval="exp_info" %in% section, echo=FALSE, results = "asis"} 
+knitr::asis_output("### Experimenters") 
+``` 
 
-```{r experimenters, echo=FALSE, eval=TRUE}
+
+```{r, section_gen_info_5, eval="exp_info" %in% section, echo=FALSE, results = "asis"} 
+knitr::asis_output("This table display metadata about the experimenters.") 
+``` 
+
+```{r experimenters, echo=FALSE, eval="exp_info" %in% section,}
 
 knitr::kable(experimenters) %>% 
   kableExtra::row_spec(1, bold = TRUE) %>% 
@@ -80,10 +99,12 @@ knitr::kable(experimenters) %>%
   kableExtra::scroll_box(width = "100%", box_css = "border: 0px;")
 ```
 
-## Sample information  
+```{r, section_gen_info_6, eval="exp_info" %in% section, echo=FALSE, results = "asis"} 
+knitr::asis_output("### Sample information") 
+``` 
 
 
-```{r sample, echo=FALSE, eval=TRUE}
+```{r sample, echo=FALSE, eval="exp_info" %in% section}
 
 knitr::kable(sample_info) %>% 
   kableExtra::row_spec(1, bold = TRUE) %>% 
@@ -92,10 +113,15 @@ knitr::kable(sample_info) %>%
   kableExtra::scroll_box(width = "100%", box_css = "border: 0px;")
 ```
 
-## Workflow parameters  
+```{r, section_gen_info_5, eval="exp_info" %in% section, echo=FALSE, results = "asis"} 
+knitr::asis_output("### Workflow parameters.") 
+``` 
+  
+```{r, section_gen_info_6, eval="exp_info" %in% section, echo=FALSE, results = "asis"} 
+knitr::asis_output("This table display informations about the worflow parameters.") 
+``` 
 
-
-```{r parameters, echo=FALSE, eval=TRUE}
+```{r parameters, echo=FALSE, eval="exp_info" %in% section}
 
 t1 <- rbind(c("Nb of modules: ", hc_tree_params[['class_nb']]),
             c("Image height: ", image_height)
@@ -106,46 +132,60 @@ knitr::kable(t1) %>% kableExtra::column_spec(1, bold = TRUE) %>%
   kableExtra::scroll_box(width = "100%", box_css = "border: 0px;")
 ```
 
-# Counts {.panelset}
+```{r, section_exp_count_1, eval="exp_count" %in% section, echo=FALSE, results = "asis"} 
+knitr::asis_output("## Counts {.panelset}") 
+``` 
 
-## Raw linear
+```{r, section_exp_count_2, eval="exp_count" %in% section, echo=FALSE, results = "asis"} 
+knitr::asis_output("This section provide an overview of total counts across samples.") 
+```
 
-```{r distributions_raw, echo=FALSE, eval=TRUE, fig.height=4.5}
+```{r, section_exp_count_3, eval="exp_count" %in% section, echo=FALSE, results = "asis"} 
+knitr::asis_output("### Total counts (linear)") 
+``` 
+
+```{r distributions_raw, echo=FALSE, eval="exp_count" %in% section, fig.height=4.5}
 STarlight::cmp_counts_st(st_grid_list, features=c("count_sum"))
 ```
 
-## Raw log (log10)
+```{r, section_exp_count_4, eval="exp_count" %in% section, echo=FALSE, results = "asis"} 
+knitr::asis_output("### log10(total counts)") 
+``` 
 
-```{r distributions_log, echo=FALSE, eval=TRUE, fig.height=4.5}
+```{r distributions_log, echo=FALSE, eval="exp_count" %in% section, fig.height=4.5}
 STarlight::cmp_counts_st(st_grid_list, features=c("count_sum"), 
                          transform = "log10")
 ```
 
-# Count distributions {.panelset}
 
-## Raw linear
+```{r, section_exp_count_dist_1, eval="exp_count_dist" %in% section, echo=FALSE, results = "asis"} 
+knitr::asis_output("## Count distributions {.panelset}") 
+``` 
 
-```{r distributions_raw, echo=FALSE, eval=TRUE, fig.height=4.5}
+```{r, section_exp_count_dist_2, eval="exp_count_dist" %in% section, echo=FALSE, results = "asis"} 
+knitr::asis_output("This section provides information about feature count distribution across samples.") 
+``` 
+
+```{r, section_exp_count_dist_3, eval="exp_count_dist" %in% section, echo=FALSE, results = "asis"} 
+knitr::asis_output("### Count distribution (linear)") 
+``` 
+
+```{r distributions_raw, echo=FALSE, eval="exp_count_dist" %in% section, fig.height=4.5}
 STarlight::dist_st(st_grid_list) + Seurat::NoLegend()
 ```
 
-## Raw log (log10)
+```{r, section_exp_count_dist_3, eval="exp_count_dist" %in% section, echo=FALSE, results = "asis"} 
+knitr::asis_output("### Count distribution (log10)") 
+``` 
 
-```{r distributions_log, echo=FALSE, eval=TRUE, fig.height=4.5}
+
+```{r distributions_log, echo=FALSE, eval="exp_count_dist" %in% section, fig.height=4.5}
 STarlight::dist_st(st_grid_list, transform="log10") + Seurat::NoLegend()
 ```
 
-## Normalized (log10)
+## Comparisons
 
-```{r distributions_norm, echo=FALSE, eval=TRUE, fig.height=4.5}
-STarlight::dist_st(st_grid_list, 
-                   transform="log10", 
-                   normalized = TRUE) + Seurat::NoLegend()
-```
-
-# Comparisons
-
-## todo
+### todo
 
 ezretr
 
