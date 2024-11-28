@@ -1,5 +1,5 @@
 Package: STarlight
-Title: Comparison of imaging-based spatial transcriptomic datasets using a grid-based approach
+Title: STarlight: creating reports in bookdown format from spatial transcriptomics experiments.
 Version: 0.0.9
 Depends: R (>= 4.0.0), methods
 biocViews: Transcriptomics, ReportWriting
@@ -7,7 +7,7 @@ Authors@R: c(
     person("Denis", "Puthier", email = "denis.puthier@univ-amu.fr", role = c("cre", "aut")),
     person("Jessica", "Chevallier", email = "jessica.chevallier@univ-amu.fr", role = "aut"),
     person("Julie", "Bavais", email = "bavais@ciml.univ-mrs.fr", role = "aut"))
-Description: This package is intended to compare imaging-based spatial transcriptomic datasets using a grid-based approach.
+Description: STarlight creates reports in bookdown format from spatial transcriptomics experiments.
 Collate: st_grid_class.R st_compr_class.R utils.R visualization.R interactive.R reporting.R
 Encoding: UTF-8
 Imports: reshape2, DESeq2, ggplot2, dplyr, magrittr, data.table, ggpol, ggrepel, ggsci, spatstat.explore, spatstat.geom, ggh4x, ggnewscale, ggtree, RColorBrewer, viridis, Seurat, stringr, tidytree, R.utils, envnames, shinydashboard, shiny, colourpicker, htmltools, sp, fs, mgc
