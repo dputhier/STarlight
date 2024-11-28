@@ -7,44 +7,49 @@
 st_report(
   st_grid_list = NULL,
   feat_list = NULL,
-  title = "Spatial transcriptomics report",
-  subtitle = "An example experiment",
+  report_title = "Spatial transcriptomics report",
+  report_subtitle = "An example experiment",
+  report_author = "Undefined",
+  report_date = format(Sys.time(), "\%d \%B \%Y"),
   out_dir = file.path(fs::path_home(), "st_book"),
-  author = "Unknown",
-  date = format(Sys.time(), "\%d \%B \%Y"),
   experimenters = data.frame(Firstname = NA, Lastname = NA, Laboratory = NA, Affiliation
     = NA),
   sample_info = data.frame(Species = NA, Age = NA, row.names = row.names(st_grid_list)),
-  image_height = 3,
+  image_height = NULL,
+  image_width = NULL,
   rmd_dir = file.path(system.file(package = "STarlight"), "rmarkdown"),
   corrplot_params = list(type = "upper", order = "original", col =
     RColorBrewer::brewer.pal(n = 8, name = "RdYlBu"), tl.cex = 0.4, diag = FALSE),
   hc_tree_params = list(class_nb = 20, offset = 8),
   plot_rip_k_params = list(ncol = 4),
-  spatial_image_params = list(ncol = 5, features = NULL),
+  spatial_image_params = list(ncol = 4, features = NULL),
   cmp_counts_st_params = list(fill_color = "#7845FF", transform = "log10"),
   rm_tmpdir = TRUE,
+  section = c("exp_info", "exp_count", "exp_count_dist", "exp_area", "smp_info",
+    "smp_count", "smp_dens", "smp_corr", "smp_spdist"),
   quiet = FALSE
 )
 }
 \arguments{
 \item{st_grid_list}{A list of feat_list to restrict the analysis.}
 
-\item{title}{A title for the report.}
+\item{report_title}{A title for the report.}
 
-\item{subtitle}{A subtitle for the report.}
+\item{report_subtitle}{A subtitle for the report.}
+
+\item{report_author}{A character string corresponding to one or severe al authors.}
+
+\item{report_date}{A date.}
 
 \item{out_dir}{A directory where to store the bookdown output.}
-
-\item{author}{A character string corresponding to one or severe al authors.}
-
-\item{date}{A date.}
 
 \item{experimenters}{A data.frame giving informations about experimenters (any number of row/columns accepted).}
 
 \item{sample_info}{A data.frame giving informations about samples (any number of row/columns accepted).}
 
-\item{image_height}{A multiplier for image size.}
+\item{image_height}{The size of the image for section "smp_spdist". If NULL size is infered.}
+
+\item{image_width}{The size of the image for section "smp_spdist". If NULL size is infered.}
 
 \item{rmd_dir}{A path where to find the templates for creating the book.}
 
