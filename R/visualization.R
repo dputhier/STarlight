@@ -1966,5 +1966,85 @@ setMethod("create_hull", "STGrid",
 
 })
 
+#' Compare Areas of Spatial Transcriptomics (STGrid) Objects
+#'
+#' This function displays the areas of multiple STGrid objects using a bar plots.
+#'
+#' @param ... One or more \code{STGrid} objects or a list of \code{STGrid} objects to be compared.
+#' @param type What should be computed: area, x size or y size.
+#' @param fill_color A vector specifying the fill colors for the bars, corresponding to the samples. Defaults to \code{NULL}, in which case default ggplot colors are used.
+#' @param border_color A color for the border of the bars. Defaults to \code{"black"}.
+#'
+#' @return A ggplot2 object representing a bar plot of the areas for the provided STGrid objects.
+#'
+#' @examples
+#' example_dataset()
+#' xen <- Xenium_Mouse_Brain_Coronal_7g
+#' x_bins <-  bin_x(xen)[181:nbin_x(xen)]
+#' y_bins <-  bin_y(xen)[101:nbin_y(xen)]
+#' xen_1 <- xen[x_bins, y_bins]
+#' x_bins <-  bin_x(xen)[61:101]
+#' y_bins <-  bin_y(xen)[101:nbin_y(xen)]
+#' xen_2 <- xen[x_bins, y_bins]
+#' cmp_dimensions(xen_1, xen_2)
+#' @import ggplot2
+#' @importFrom reshape2 melt
+#' @importFrom ggplot2 ggplot geom_col scale_fill_manual theme_bw theme element_text element_blank  ylab xlab
+#' @importFrom Seurat NoLegend
+#' @export
+cmp_dimensions <- function(...,
+                     type=c("area", "x_size", "y_size", "object_density"),
+                     fill_color = NULL,
+                     border_color = "black") {
 
+  type <- match.arg(type)
+
+  st_list <- list(...)
+  print_this_msg("Found ", length(st_list), "STGrid objects.", msg_type = "INFO")
+
+  if (is.list(st_list[[1]]))
+    st_list <- st_list[[1]]
+
+  check_st_list(st_list)
+
+  if(type == "area"){
+    area <- reshape2::melt(as.data.frame(lapply(st_list, area)))
+  }else if(type == "x_size"){
+    area <- reshape2::melt(as.data.frame(lapply(st_list, function(x) x@x_max - x@x_min)))
+  }else if(type == "y_size"){
+    area <- reshape2::melt(as.data.frame(lapply(st_list, function(x) x@y_max - x@y_min)))
+  }else if(type == "object_density"){
+    count <-
+    area <- reshape2::melt(as.data.frame(lapply(st_list, function(x) x@y_max - x@y_min)))
+  }
+
+  colnames(area) <- c("Sample", "area")
+
+  p <- ggplot2::ggplot(data = area,
+                       mapping = ggplot2::aes(x = Sample, y = area, fill = Sample)) +
+    ggplot2::geom_col(position = "dodge2")
+
+  if (!is.null(fill_color))
+    p <- p + ggplot2::scale_fill_manual(values = fill_color)
+
+  p <- p + ggplot2::theme_bw() +
+    ggplot2::theme(
+      axis.text.x = ggplot2::element_text(
+        size = 10,
+        angle = 45,
+        vjust = 0.5
+      ),
+      axis.text.y = ggplot2::element_text(size = 8),
+      panel.grid.major.y = ggplot2::element_blank(),
+      panel.grid.minor.x = ggplot2::element_blank(),
+      panel.grid.minor.y = ggplot2::element_blank(),
+      panel.border = ggplot2::element_blank()
+    )
+
+  p <- p + ggplot2::ylab(type) +
+    ggplot2::xlab("Sample") + Seurat::NoLegend()
+
+  return(p)
+
+}
 
