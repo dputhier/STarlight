@@ -3,15 +3,15 @@
 #' Create a report from an STGrid object.
 #' @param st_grid_list A list of STGrid objects.
 #' @param st_grid_list A list of feat_list to restrict the analysis.
-#' @param title A title for the report.
-#' @param subtitle A subtitle for the report.
-#' @param subtitle A subtitle for the report.
+#' @param report_title A title for the report.
+#' @param report_subtitle A subtitle for the report.
+#' @param report_author A character string corresponding to one or severe al authors.
+#' @param report_date A date.
 #' @param out_dir A directory where to store the bookdown output.
-#' @param author A character string corresponding to one or severe al authors.
-#' @param date A date.
 #' @param experimenters A data.frame giving informations about experimenters (any number of row/columns accepted).
 #' @param sample_info A data.frame giving informations about samples (any number of row/columns accepted).
-#' @param image_height A multiplier for image size.
+#' @param image_height The size of the image for section "smp_spdist". If NULL size is infered.
+#' @param image_width The size of the image for section "smp_spdist". If NULL size is infered.
 #' @param rmd_dir A path where to find the templates for creating the book.
 #' @param corrplot_params Parameters for corrplot() function.
 #' @param hc_tree_params Parameters for hc_tree() function.
@@ -35,11 +35,11 @@
 #' @export st_report
 st_report <- function(st_grid_list = NULL,
                       feat_list = NULL,
-                      title = "Spatial transcriptomics report",
-                      subtitle = "An example experiment",
+                      report_title = "Spatial transcriptomics report",
+                      report_subtitle = "An example experiment",
+                      report_author = "Undefined",
+                      report_date = format(Sys.time(), '%d %B %Y'),
                       out_dir = file.path(fs::path_home(), "st_book"),
-                      author = "Unknown",
-                      date = format(Sys.time(), '%d %B %Y'),
                       experimenters = data.frame(
                         Firstname = NA,
                         Lastname = NA,
@@ -49,7 +49,8 @@ st_report <- function(st_grid_list = NULL,
                       sample_info = data.frame(Species = NA,
                                                Age = NA,
                                                row.names = row.names(st_grid_list)),
-                      image_height = 1,
+                      image_height = NULL,
+                      image_width=NULL,
                       rmd_dir = file.path(system.file(package = "STarlight"), "rmarkdown"),
                       corrplot_params = list(type="upper",
                                              order="original",
@@ -60,17 +61,10 @@ st_report <- function(st_grid_list = NULL,
                       spatial_image_params = list(ncol = 4,
                                                   features = NULL),
                       cmp_counts_st_params = list(fill_color = "#7845FF",
-                                                  transform = "log10"),
+                                                  transform = "log10")
                       rm_tmpdir = TRUE,
-                      section=c("exp_info",
-                                "exp_count",
-                                "exp_count_dist",
-                                "smp_info",
-                                "smp_count",
-                                "smp_dens",
-                                "smp_corr",
-                                "smp_spdist"
-                                ),
+                      section=c("exp_info", "exp_count","exp_count_dist", "exp_area",
+                                "smp_info", "smp_count", "smp_dens", "smp_corr", "smp_spdist"),
                       quiet=FALSE) {
 
   verb_level <- get_verb_level()
@@ -158,17 +152,6 @@ st_report <- function(st_grid_list = NULL,
   print_this_msg("Deleting sample.Rmd.")
 
   unlink(sample_rmd)
-
-  print_this_msg("Preparing index.rmd file.")
-
-  code_rmd  <- readLines(file.path(tmp_dir, "index.Rmd"))
-  code_rmd  <- gsub("REPORT_TITLE", title, x = code_rmd)
-  code_rmd  <- gsub("REPORT_AUT", title, x = code_rmd)
-  code_rmd  <- gsub("REPORT_SUBTITLE", subtitle, x = code_rmd)
-  code_rmd  <- gsub("REPORT_DATE", date, x = code_rmd)
-  code_rmd  <- gsub("FIG_PATH", "all_", x = code_rmd)
-  writeLines(code_rmd, con = file.path(tmp_dir, "index.Rmd"))
-
 
   print_this_msg("preparing _bookdown.yml")
 
