@@ -307,6 +307,32 @@ setGeneric("nbin_y",
 setMethod("nbin_y", "STGrid",
           function(x)
             length(bin_y(x)))
+
+#' @title Get the area of an STGrid object.
+#' @description
+#' Area is computed as (x_max - x_min)*(y_max - y_min).
+#' @param x The STGrid object
+#' @examples
+#' example_dataset()
+#' area(Xenium_Mouse_Brain_Coronal_7g)
+#' @keywords internal
+#' @export
+setGeneric("area",
+           function(x)
+             standardGeneric("area"))
+
+#' @title Get the area of an STGrid object.
+#' @description
+#' Area is computed as (x_max - x_min)*(y_max - y_min).
+#' @param x The STGrid object
+#' @examples
+#' example_dataset()
+#' area(Xenium_Mouse_Brain_Coronal_7g)
+#' @export
+setMethod("area", "STGrid",
+          function(x)
+            (x@x_max - x@x_min)*(x@y_max - x@y_min))
+
 #' @title The coordinates stored in a STGrid object
 #' @description
 #' The coordinates stored in a STGrid object
