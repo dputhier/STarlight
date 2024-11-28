@@ -1,15 +1,15 @@
 --- 
-title: "REPORT_TITLE"
-subtitle: "REPORT_SUBTITLE"
-author: "REPORT_AUT"
-date: "REPORT_DATE"
+title: "`r report_title`"
+subtitle: "`r report_subtitle`"
+author: "`r report_author`"
+date: "`r report_date`"
 site: bookdown::bookdown_site
 output:
   bookdown::gitbook:
     css: style.css
     number_sections: false
+    toc_depth: 2
     config:
-      toc_depth: 1
       toc:
         collapse: section
     sharing:
@@ -33,7 +33,7 @@ library(knitr)
 options(width=400)
 
 knitr::opts_chunk$set(
-  fig.path="FIG_PATH",
+  fig.path="all_",
   fig.align = "center", 
   size = "tiny", 
   comment = "",
@@ -70,10 +70,10 @@ knitr::asis_output("This table display metadata about the report (e.g., title, s
 
 ```{r parameters, echo=FALSE, eval="exp_info" %in% section}
 
-t1 <- rbind(c("Title: ", "REPORT_TITLE"),
-            c("Subtitle: ", "REPORT_SUBTITLE"),
-            c("Author", "REPORT_AUT"),
-            c("Date", "REPORT_DATE")
+t1 <- rbind(c("Title: ", report_title),
+            c("Subtitle: ", report_subtitle),
+            c("Author", report_author),
+            c("Date", report_date)
             )
 
 knitr::kable(t1) %>% kableExtra::column_spec(1, bold = TRUE) %>%
@@ -149,7 +149,7 @@ STarlight::cmp_counts_st(st_grid_list, features=c("count_sum"))
 ```
 
 ```{r, section_exp_count_4, eval="exp_count" %in% section, echo=FALSE, results = "asis"} 
-knitr::asis_output("### log10(total counts)") 
+knitr::asis_output("### Total counts (log10)") 
 ``` 
 
 ```{r distributions_log, echo=FALSE, eval="exp_count" %in% section, fig.height=4.5}
@@ -183,9 +183,35 @@ knitr::asis_output("### Count distribution (log10)")
 STarlight::dist_st(st_grid_list, transform="log10") + Seurat::NoLegend()
 ```
 
-## Comparisons
+```{r, section_exp_area_1, eval="exp_area" %in% section, echo=FALSE, results = "asis"} 
+knitr::asis_output("## Region dimensions {.panelset}") 
+``` 
 
-### todo
+```{r, section_exp_area_2, eval="exp_area" %in% section, echo=FALSE, results = "asis"} 
+knitr::asis_output("This section present some informations regarding the dimension of the region that were analyzed. The units are according the provided x/y coordinates. Area is computed as `(x_max - x_min)*(y_max - y_min)`") 
+``` 
 
-ezretr
+```{r, section_exp_area_3, eval="exp_area" %in% section, echo=FALSE, results = "asis"} 
+knitr::asis_output("### Area") 
+``` 
+
+```{r section_exp_area_4, eval="exp_area" %in% section, echo=FALSE, results = "asis"} 
+STarlight::cmp_dimensions(st_grid_list)
+```
+
+```{r, section_exp_area_5, eval="exp_area" %in% section, echo=FALSE, results = "asis"} 
+knitr::asis_output("### X dimension") 
+``` 
+
+```{r section_exp_area_6, eval="exp_area" %in% section, echo=FALSE, results = "asis"} 
+STarlight::cmp_dimensions(st_grid_list, type="x_size")
+```
+
+```{r, section_exp_area_7, eval="exp_area" %in% section, echo=FALSE, results = "asis"} 
+knitr::asis_output("### Y dimension") 
+``` 
+
+```{r section_exp_area_8, eval="exp_area" %in% section, echo=FALSE, results = "asis"} 
+STarlight::cmp_dimensions(st_grid_list, type="y_size")
+```
 

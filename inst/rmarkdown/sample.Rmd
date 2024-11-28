@@ -1,6 +1,6 @@
 
-<!-- UPPERCASE variable are text to be replaced. -->
-<!-- NB: There are several global variables obtained from st_report() function arguments. -->
+<!-- UPPERCASE variable are text to be replaced (see st_report() function). -->
+<!-- NB: The code contains several global variables derived from st_report() function arguments. -->
 
 ```{r start_SMP_NUMBER, include=FALSE, echo=FALSE, eval=TRUE}
 
@@ -21,7 +21,7 @@ knitr::opts_chunk$set(
 
 
 ```{r setparams_SMP_NUMBER, include=FALSE, echo=FALSE, eval=TRUE}
-fig_h <- round(STarlight::nb_feat(ST_GRID)/7, 0) + 2
+bar_plot_height <- round(STarlight::nb_feat(ST_GRID)/7, 0) + 2
 ```
 
 
@@ -99,7 +99,7 @@ DT::datatable(as.data.frame(counts))
 knitr::asis_output("### Count barplot") 
 ``` 
 
-```{r cmp_counts_st_SMP_NUMBER, echo=FALSE, eval="smp_count" %in% section, fig.height=fig_h, fig.width=7}
+```{r cmp_counts_st_SMP_NUMBER, echo=FALSE, eval="smp_count" %in% section, fig.height=bar_plot_height, fig.width=7}
 
 cmp_counts_st_params$st_grid <- ST_GRID
 cmp_counts_st_params$features <- STarlight::feat_names(ST_GRID)
@@ -124,7 +124,7 @@ knitr::asis_output("### Moran's Index")
 
 
 
-```{r moran_i_SMP_NUMBER, echo=FALSE, eval="smp_dens" %in% section, fig.height=fig_h, fig.width=7}
+```{r moran_i_SMP_NUMBER, echo=FALSE, eval="smp_dens" %in% section, fig.height=bar_plot_height, fig.width=7}
 STarlight::set_verb_level(0)
 ST_GRID <- STarlight::compute_moran_index(ST_GRID)
 STarlight::plot_moran_i(ST_GRID)
@@ -286,7 +286,9 @@ knitr::asis_output("This subsection presents rasterized images of individual fea
 
 ```{r compute_img_size_sp, echo=FALSE, eval="smp_spdist" %in% section}
 
-fig_width_sp <- 5
+if(is.null(image_width))
+    image_width <- 5
+
 img_ratio <- (ST_GRID@y_max - ST_GRID@y_min) / (ST_GRID@x_max - ST_GRID@x_min)
 img_ratio <- ifelse(img_ratio < 1, 1, img_ratio)
 
@@ -297,13 +299,17 @@ if(is.null(spatial_image_params$features)){
 }
 
 nb_line_sp <- ifelse(nb_line_sp <= 0, 1, nb_line_sp)
-fig_height_sp <- img_ratio *  fig_width_sp * nb_line_sp * image_height / 5   
-fig_height_sp <- ifelse(fig_height_sp < fig_width_sp, fig_width_sp * img_ratio, fig_height_sp)
 
-fig_width_sp_sum <- 2.5
+if(is.null(image_height))
+  image_height <- img_ratio *  image_width * nb_line_sp  / 5 
+
+  
+image_height <- ifelse(image_height < image_width, image_width * img_ratio, image_height)
+
+image_width_sum <- 2.5
 ```
 
-```{r Rasterized_images_of_features_SMP_NUMBER, echo=FALSE, eval="smp_spdist" %in% section, fig.align='center', fig.pos='top', fig.width=fig_width_sp, fig.height= fig_height_sp * image_height}
+```{r Rasterized_images_of_features_SMP_NUMBER, echo=FALSE, eval="smp_spdist" %in% section, fig.align='center', fig.pos='top', fig.width=image_width, fig.height= image_height}
 spatial_image_params$object <- ST_GRID
 spatial_image_params$features <- STarlight::feat_names(ST_GRID)
 do.call(eval(parse(text="STarlight::spatial_image")), 
@@ -319,7 +325,7 @@ knitr::asis_output("This subsection examines the spatial distribution of the sum
 ```
 
 <div class="topalign">
-```{r Spatial_distribution_of_counts_SMP_NUMBER, out.width="40%", echo=FALSE, eval="smp_spdist" %in% section, fig.width=fig_width_sp_sum, fig.align='center'}
+```{r Spatial_distribution_of_counts_SMP_NUMBER, out.width="40%", echo=FALSE, eval="smp_spdist" %in% section, fig.width=image_width_sum, fig.align='center'}
 knitr::opts_chunk$set(out.width="40%")
 STarlight::spatial_image(object = ST_GRID, 
           features = "count_sum")
