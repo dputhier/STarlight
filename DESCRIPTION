@@ -1,5 +1,5 @@
 Package: STarlight
-Title: STarlight: creating reports in bookdown format from spatial transcriptomics experiments.
+Title: STarlight: creating reports in bookdown format from spatial transcriptomics experiments..
 Version: 0.0.9
 Depends: R (>= 4.0.0), methods
 biocViews: Transcriptomics, ReportWriting
