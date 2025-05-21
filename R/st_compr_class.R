@@ -9,7 +9,7 @@
 #' scaling factors, and statistical test results.
 #'
 #' @slot conditions A character vector specifying the conditions being compared.
-#' @slot method A character vector specifying the technology used for each condition.
+#' @slot mode A character vector specifying the mode used for loading (see load_spatial()).
 #' @slot raw_counts A data.frame storing raw count data for each condition.
 #' @slot norm_counts A data.frame storing normalized counts for each condition.
 #' @slot scaling_factor A numeric vector representing the scaling factors used during normalization (to be divided).
@@ -29,7 +29,7 @@
 setClass("STCompR",
          slots = c(
            conditions = "character",
-           method="character",
+           mode="character",
            raw_counts = "data.frame",
            norm_counts = "data.frame",
            scaling_factor = "numeric",
@@ -40,7 +40,7 @@ setClass("STCompR",
          ),
          prototype = list(
            conditions = "",
-           method="",
+           mode="",
            raw_counts = data.frame(),
            norm_counts = data.frame(),
            scaling_factor = numeric(),
@@ -291,9 +291,9 @@ stcompr <- function(object_1,
   STCompR@conditions <- c(rep(name_1, length(object_1)),
                           rep(name_2, length(object_2)))
   names(STCompR@conditions) <- colnames(raw_counts)
-  STCompR@method <- c(unlist(lapply(object_1, function(x) x@method)),
-                      unlist(lapply(object_2, function(x) x@method)))
-  names(STCompR@method) <- colnames(raw_counts)
+  STCompR@mode <- c(unlist(lapply(object_1, function(x) x@mode)),
+                      unlist(lapply(object_2, function(x) x@mode)))
+  names(STCompR@mode) <- colnames(raw_counts)
   STCompR@scaling_factor <- DESeq2::sizeFactors(dds.norm)
   STCompR@stat_test <- stats
   STCompR@raw_counts <- as.data.frame(raw_counts)
