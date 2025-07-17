@@ -1,0 +1,84 @@
+---
+title: "Exploring cell population heterogeneity"
+author: "Denis Puthier & Jessica Chevallier"
+date: "2024-02-07"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteEngine{knitr::knitr}
+  %\VignetteIndexEntry{Exploring cell population heterogeneity}
+  %\usepackage[UTF-8]{inputenc}
+  html_document:
+  fig_caption: yes
+  highlight: zenburn
+  theme: cerulean
+  toc: no
+  toc_depth: 3
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>", 
+  fig.align = "center",
+  dpi = 150, 
+  cache.rebuild = TRUE
+)
+```
+
+<style>
+body {
+text-align: justify}
+img {
+border: 0;}
+</style>
+
+# Objective
+
+The STarlight package is an R package designed for the exploratory analysis and reporting of cell or molecule coordinates obtained from Spatial omics experiments. Here we will explore a subset of the CODEX data from Hickey *et al* (). In their article entitled 'Strategies for Accurate Cell Type Identification in CODEX Multiplexed Imaging Data', Hickey *et al* generated single-cell multiplexed imaging datasets by conducting CODEX on four human colon sections (ascending, transverse, descending, and sigmoid) from the same donor using a panel of 47 oligonucleotide-barcoded antibodies. The regions are therafter refered as regions 1 to 4 respectively. Following cell segmentation, they applied normalization combined with unsupervised clustering algorithms to produce identify cell type populations.
+In this vignette we will examplify the use of STarlight to create a Bookdown report based on x/y coordinates of cell populations. 
+
+From the authors: "
+Multiplexed imaging techniques allow imaging up to 60 markers in a tissue simultaneously, which increases the number of identifiable cell types in situ [...] ... we created single-cell multiplexed imaging datasets by performing CODEX on four sections of the human colon (ascending, transverse, descending, and sigmoid) using a panel of 47 oligonucleotide-barcoded antibodies. "
+
+((https://pmc.ncbi.nlm.nih.gov/articles/PMC8415085/
+https://datadryad.org/dataset/doi:10.5061/dryad.dfn2z352c))
+
+OR THIS ONE
+
+https://datadryad.org/dataset/doi:10.5061/dryad.pk0p2ngrf 
+B004_Ascending
+
+scan("~/Downloads/cell_1_annot.csv", what = "character", n = 10)
+
+```{r}
+library(STarlight)
+
+st_file <- file.path("/Users/puthier/Documents/ST_data/codex_Hickey/23_09_CODEX_HuBMAP_alldata_Dryad_merged.csv")
+st_dt <- as.data.frame(data.table::fread(st_file,
+                                          sep = ",",
+                                          head = TRUE,
+                                          nThread = 4))
+uniq_region <- unique(st_dt$unique_region)
+
+mapping <- c("x"="x", "y"="y", feature="Cell Type")
+
+list_st <- list()
+for(region in uniq_region){
+  print(paste0("Reading ", region))
+    list_st[[region]] <- load_spatial(st_dt, 
+                                      mapping = mapping, 
+                                      sep=",", 
+                                      bin_size = 50, 
+                                      constrain = list(paste0("unique_region == '", region, "'")))
+}
+
+```
+
+
+```{r}
+st_report(list_st, 
+          hc_tree_params = list(class_nb = 10, offset = 8))
+```
+
+
+

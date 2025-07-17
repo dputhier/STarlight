@@ -1,0 +1,493 @@
+---
+title: "Exploring Xenium data"
+author: "Denis Puthier & Jessica Chevallier"
+date: "2024-02-07"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteEngine{knitr::knitr}
+  %\VignetteIndexEntry{Exploring Xenium data}
+  %\usepackage[UTF-8]{inputenc}
+  html_document:
+  fig_caption: yes
+  highlight: zenburn
+  theme: cerulean
+  toc: no
+  toc_depth: 3
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>", 
+  fig.align = "center",
+  dpi = 150, 
+  cache.rebuild = TRUE
+)
+```
+
+<style>
+body {
+text-align: justify}
+img {
+border: 0;}
+</style>
+
+# Objective
+
+The STarlight package is an R package designed for the exploratory analysis and reporting of cell coordinates obtained from Spatial omics experiments. However, it should be able to work with any kind of biological object for which 2D locations are provided. In this regards, it has been tested with Xenium and Merscope datasets. Below we demonstrate the usage of STarlight for exploratory analysis of Xenium data.
+We are going to use a subset (64 genes) of a 10x Genomics dataset taken from the Xenium Explorer Demo. The region corresponds to a fresh frozen mouse brain coronal section. 
+
+# Loading libraries
+
+```{r loading_libs, echo=FALSE, eval=TRUE, warning=FALSE, results='hide'}
+suppressMessages(suppressWarnings(library(magrittr, quietly = TRUE)))
+suppressMessages(suppressWarnings(library(Seurat, quietly = TRUE)))
+suppressMessages(suppressWarnings(library(STarlight, quietly = TRUE)))
+STarlight::set_verb_level(0)
+suppressMessages(suppressWarnings(library(patchwork, quietly = TRUE)))
+suppressMessages(suppressWarnings(library(ggplot2, quietly = TRUE)))
+suppressMessages(suppressWarnings(library(dplyr, quietly = TRUE)))
+```
+
+```{r loading_libs_2, echo=TRUE, eval=FALSE}
+library(magrittr)
+library(Seurat)
+library(STarlight)
+STarlight::set_verb_level(0)
+library(patchwork)
+library(ggplot2)
+library(dplyr)
+```
+
+# Retrieving the dataset
+
+The original dataset can be downloaded [here](https://www.10xgenomics.com/resources/datasets/fresh-frozen-mouse-brain-for-xenium-explorer-demo-1-standard). 
+
+```{r load_data}
+## Create a temporary folder
+tmpdir <- tempdir()
+dir.create(tmpdir, showWarnings = FALSE)
+remote_file <- "Xenium_Mouse_Brain_Coronal_tiny.csv.gz"
+## Download and unzip the file
+url_data <- paste0("https://zenodo.org/records/11371819/files/",
+                   remote_file)
+dest_file <- file.path(tmpdir, remote_file)
+download.file(url_data, destfile = dest_file)
+
+```
+
+# Loading the data
+
+The `load_spatial()` function is the entry point of the `STarlight` package. It allows you to load molecule coordinates and create a 2D binned grid (default size of 25µm) that will be stored in an S4 object of class STGrid. Since we are working with a csv flat file containing x/y molecular coordinates and gene names we do not need to specify the argument `method`. If you have access to the full Xenium directory, you can use the arguments `method="xenium"` and `path="path/to/directory"` to load the data.
+
+```{r create_STGrid_object}
+st_obj <- load_spatial(path = dest_file, 
+             mode = "coordinates", 
+             sep=",", 
+             mapping = c(feature="feature_name", 
+                         x="x_location", 
+                         y="y_location"), 
+                         bin_size = 25, 
+            control = "(NegControlProbe_)|(BLANK_)", verbose = FALSE)
+```
+
+Using the argument `control` in the `load_spatial` function allows users to identify blank/control probes in their data. The probes can be removed using the command below:  
+
+```{r delete_control_probes, echo = TRUE, eval=TRUE, warning=FALSE}
+st_obj <- rm_controls(st_obj)
+```
+
+# Manipulating the STGrid object
+
+The Spatial Transcriptomic Grid class (STGrid) is a structured framework for managing and analyzing data. It facilitates the exploration and interpretation of spatial gene expression patterns within tissue sections.
+
+```{r show, echo = TRUE, eval=TRUE, warning=FALSE}
+STarlight::set_verb_level(1)
+st_obj
+```
+Here are the slots contained in the object:
+
+```{r slots, echo = TRUE, eval=TRUE, warning=FALSE}
+slotNames(st_obj)
+```
+Multiple methods are supported by the STGrid object: 
+
+```{r show_st_methods, echo = TRUE, eval=TRUE, warning=FALSE}
+STarlight::show_st_methods()
+```
+
+## Subsetting
+
+We've made it easy for users to subset data in their STGrid object using the "[" operator. This is designed to facilitate the extraction of specific genes or regions for a more focused analysis.
+
+### Subsetting using bin_x / bin_y
+
+We can explore the binning information stored within the STGrid object using `bin_x()` and `bin_y()`.
+
+This command retrieves the first few entries of the bin_x vector (bins along the x-axis).
+```{r binx_1, echo = TRUE, eval=FALSE, warning=FALSE, results='hide'}
+head(bin_x(st_obj))
+```
+
+Similarly, this command retrieves the first few entries of the `bin_y` vector (bins along the y-axis).
+
+```{r binx_2, echo = TRUE, eval=FALSE, warning=FALSE, results='hide'}
+head(bin_y(st_obj))
+```
+
+We can leverage the subsetting function to extract data corresponding to specific bins along the x-axis (i.e. bins from the 50th to the 100th entry of the bin_x vector). The following command extracts a subset of the data and saves it to a new STGrid object.
+
+```{r binx_3, echo = TRUE, eval=FALSE, warning=FALSE, results='hide'}
+subset <- st_obj[bin_x(st_obj)[50:100], ]
+```
+
+### Subsetting using genes
+
+We can also extract data associated to specific genes. Here we extract data corresponding to the genes *Chat* and *Cbln4*:
+
+```{r genes, echo = TRUE, eval=FALSE, warning=FALSE, results='hide'}
+st_obj[c("Chat", "Cbln4"), ]
+```
+
+### Subsetting using numeric indices
+
+We can retrieve data based on the position of genes within the `feat_names()` vector of the STGrid object. Let's extract data for the first 10 genes according to their position in the `feat_names()` vector:
+
+```{r numerics_1, echo = TRUE, eval=FALSE, warning=FALSE, results='hide'}
+st_obj[feat_names(st_obj)[1:10], ]
+```
+
+Users can also explore data for the 10th to 12th genes using numeric indices. We first start by determining the total number of genes in our STGrid object:
+
+```{r numerics_2, echo = TRUE, eval=FALSE, warning=FALSE, results='hide'}
+nb_feat(st_obj)
+```
+
+We then retrieve data for genes positioned 10 through 12 in the `feat_names()` vector.
+
+```{r index_10_12, echo = TRUE, eval=FALSE, warning=FALSE, results='hide'}
+st_obj[10:12, ]
+```
+
+# Visualization functions
+
+## The spatial_image() function
+
+The `spatial_image()` function allows users to visualize the spatial density of molecules across tissue sections. Users can do the following if they want to visualize a single gene. The `grid=TRUE` argument overlays a bin of a specified size, which eases the selection of particular regions.
+
+```{r single_gene, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=3, fig.width=4}
+
+spatial_image(
+  st_obj,
+  feat = "Ano1",
+  grid = 20,
+  logb = 10,
+  scale = TRUE,
+  saturation = 0.9
+)
+
+
+```
+Users can choose to **zoom** into specific regions. For example, we can zoom into the region with a high *Ano1* molecule density (upper right corner of the image above). We use `rebin()` to increase the binning resolution of the selected region.
+
+```{r zoom, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=3, fig.width=4, fig.asp=0.60}
+x_bins <-  bin_x(st_obj)[181:nbin_x(st_obj)]
+y_bins <-  bin_y(st_obj)[101:nbin_y(st_obj)]
+st_obj_r1 <- st_obj[x_bins, y_bins]
+spatial_image(
+  re_bin(st_obj_r1[c("Ano1", "Chat"),], bin_size = 5, verbose = FALSE),
+  feat = c("Ano1", "Chat"),
+  logb = 10,
+  scale = TRUE,
+  saturation = 0.9
+)
+
+```
+
+## The spatial_plot() function
+
+The `spatial_plot()` function can be used to create scatter plots of molecular x/y coordinates. We can choose to highlight other molecules potentially located in the vicinity of *Ano1*.
+
+```{r spatial_plot, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=3, fig.width=4}
+spatial_plot(
+  st_obj[x_bins, y_bins],
+  feat_list = c("Ano1",
+                "Chat",
+                "Ebf3"),
+  colors = ggsci::pal_aaas()(3),
+  size = 0.6
+)
+
+```
+
+## The feature_contrast() function
+
+This function can be used to compare the log2 ratio between two genes across x/y bins. Several genes pairs can be provided.
+
+
+```{r feature_contrast, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=2, fig.width=5}
+
+feature_contrast(
+  st_obj,
+  feat_list_1 = c("Nwd2",
+                  "Kctd8",
+                  "Chat"),
+  feat_list_2 = c("Igf1",
+                  "Ebf3", 
+                  "Hat1"),
+  centered = TRUE, 
+  trim_ratio = 0.025)
+
+
+```
+
+## The multi_feat_contrast() function
+
+This function performs a contrast analysis between multiple features (genes) by binarizing gene expression based on a user-defined threshold across x/y bins. An STGrid object is used as input. For each bin, a binary vector is computed and encoded as a color (e.g 000, none of 3 genes are above the threshold; 100, gene 1 is the only one above the threshold; 110, gene 1 and 2 are both above the threshold...). The number of colors required increases rapidly (2^(length(feat_list))) as the number of genes increases. It is advised not to go beyond 4 features/genes. 
+
+
+```{r multi_feat_contrast, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=2, fig.width=4}
+
+multi_feat_contrast(
+  st_obj,
+  feat_list = c("Ebf3",
+                "Kctd8",
+                "Chat",
+                "Ano1"), 
+  threshold = 2) 
+
+```
+
+# Neighborhood exploration
+
+## Indentifying connected components
+
+Cell populations expressing a specific marker may be found more or less clustered in the tissue. The  bins containing the corresponding molecules may appear as connected components that can be captured using the  *connected_components()* function. The connected components are stored in the *meta* slot of the STGrid object and named with original feature name and a "_cpt" suffix. Here we will search for connected components displaying at least 1 count for Nwd2 filtering out those with surface lower than 9 bins. We will also add a hull around the  connected components.
+
+```{r connected_components, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=2, fig.width=6}
+st_obj <- connected_components(st_obj, feat_list = "Nwd2", 
+                               threshold = 1, 
+                               min_size = 9)
+nb_cc <- length(unique(st_obj$Nwd2_cpt))
+p1 <- spatial_image(st_obj, features = "Nwd2_cpt", 
+                    as_factor = TRUE, 
+                    colors = c("black", rainbow(nb_cc - 1))) 
+p2 <- p1 + create_hull(st_obj, feat = "Nwd2_cpt", color="grey") 
+p1 + p2
+```
+
+We can next  extend the connected component with neighboring bins with the objective to more clearly highlight the component of interest.
+
+```{r cc_neighborhood, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=2, fig.width=4}
+st_obj <- cc_neighborhood(st_obj, feat = "Nwd2_cpt")
+head(meta(st_obj), 3)
+p1 + create_hull(st_obj, feat = "Nwd2_cpt_ngb")
+```
+
+And use this hull as a footprint of Nwd2 gene expression when analysing Cpne4.
+
+```{r Cabp7, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=2, fig.width=4}
+spatial_image(st_obj, "Cpne4") + create_hull(st_obj, 
+                                             feat = "Nwd2_cpt_ngb", 
+                                             linewidth = .3, color="white") 
+```
+
+
+## Identifying co-localizing genes 
+
+The `hc_tree()` function can used to organize genes into subclusters (modules), revealing which genes tend to colocalize and follow a similar spatial distribution across the tissue.  
+
+```{r gene_colocalization, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=5, fig.width=5, fig.asp=0.80}
+hc_st <- hc_tree(
+  st_obj,
+  method = "ward.D",
+  layout = "circular",
+  dist_method = "pearson",
+  class_nb = 20, 
+  lab_fontsize = 2.5,
+  offset = 9
+) 
+
+hc_st
+```
+
+```{r}
+# The first 3 modules
+hc_st$tree_classes[1:3]
+```
+
+Compute average module score.
+
+```{r compute_module_scores}
+st_obj <- compute_module_score(st_obj, modules = hc_st$tree_classes)
+meta_names(st_obj)
+```
+
+We can map modules using the `spatial_image()` function.
+
+```{r map_modules, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=6, fig.width=5, fig.asp=0.90}
+spatial_image(st_obj, features = meta_names(st_obj)[-c(1:3)], ncol = 4)
+```
+
+We can also plot the genes belonging to a specific module. 
+
+```{r map_genes_specific_module, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=4, fig.width=4, fig.asp=0.60}
+spatial_image(st_obj, features = hc_st$tree_classes[["MOD08"]], ncol = 3)
+
+```
+
+## Assessing molecule clustering using Ripley's K function
+
+The STarlight package proposes the Ripley’s K function (from spatstat.explore package) to assess if gene molecules tend to be more concentrated or dispersed across the tissue. Users can use the `compute_k_ripley` function to get a list of genes whose molecules are spatially concentrated. For this tutorial, we chose to compute Ripley's K function for a few genes because this step is rather time consuming as the molecule density increases. 
+
+```{r compute_k_ripley, warning=FALSE, results='hide', echo = TRUE, eval=TRUE}
+plot_rip_k(compute_k_ripley(st_obj, rmax = 80, verbose = FALSE)) 
+
+```
+
+Mapping the above genes confirms they are spatially concentrated.
+
+```{r confirm_k_ripley, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=4, fig.width=4, fig.asp=0.60}
+
+spatial_image(st_obj, features = c("Chat", "Spag16", "Tacr1", "Calb2"), ncol = 2)
+
+```
+
+# Dataset/region comparison: the STCompR class
+
+Users can create an STCompR object from their STGrid object(s) using the `stcompr()` function. This object can then be used to easily compare multiple datasets or regions. For illustrative purposes and to limit the computation time required for this vignette, we will compare two regions of the organ, which will be considered here as two conditions. We have chosen to generate two replicates per region (representative of two close regions). 
+
+## Creating sample datasets
+
+```{r create_sample_data, warning=FALSE, results='hide', echo = TRUE, eval=TRUE}
+## "Region 1 = Condition 1"
+# "replicate 1"
+x_bins <-  bin_x(st_obj)[180:nbin_x(st_obj)]
+y_bins <-  bin_y(st_obj)[100:nbin_y(st_obj)]
+st_obj_r1_1 <- st_obj[x_bins, y_bins]
+
+# "replicate 2"
+x_bins <-  bin_x(st_obj)[170:200]
+y_bins <-  bin_y(st_obj)[90:130]
+st_obj_r1_2 <- st_obj[x_bins, y_bins]
+
+
+## "Region 2 = Condition 2"
+# "replicate 1"
+x_bins <-  bin_x(st_obj)[60:100]
+y_bins <-  bin_y(st_obj)[100:nbin_y(st_obj)]
+st_obj_r2_1 <- st_obj[x_bins, y_bins]
+
+# "replicate 2"
+x_bins <-  bin_x(st_obj)[50:90]
+y_bins <-  bin_y(st_obj)[80:130]
+st_obj_r2_2 <- st_obj[x_bins, y_bins]
+```
+
+These are the datasets were are working with:
+
+```{r compare_count_distribution, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=4, fig.width=2}
+cmp_images(st_obj_r1_1,
+           st_obj_r1_2,
+           st_obj_r2_1, 
+           st_obj_r2_2,
+           feat_list="count_sum",
+           names=c("region_1_1", "region_1_2", "region_2_1", "region_2_2"),
+           color_y_strip=c("#3FA0FF", "#ABF8FF", "#EF6C00", "#FFB74D"),
+           color_strip_text_y = "black",
+           color_x_strip="#333333",
+           colors = viridis::magma(10)
+           )
+```
+We can visualize the count distribution for each replicate:
+
+```{r violin_plot, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=3, fig.width=4}
+dist_st(
+  st_obj_r1_1,
+  st_obj_r1_2,
+  st_obj_r2_1,
+  st_obj_r2_2,
+  transform = "log10",
+  fill_color = c("#3FA0FF", "#ABF8FF", "#EF6C00", "#FFB74D"),
+  names = c("region_1_1", "region_1_2", "region_2_1", "region_2_2")
+)
+
+```
+
+
+## Creating an STCompR object
+
+Now we can create an STCompR object using the `stcompr()` function. 
+
+```{r create_STCompR, warning=FALSE, results='hide', echo = TRUE, eval=TRUE}
+cmp <- stcompr(list(st_obj_r1_1,
+                    st_obj_r1_2),
+                list(st_obj_r2_1, 
+                    st_obj_r2_2), 
+               name_1="region_1", name_2="region_2")
+```
+
+## Count distribution
+
+We can visualize the normalized count distribution for each replicate:
+
+```{r cmp_boxplot, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=3, fig.width=4}
+cmp_boxplot(cmp,
+            transform = "log10",
+            normalized = TRUE) + 
+  scale_fill_manual(
+              name = "Conditions",
+              labels = c("region_1_1", "region_1_2", "region_2_1", "region_2_2"),
+              values = c("#3FA0FF", "#ABF8FF", "#EF6C00", "#FFB74D")
+            ) + 
+  theme(axis.text.x = element_text(size = 8),
+        axis.text.y = element_text(size = 8))
+```
+
+## Count comparison
+
+As we can see below, the expression level of several genes differ between both regions.
+
+```{r cmp_volcano, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=4, fig.width=4, fig.asp=0.60}
+cmp_volcano(
+  cmp,
+  text_y_lim = 20,
+  text_size = 2,
+  text_x_lim = 2.5,
+  title = "Comparison of region_1 vs. region_2"
+)
+```
+
+Using the `cmp_images()` function, we map these genes to see how they spatially differ across regions. 
+
+```{r cmp_images, warning=FALSE, results='hide', echo = TRUE, eval=TRUE, fig.height=4, fig.width=5, fig.asp=1}
+genes <- cmp@stat_test %>%
+  dplyr::filter(abs(log2_ratio) > 2.5) %>%
+  dplyr::arrange(log2_ratio) %>%
+  dplyr::filter(-log10(p_values) > 20) %>% rownames()
+
+cmp_images(
+  st_obj_r1_1,
+  st_obj_r1_2,
+  st_obj_r2_1,
+  st_obj_r2_2,
+  feat_list = genes,
+  names = c("region_1_1", "region_1_2", "region_2_1", "region_2_2"),
+  color_y_strip = c("#3FA0FF", "#ABF8FF", "#EF6C00", "#FFB74D"),
+  color_strip_text_y = "black",
+  color_x_strip = c("#558B2F", "#558B2F", "#C5E1A5", "#C5E1A5", "#C5E1A5"),
+  color_strip_text_x = "black",
+  colors = viridis::magma(10)
+)
+```
+
+# Session info
+
+```{r}
+sessioninfo::session_info()%>%
+  details::details(
+    summary = 'Current session info',
+    open    = TRUE
+  )
+```
+
