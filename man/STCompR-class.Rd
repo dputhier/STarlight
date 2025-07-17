@@ -14,7 +14,7 @@ scaling factors, and statistical test results.
 \describe{
 \item{\code{conditions}}{A character vector specifying the conditions being compared.}
 
-\item{\code{method}}{A character vector specifying the technology used for each condition.}
+\item{\code{mode}}{A character vector specifying the mode used for loading (see load_spatial()).}
 
 \item{\code{raw_counts}}{A data.frame storing raw count data for each condition.}
 

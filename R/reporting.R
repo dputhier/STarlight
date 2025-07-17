@@ -61,7 +61,7 @@ st_report <- function(st_grid_list = NULL,
                       spatial_image_params = list(ncol = 4,
                                                   features = NULL),
                       cmp_counts_st_params = list(fill_color = "#7845FF",
-                                                  transform = "log10")
+                                                  transform = "log10"),
                       rm_tmpdir = TRUE,
                       section=c("exp_info", "exp_count","exp_count_dist", "exp_area",
                                 "smp_info", "smp_count", "smp_dens", "smp_corr", "smp_spdist"),

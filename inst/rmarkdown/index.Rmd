@@ -22,7 +22,6 @@ params:
   fig_path: "all_"
 ---
 
-
 <!-- UPPERCASE variable are text to be replaced. -->
 <!-- There are several global variables obtained from st_report() function. -->
 

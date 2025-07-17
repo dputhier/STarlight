@@ -25,7 +25,7 @@ This class stores transcript molecules or cell coordinates as a grid.
 
 \item{\code{path}}{Character value representing the file path to the original data.}
 
-\item{\code{method}}{The technology used.}
+\item{\code{mode}}{The technology used.}
 
 \item{\code{meta}}{A list containing meta-information about bins.}
 

@@ -19,7 +19,8 @@ spatial_image(
   logb = 10,
   pseudo_count = 1,
   as_factor = FALSE,
-  ncol = 4
+  ncol = 4,
+  na_value = "white"
 )
 }
 \arguments{
@@ -53,6 +54,8 @@ No overlay if NULL otherwise the size of the interval (e.g. 20).}
 \item{as_factor}{Whether to consider the feature as a factor (e.g. for ggplot scale).}
 
 \item{ncol}{The number of columns for the facets.}
+
+\item{na_value}{A color for NA values.}
 }
 \description{
 This function displays a color-coded representation of the object (e.g. molecules) density observed in a spatial transcriptomics experiment.

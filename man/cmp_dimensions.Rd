@@ -6,7 +6,7 @@
 \usage{
 cmp_dimensions(
   ...,
-  type = c("area", "x_size", "y_size"),
+  type = c("area", "x_size", "y_size", "object_density"),
   fill_color = NULL,
   border_color = "black"
 )

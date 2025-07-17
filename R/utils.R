@@ -99,17 +99,17 @@ print_this_msg <-
 
     if (msg_type == "DEBUG"){
       if (unname(unlist(options()["STarlight_verbosity"]) > 1))
-        cat(paste("|-- DEBUG : ", msg, "\n"))
+        cat(paste("|-- DEBUG >> ", msg, "\n"))
 
     }else if (msg_type == "WARNING"){
-      warning("|-- WARNING : ", msg, call. = FALSE)
+      warning("|-- WARNING >> ", msg, call. = FALSE)
 
     }else if (msg_type == "STOP"){
-      stop(paste0("|-- STOP : ", msg), call. = FALSE)
+      stop(paste0("|-- STOP  >> ", msg), call. = FALSE)
 
     }else{
       if (unname(unlist(options()["STarlight_verbosity"]) > 0))
-        cat(paste("|-- INFO : ", msg, "\n"))
+        cat(paste("|-- INFO  >> ", msg, "\n"))
     }
   }
 

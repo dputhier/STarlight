@@ -20,6 +20,32 @@ knitr::opts_chunk$set(
 ```
 
 
+```{r compute_img_size_sp, echo=FALSE, eval="smp_spdist" %in% section}
+
+if(is.null(image_width))
+    image_width <- 5
+
+img_ratio <- (ST_GRID@y_max - ST_GRID@y_min) / (ST_GRID@x_max - ST_GRID@x_min)
+img_ratio <- ifelse(img_ratio < 1, 1, img_ratio)
+
+if(is.null(spatial_image_params$features)){
+  nb_line_sp <- round(length(feat_names(ST_GRID)) / spatial_image_params$ncol, 0)
+}else{
+  nb_line_sp <- round(length(feat_names(ST_GRID)) / spatial_image_params$ncol, 0)
+}
+
+nb_line_sp <- ifelse(nb_line_sp <= 0, 1, nb_line_sp)
+
+if(is.null(image_height))
+  image_height <- img_ratio *  image_width * nb_line_sp  / 5 
+
+  
+image_height <- ifelse(image_height < image_width, image_width * img_ratio, image_height)
+
+image_width_sum <- 2.5
+```
+
+
 ```{r setparams_SMP_NUMBER, include=FALSE, echo=FALSE, eval=TRUE}
 bar_plot_height <- round(STarlight::nb_feat(ST_GRID)/7, 0) + 2
 ```
@@ -239,7 +265,7 @@ knitr::asis_output("### Modules ")
 knitr::asis_output("Modules represent clusters of features that exhibit similar spatial patterns or functional relationships, providing a modular perspective on the dataset.") 
 ``` 
 
-```{r modules_SMP_NUMBER, echo=FALSE, eval="smp_corr" %in% section}
+```{r modules_SMP_NUMBER, echo=FALSE, eval="smp_corr" %in% section, fig.align='center', fig.pos='top', fig.width=image_width, fig.height= image_height}
 
 ST_GRID <- STarlight::compute_module_score(ST_GRID, 
                                           modules = hc$tree_classes)
@@ -284,30 +310,6 @@ knitr::asis_output("### Rasterized images of features")
 knitr::asis_output("This subsection presents rasterized images of individual features, translating spatial data into binned representations.") 
 ```
 
-```{r compute_img_size_sp, echo=FALSE, eval="smp_spdist" %in% section}
-
-if(is.null(image_width))
-    image_width <- 5
-
-img_ratio <- (ST_GRID@y_max - ST_GRID@y_min) / (ST_GRID@x_max - ST_GRID@x_min)
-img_ratio <- ifelse(img_ratio < 1, 1, img_ratio)
-
-if(is.null(spatial_image_params$features)){
-  nb_line_sp <- round(length(feat_names(ST_GRID)) / spatial_image_params$ncol, 0)
-}else{
-  nb_line_sp <- round(length(feat_names(ST_GRID)) / spatial_image_params$ncol, 0)
-}
-
-nb_line_sp <- ifelse(nb_line_sp <= 0, 1, nb_line_sp)
-
-if(is.null(image_height))
-  image_height <- img_ratio *  image_width * nb_line_sp  / 5 
-
-  
-image_height <- ifelse(image_height < image_width, image_width * img_ratio, image_height)
-
-image_width_sum <- 2.5
-```
 
 ```{r Rasterized_images_of_features_SMP_NUMBER, echo=FALSE, eval="smp_spdist" %in% section, fig.align='center', fig.pos='top', fig.width=image_width, fig.height= image_height}
 spatial_image_params$object <- ST_GRID

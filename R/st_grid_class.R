@@ -14,7 +14,7 @@
 #' @slot x_min Numeric value representing the minimum x-coordinate (default is 0).
 #' @slot x_max Numeric value representing the maximum x-coordinate (default is 0).
 #' @slot path Character value representing the file path to the original data.
-#' @slot method The technology used.
+#' @slot mode The technology used.
 #' @slot meta A list containing meta-information about bins.
 #' @slot bin_size Numeric value representing the bin size.
 #' @slot bin_x Character vector containing the names of bins/windows along the x-axis.
@@ -36,7 +36,7 @@ setClass(
     x_min = "numeric",
     x_max = "numeric",
     path = "character",
-    method = "character",
+    mode = "character",
     meta = "data.frame",
     bin_size = "numeric",
     bin_x = "character",
@@ -53,7 +53,7 @@ setClass(
     x_min = 0,
     x_max = 0,
     path = character(),
-    method = character(),
+    mode = character(),
     meta = data.frame(),
     bin_size = 0,
     bin_x = character(),
@@ -433,7 +433,7 @@ setMethod("bin_mat", "STGrid",
             }
 
             if(any(colnames(object@meta) %in% feat_list)){
-              print_this_msg("Using a feature from meta slot.", msg_type = "DEBUG")
+              print_this_msg("Using a feature from meta slot.", msg_type = "INFO")
               this_bin_mat <- object@bin_mat
               for(i in feat_list[feat_list %in% colnames(object@meta)])
                 this_bin_mat[[i]] <- object@meta[[i]]
@@ -1087,7 +1087,7 @@ setMethod("[", signature(x = "STGrid"),
             STGrid_obj@y_min <- x@y_min
             STGrid_obj@x_max <- x@x_max
             STGrid_obj@x_min <- x@x_min
-            STGrid_obj@method <- x@method
+            STGrid_obj@mode <- x@mode
             STGrid_obj@meta <- n_meta
             STGrid_obj@bin_size <- x@bin_size
             STGrid_obj@bin_x <-
@@ -1403,18 +1403,18 @@ setMethod("compute_k_ripley", signature("STGrid"),
 #' The load_spatial() function is the entry point of the STarlight package.
 #' It will load the molecule coordinates and create a 2D binned grid with default size 25µm.
 #'
-#' @param path Either a file (if method is set to "coordinates") or a directory (if method
-#' is set to "merscope"). If method is set to "coordinates" the file should contain at least 3 columns
+#' @param path_or_data Either a file (if mode is set to "coordinates") or a directory (if mode
+#' is set to "merscope"). If mode is set to "coordinates" the file should contain at least 3 columns
 #' ("x", "y", "gene"), ("x", "y", "feature") or ("x", "y", "cell").
-#' @param method The type of technology/file/directory structure. See details.
+#' @param mode The type of technology/file/directory structure. See details.
 #' @param bin_size Numeric value representing the bin size (default to 25). Unit is microns for Xenium and Merscope and pixel for CosMx.
 #' @param control A regular expression to identify controls. As the function computes the sum of
 #' counts, this will allow to delete these blanks/controls for computation.
-#' @param sep The separator when method is set to "coordinates" (default "\\t").
+#' @param sep The separator when mode is set to "coordinates" (default "\\t").
 #' @param threads The number of threads (see data.table::fread).
 #' @param verbose Whether to display the progress bar.
-#' @param constrain Whether to put constrains on a column when method is set to 'coordinates'. E.g: 'list("global_z==0", "fov==0")'. Works currently with 'coordinates'.
-#' @param mapping if method='coordinates' is used and non conventional column names are used in the input file,
+#' @param constrain Whether to put constrains on a column when mode is set to 'coordinates'. E.g: 'list("global_z==0", "fov==0")'. Works currently with 'coordinates'.
+#' @param mapping if mode='coordinates' is used and non conventional column names are used in the input file,
 #'
 #' @return An object of class STGrid.
 #' @importFrom Seurat ReadVizgen
@@ -1423,34 +1423,34 @@ setMethod("compute_k_ripley", signature("STGrid"),
 #' @importFrom R.utils isZero
 #' @importFrom data.table fread
 #' @details
-#' If method is set to 'coordinates' a flat file with ("x", "y", "gene"), ("x", "y", "feature") or ("x", "y", "cell")
-#' expected for path. If method is set to 'merscope_csv' the transcript csv file exported by Merscope should be provided
-#' as path (contains 'global_x', 'global_y' and 'gene' column). If method is set to 'xenium' or 'merscope'
-#' path is passed to the 'data.dir' argument of Seurat::ReadXenium and Seurat::ReadVizgen respectively (see corresponding docs).
-#'
+#' If mode is set to 'coordinates' a flat file with ("x", "y", "gene"), ("x", "y", "feature") or ("x", "y", "cell")
+#' expected for path_or_data. If mode is set to 'merscope_csv' the transcript csv file exported by Merscope should be provided
+#' as path_or_data (contains 'global_x', 'global_y' and 'gene' column). If mode is set to 'xenium' or 'merscope'
+#' path_or_data is passed to the 'data.dir' argument of Seurat::ReadXenium and Seurat::ReadVizgen respectively (see corresponding docs).
+#' Note that if mode is set to 'coordinates' path_or_data can be a data.frame.
 #' @examples
 #'   # Coordinate example
 #'   fp <- file.path(system.file("extdata", package = "STarlight"), "tyni.txt")
-#'   st <- load_spatial(fp, method = "coordinates")
+#'   st <- load_spatial(fp, mode = "coordinates")
 #'   # merscope csv file
 #'   fp <- file.path(system.file("extdata", package = "STarlight"), "merscope_122_r1_sub.csv.gz")
-#'   st <- load_spatial(fp, method = "merscope_csv", sep=",")
+#'   st <- load_spatial(fp, mode = "merscope_csv", sep=",")
 #'   # Xenium
 #'   fp <- file.path(system.file("extdata", package = "STarlight"), "xenium_mouse_brain_tx_tiny.csv")
 #'   st <- load_spatial(fp,
-#'                      method = "coordinates", sep=",",
+#'                      mode = "coordinates", sep=",",
 #'                      mapping = c("x"="x_location", "y"="y_location", "feature"="feature_name"))
 #'   # Cosmix
 #'   fp <- file.path(system.file("extdata", package = "STarlight"), "Lung5_Rep1_tx_file_tiny.csv.gz")
-#'   st <- load_spatial(fp, method = "coordinates", sep=",", mapping=c("x"="x_global_px", "y"="y_global_px", feature="target"))
+#'   st <- load_spatial(fp, mode = "coordinates", sep=",", mapping=c("x"="x_global_px", "y"="y_global_px", feature="target"))
 #'
 #' @export load_spatial
-load_spatial <- function(path = "",
-                         method = c("coordinates",
-                                    "merscope",
-                                    "merscope_csv",
-                                    "xenium",
-                                    "cosmx"),
+load_spatial <- function(path_or_data = "",
+                         mode = c("coordinates",
+                                  "merscope",
+                                  "merscope_csv",
+                                  "xenium",
+                                  "cosmx"),
                          bin_size = 25,
                          control = NULL,
                          sep="\t",
@@ -1458,41 +1458,48 @@ load_spatial <- function(path = "",
                          constrain=NULL,
                          verbose = TRUE,
                          mapping=NULL) {
-  method <- match.arg(method)
+  mode <- match.arg(mode)
 
-  print_this_msg("Technology is '", method, "'.")
-  print_this_msg("Loading data from file:", path)
+  print_this_msg("Technology is '", mode, "'.")
+
+  if(!inherits(path_or_data, "data.frame"))
+    print_this_msg("Loading data from file:", path_or_data)
+
+  if(inherits(path_or_data, "data.frame")){
+    if(mode != "coordinates")
+      print_this_msg("Only mode='coordinates' is supported if path_or_data is a data.frame", msg_type = "STOP")
+  }
 
   # Force the use of R.utils
   out <- R.utils::isZero(0)
 
-  if (method == "merscope") {
+  if (mode == "merscope") {
     spat_input <-
-      Seurat::ReadVizgen(data.dir = path, type = "centroids")
+      Seurat::ReadVizgen(data.dir = path_or_data, type = "centroids")
     spat_input <- spat_input$microns[, c("x", "y", "gene")]
 
     if (is.null(control))
       control <- "^Blank\\-[0-9]+"
 
-  }  else if (method == "xenium") {
+  }  else if (mode == "xenium") {
     spat_input <-
-      Seurat::ReadXenium(data.dir = path, type = "centroids")
+      Seurat::ReadXenium(data.dir = path_or_data, type = "centroids")
     spat_input <- spat_input$microns[, c("x", "y", "gene")]
 
     if (is.null(control))
       control <-  "(NegControl)|(^BLANK)"
 
-  }else if (method == "cosmx") {
+  }else if (mode == "cosmx") {
     spat_input <-
-      Seurat::ReadNanostring(data.dir = path, type = "centroids")
+      Seurat::ReadNanostring(data.dir = path_or_data, type = "centroids")
     spat_input <- spat_input$pixels[, c("x", "y", "gene")]
 
     if (is.null(control))
       control <-  "^NegPrb"
 
-  }else if(method == "merscope_csv"){
-    check_this_file(path, mode = "read")
-    spat_input <- as.data.frame(data.table::fread(path,
+  }else if(mode == "merscope_csv"){
+    check_this_file(path_or_data, mode = "read")
+    spat_input <- as.data.frame(data.table::fread(path_or_data,
                                     sep = sep,
                                     head = TRUE,
                                     nThread = threads))
@@ -1503,11 +1510,16 @@ load_spatial <- function(path = "",
     if (is.null(control))
       control <- "^Blank\\-[0-9]+"
 
-  }else if (method == "coordinates") {
-    check_this_file(path, mode = "read")
-    spat_input <- as.data.frame(data.table::fread(path,
-                                    sep = sep,
-                                    head = TRUE, nThread = threads))
+  }else if (mode == "coordinates") {
+    if(inherits(path_or_data, "data.frame")){
+      spat_input <- path_or_data
+    }else{
+      check_this_file(path_or_data, mode = "read")
+      spat_input <- as.data.frame(data.table::fread(path_or_data,
+                                                    sep = sep,
+                                                    head = TRUE, nThread = threads))
+    }
+
 
     if(!is.null(constrain)){
       if(!is.list(constrain))
@@ -1580,9 +1592,11 @@ load_spatial <- function(path = "",
                               control = control)
 
   # create a STGrid object                             ---------
+  if(inherits(path_or_data, "data.frame"))
+    path_or_data <- ""
 
   STGrid_obj <- methods::new("STGrid",
-                    path = path)
+                         path = path_or_data)
 
   STGrid_obj@coord <- bin_matrix$coord
   STGrid_obj@bin_mat <- bin_matrix$spatial_matrix
@@ -1590,8 +1604,8 @@ load_spatial <- function(path = "",
   STGrid_obj@y_min <- bin_matrix$y_min
   STGrid_obj@x_max <- bin_matrix$x_max
   STGrid_obj@x_min <- bin_matrix$x_min
-  STGrid_obj@path <- path
-  STGrid_obj@method <- method
+  STGrid_obj@path <- path_or_data
+  STGrid_obj@mode <- mode
   STGrid_obj@meta <-
     data.frame(row.names = rownames(STGrid_obj@bin_mat),
                count_sum = count_sum)
@@ -1753,7 +1767,7 @@ bin_this_matrix <- function(coord = NULL,
   coord$bin_x <- NA
   coord$bin_y <- NA
 
-  print_this_msg("Looping over genes...")
+  print_this_msg("Looping over features...")
 
   if (verbose) {
     pb <- utils::txtProgressBar(
@@ -1888,7 +1902,7 @@ setMethod("re_bin", signature(object = "STGrid"),
             STGrid_obj@x_max <- bin_matrix$x_max
             STGrid_obj@x_min <- bin_matrix$x_min
             STGrid_obj@path <- object@path
-            STGrid_obj@method <- object@method
+            STGrid_obj@mode <- object@mode
             STGrid_obj@meta <- object@meta
 
             STGrid_obj@meta <- data.frame(row.names = rownames(STGrid_obj@bin_mat),
@@ -2644,6 +2658,9 @@ setMethod("cc_neighborhood",
 #' @param feat_list A character vector specifying the features of interest.
 #' @param threshold A numeric value specifying the threshold for binarizing the matrix. If NULL, the matrix should already be binary.
 #' @param min_size An integer specifying the minimum size of the connected components to retain. Default is 9.
+#' @param neighborhood Extend the size of the neighborhood for each non zero value before component analysis.
+#' @param merge Logical. If TRUE, label all connected components with the same label ("1").
+#' @param labels A set of labels to be used for the connected components.
 #' @return The input STGrid object with additional fields for each feature's connected components.
 #' @importFrom mgc ConnCompLabel
 #' @importFrom reshape2 melt
@@ -2659,7 +2676,10 @@ setGeneric("connected_components",
            function(object=NULL,
                     feat_list=NULL,
                     threshold=NULL,
-                    min_size = 9)
+                    min_size = 9,
+                    neighborhood = 0,
+                    merge=TRUE,
+                    labels=NULL)
              standardGeneric("connected_components"))
 
 #' @title Given a Feature and an STGrid object, Label and Store Connected Components.
@@ -2670,9 +2690,13 @@ setGeneric("connected_components",
 #' @param feat_list A character vector specifying the features of interest.
 #' @param threshold A numeric value specifying the threshold for binarizing the matrix. If NULL, the matrix should already be binary.
 #' @param min_size An integer specifying the minimum size of the connected components to retain. Default is 9.
+#' @param neighborhood Extend the size of the neighborhood for each non zero value before component analysis.
+#' @param merge Logical. If TRUE, label all connected components with the same label ("1").
+#' @param labels A set of labels to be used for the connected components.
 #' @return The input STGrid object with additional fields for each feature's connected components.
 #' @importFrom mgc ConnCompLabel
 #' @importFrom reshape2 melt
+#' @importFrom raster raster focal as.matrix
 #' @examples
 #' example_dataset()
 #' xen <- Xenium_Mouse_Brain_Coronal_7g
@@ -2685,14 +2709,20 @@ setMethod("connected_components",
           function(object=NULL,
                    feat_list=NULL,
                    threshold=NULL,
-                   min_size = 9){
+                   min_size = 9,
+                   neighborhood = 0,
+                   merge=TRUE,
+                   labels=NULL){
 
   if(is.null(feat_list))
     print_this_msg("please provide at least a single feature...", msg_type = "STOP")
 
+
   if(!check_features_exist(object, feat_list))
     print_this_msg("Please provide an available feature", msg_type = "STOP")
 
+
+  print_this_msg("Processing feature: ", feat_list, ".",  msg_type = "INFO")
   check_st_list(list(object), feat_list)
 
   for(feature in feat_list){
@@ -2712,8 +2742,28 @@ setMethod("connected_components",
       print_this_msg("This is already a binarized matrix. Skipping thresholding...")
     }
 
+    if(neighborhood > 0){
+      print_this_msg("Extending neighborhood size to ", neighborhood, " for each non-zero value.", msg_type = "DEBUG")
+
+      r <- raster::raster(mat)
+
+      print_this_msg("Defining a 3x3 queen kernel", msg_type = "DEBUG")
+      queen_kernel <- matrix(1, nrow = 1 + neighborhood * 2, ncol = 1 + neighborhood * 2)
+
+      print_this_msg("Applying focal operation (sum over the neighborhood).", msg_type = "DEBUG")
+      neighbor_sum <- raster::focal(r, w = queen_kernel, pad = TRUE, padValue = 0)
+
+      neighbor_sum <- raster::as.matrix(neighbor_sum)
+      rownames(neighbor_sum) <- rownames(mat)
+      colnames(neighbor_sum) <- colnames(mat)
+      mat <- neighbor_sum
+      mat[mat > 1] <- 1
+    }
+
+    print_this_msg("Looking for components...", msg_type = "DEBUG")
     components <- mgc::ConnCompLabel(mat)
 
+    print_this_msg("Reshaping...", msg_type = "DEBUG")
     components <- reshape2::melt(components)
     rownames(components) <- paste0(components$Var1, "~", components$Var2)
     components <- components[rownames(object@meta),]
@@ -2723,14 +2773,41 @@ setMethod("connected_components",
 
     max_size_cpt <- as.numeric(names(cpt_size)[1])
 
+    print_this_msg("Largest compartment size: ", max_size_cpt, msg_type = "DEBUG")
+
+    printed_msg <- FALSE
+
     for(i in 1:length(names(cpt_size))){
 
+      # If compartmet size is lower than min_size,
+      # we set it to the largest compartment size
+      # (which is supposed to be outside the feature of interest)
+
       if(cpt_size[i] < min_size){
-        print_this_msg("Deleting compartment ", names(cpt_size[i]), "(see min_size).",
-                       msg_type = "DEBUG")
-        components$value[components$value == as.numeric(names(cpt_size)[i])] <- max_size_cpt
+        if(!printed_msg){
+          print_this_msg("Deleting components", msg_type = "INFO")
+          printed_msg <- TRUE
+        }
+
+        components$value[as.numeric(as.character(as.factor(components$value))) == as.numeric(names(cpt_size)[i])] <- max_size_cpt
       }
 
+    }
+
+    if(merge){
+      print_this_msg("Merging all connected component into a single category.", msg_type = "DEBUG")
+      components$value[components$value > 0] <- 1
+    }
+
+    if(!is.null(labels)){
+      if(length(labels) < length(unique(components$value))) {
+        print_this_msg("Please provide a set of labels with the same length as the number of components.",
+                       msg_type = "STOP")
+      }
+      print_this_msg("Using provided labels for connected components.", msg_type = "DEBUG")
+      lev <- 0:(length(unique(components$value)) - 1)
+      components$value <- factor(components$value, levels = lev,
+                                 labels = labels[1:length(lev)])
     }
 
     cpt_name <- paste0(feature, "_cpt")
@@ -2764,7 +2841,7 @@ setGeneric("compute_moran_index",
 #' @examples
 #' example_dataset()
 #' xen <- Xenium_Mouse_Brain_Coronal_7g
-#' xen <- moran_index(re_bin(xen, bin_size = 400))
+#' xen <- compute_moran_index(re_bin(xen, bin_size = 400))
 #' print(xen@moran_index)
 #' @export
 setMethod("compute_moran_index",
@@ -2792,11 +2869,14 @@ setMethod("compute_moran_index",
             print_this_msg("Computing neighborhood.")
 
             neighborhood <- spdep::cell2nb(nrow = nbin_y,
-                                  ncol = nbin_x,
-                                  type = queen_or_rook,
-                                  legacy = FALSE)
+                                           ncol = nbin_x,
+                                           type = queen_or_rook,
+                                           legacy = FALSE)
 
-            print_this_msg("Calling adespatial::moran.randtest().")
+            w <- spdep::nb2mat(neighborhood)
+            colnames(w) <- rownames(w) <- 1:nrow(xygrid)
+
+            print_this_msg("Calling spdep::nb2listw().")
             nb_as_list <- spdep::nb2listw(neighborhood)
 
             # moran_index <- moran.randtest(bin_mat(object = object,
@@ -2811,13 +2891,17 @@ setMethod("compute_moran_index",
             moran_index <- data.frame(row.names=feat_names(object))
             tmp_i <- vector()
             tmp_k <- vector()
+            tmp_meringue <- vector()
 
             for(i in 1:length(feat_names(object))){
-               bm <- bin_mat[,i]
 
-               if(scaling){
+              if(scaling){
                 bm <- bin_mat[,i] / sum(bin_mat[,i]) * 100
+               }else{
+                bm <- bin_mat[,i]
               }
+
+              names(bm) <- 1:length(bm)
 
               tmp <- spdep::moran(bm,
                                   nb_as_list,
@@ -2825,15 +2909,18 @@ setMethod("compute_moran_index",
                                   spdep::Szero(nb_as_list))
               tmp_i[i] <- tmp$I
               tmp_k[i] <- tmp$K
+
+              tmp <- MERINGUE::moranTest(bm, w)
+              tmp_meringue[i] <- tmp["observed"]
             }
 
             moran_index$I <- tmp_i
             moran_index$K <- tmp_k
-
+            moran_index$meringue <- tmp_meringue
 
             object@moran_index <- moran_index
 
-            return(object)
+            return(list(moran_index, I))
 })
 
 # -------------------------------------------------------------------------

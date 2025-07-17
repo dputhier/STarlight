@@ -8,7 +8,10 @@ connected_components(
   object = NULL,
   feat_list = NULL,
   threshold = NULL,
-  min_size = 9
+  min_size = 9,
+  neighborhood = 0,
+  merge = TRUE,
+  labels = NULL
 )
 }
 \arguments{
@@ -19,6 +22,12 @@ connected_components(
 \item{threshold}{A numeric value specifying the threshold for binarizing the matrix. If NULL, the matrix should already be binary.}
 
 \item{min_size}{An integer specifying the minimum size of the connected components to retain. Default is 9.}
+
+\item{neighborhood}{Extend the size of the neighborhood for each non zero value before component analysis.}
+
+\item{merge}{Logical. If TRUE, label all connected components with the same label ("1").}
+
+\item{labels}{A set of labels to be used for the connected components.}
 }
 \value{
 The input STGrid object with additional fields for each feature's connected components.

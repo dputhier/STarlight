@@ -21,6 +21,6 @@ Compute Moran's Index.
 \examples{
 example_dataset()
 xen <- Xenium_Mouse_Brain_Coronal_7g
-xen <- moran_index(re_bin(xen, bin_size = 400))
+xen <- compute_moran_index(re_bin(xen, bin_size = 400))
 print(xen@moran_index)
 }

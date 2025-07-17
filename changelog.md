@@ -11,7 +11,7 @@
 
 ## v0.1.0
 
-* multi_gene_contrast() has been renamed multi_feat_contrast()
+* multi_feature_contrast() has been renamed multi_feat_contrast()
 * gene contrast() has been renamed feature_contrast().
 
 ## v0.0.8
@@ -25,7 +25,7 @@
 
 ## v0.0.7
 
-* "Added function gene_contrast and multi_feat_contrast".
+* "Added function feature_contrast and multi_feat_contrast".
 
 ## v0.0.4
 

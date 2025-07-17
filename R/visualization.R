@@ -21,6 +21,7 @@
 #' @param pseudo_count a value for the pseudo count used for log transformation (default to 1).
 #' @param as_factor Whether to consider the feature as a factor (e.g. for ggplot scale).
 #' @param ncol The number of columns for the facets.
+#' @param na_value A color for NA values.
 #' @keywords internal
 #' @examples
 #' example_dataset()
@@ -52,7 +53,8 @@ setGeneric("spatial_image", function(object = NULL,
                                      logb = 10,
                                      pseudo_count = 1,
                                      as_factor=FALSE,
-                                     ncol = 4)
+                                     ncol = 4,
+                                     na_value="white")
            standardGeneric("spatial_image"))
 
 #' Color-coded representation of the object (e.g. molecules) density
@@ -75,6 +77,7 @@ setGeneric("spatial_image", function(object = NULL,
 #' @param pseudo_count a value for the pseudo count used for log transformation (default to 1).
 #' @param as_factor Whether to consider the feature as a factor (e.g. for ggplot scale).
 #' @param ncol The number of columns for the facets.
+#' @param na_value A color for NA values.
 #' @importFrom ggplot2 aes coord_fixed facet_wrap geom_point geom_tile scale_fill_gradientn theme xlab ylab element_blank element_rect element_text scale_x_discrete scale_y_discrete
 #' @importFrom reshape2 melt
 #' @importFrom viridis inferno
@@ -108,7 +111,8 @@ setMethod("spatial_image", signature(object = "STGrid"), function(object = NULL,
                                                                   logb = 10,
                                                                   pseudo_count = 1,
                                                                   as_factor=FALSE,
-                                                                  ncol = 4) {
+                                                                  ncol = 4,
+                                                                  na_value="white") {
   check_this_var(grid_by, null_accepted = TRUE, type = "int")
 
   if (saturation > 1 | saturation < 0)
@@ -137,7 +141,7 @@ setMethod("spatial_image", signature(object = "STGrid"), function(object = NULL,
   }
 
   if (any(colnames(object@meta) %in% features)) {
-    print_this_msg("Using a feature from meta slot.", msg_type = "DEBUG")
+    print_this_msg("Using a feature from meta slot.", msg_type = "INFO")
     spatial_matrix <- object@bin_mat[, c("bin_x", "bin_y", setdiff(features, colnames(object@meta)))]
     for (i in features[features %in% colnames(object@meta)]) {
       spatial_matrix[, i] <- object@meta[, i, drop = FALSE]
@@ -210,10 +214,10 @@ setMethod("spatial_image", signature(object = "STGrid"), function(object = NULL,
 
   if(as_factor){
 
-    p <- p + ggplot2::scale_fill_manual(values = colors)
+    p <- p + ggplot2::scale_fill_manual(values = colors, na.value=na_value)
 
   }else{
-    p <- p + ggplot2::scale_fill_gradientn(colours = colors)
+    p <- p + ggplot2::scale_fill_gradientn(colours = colors, na.value=na_value)
   }
 
   p <- p + ggplot2::facet_wrap(~ variable, ncol = ncol)
@@ -1218,6 +1222,9 @@ setMethod("plot_rip_k", signature("STGrid"), function(object,
 
   ripk_sub <- ripk[ripk$feature %in% goi, ]
 
+  ripk <- ripk[order(ripk$border), ]
+
+  ripk$feature <- factor(ripk$feature, levels = unique(as.character(ripk$feature)), ordered = TRUE)
 
   r <- border <- theo <- NULL
 
@@ -1605,11 +1612,11 @@ cmp_images <- function(...,
 #' @examples
 #' example_dataset()
 #' xen <- Xenium_Mouse_Brain_Coronal_7g
-#' gene_contrast(xen, feat_list_1="Ano1", feat_list_2="Chat")
-#' gene_contrast(xen, feat_list_1=c("Ano1", "Necab2"), feat_list_2=c("Chat", "Nrp2"))
+#' feature_contrast(xen, feat_list_1="Ano1", feat_list_2="Chat")
+#' feature_contrast(xen, feat_list_1=c("Ano1", "Necab2"), feat_list_2=c("Chat", "Nrp2"))
 #' @export
 #' @keywords internal
-setGeneric("gene_contrast",
+setGeneric("feature_contrast",
            function(object,
                     feat_list_1=NULL,
                     feat_list_2=NULL,
@@ -1620,7 +1627,7 @@ setGeneric("gene_contrast",
                     midpoint=0,
                     pseudo_count=1,
                     centered=TRUE,
-                    trim_ratio=0.025) standardGeneric("gene_contrast"))
+                    trim_ratio=0.025) standardGeneric("feature_contrast"))
 
 #' @title Gene Contrast Analysis for an STgrid object.
 #' @description
@@ -1641,10 +1648,10 @@ setGeneric("gene_contrast",
 #' @examples
 #' example_dataset()
 #' xen <- Xenium_Mouse_Brain_Coronal_7g
-#' gene_contrast(xen, feat_list_1="Ano1", feat_list_2="Chat")
-#' gene_contrast(xen, feat_list_1=c("Ano1", "Necab2"), feat_list_2=c("Chat", "Nrp2"))
+#' feature_contrast(xen, feat_list_1="Ano1", feat_list_2="Chat")
+#' feature_contrast(xen, feat_list_1=c("Ano1", "Necab2"), feat_list_2=c("Chat", "Nrp2"))
 #' @export
-setMethod("gene_contrast",
+setMethod("feature_contrast",
           "STGrid",
           function(object,
                    feat_list_1=NULL,

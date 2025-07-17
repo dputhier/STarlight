@@ -5,8 +5,8 @@
 \title{Create a Spatial Transcriptomic Grid class (STGrid)}
 \usage{
 load_spatial(
-  path = "",
-  method = c("coordinates", "merscope", "merscope_csv", "xenium", "cosmx"),
+  path_or_data = "",
+  mode = c("coordinates", "merscope", "merscope_csv", "xenium", "cosmx"),
   bin_size = 25,
   control = NULL,
   sep = "\\t",
@@ -17,26 +17,26 @@ load_spatial(
 )
 }
 \arguments{
-\item{path}{Either a file (if method is set to "coordinates") or a directory (if method
-is set to "merscope"). If method is set to "coordinates" the file should contain at least 3 columns
+\item{path_or_data}{Either a file (if mode is set to "coordinates") or a directory (if mode
+is set to "merscope"). If mode is set to "coordinates" the file should contain at least 3 columns
 ("x", "y", "gene"), ("x", "y", "feature") or ("x", "y", "cell").}
 
-\item{method}{The type of technology/file/directory structure. See details.}
+\item{mode}{The type of technology/file/directory structure. See details.}
 
 \item{bin_size}{Numeric value representing the bin size (default to 25). Unit is microns for Xenium and Merscope and pixel for CosMx.}
 
 \item{control}{A regular expression to identify controls. As the function computes the sum of
 counts, this will allow to delete these blanks/controls for computation.}
 
-\item{sep}{The separator when method is set to "coordinates" (default "\\t").}
+\item{sep}{The separator when mode is set to "coordinates" (default "\\t").}
 
 \item{threads}{The number of threads (see data.table::fread).}
 
-\item{constrain}{Whether to put constrains on a column when method is set to 'coordinates'. E.g: 'list("global_z==0", "fov==0")'. Works currently with 'coordinates'.}
+\item{constrain}{Whether to put constrains on a column when mode is set to 'coordinates'. E.g: 'list("global_z==0", "fov==0")'. Works currently with 'coordinates'.}
 
 \item{verbose}{Whether to display the progress bar.}
 
-\item{mapping}{if method='coordinates' is used and non conventional column names are used in the input file,}
+\item{mapping}{if mode='coordinates' is used and non conventional column names are used in the input file,}
 }
 \value{
 An object of class STGrid.
@@ -46,25 +46,26 @@ The load_spatial() function is the entry point of the STarlight package.
 It will load the molecule coordinates and create a 2D binned grid with default size 25µm.
 }
 \details{
-If method is set to 'coordinates' a flat file with ("x", "y", "gene"), ("x", "y", "feature") or ("x", "y", "cell")
-expected for path. If method is set to 'merscope_csv' the transcript csv file exported by Merscope should be provided
-as path (contains 'global_x', 'global_y' and 'gene' column). If method is set to 'xenium' or 'merscope'
-path is passed to the 'data.dir' argument of Seurat::ReadXenium and Seurat::ReadVizgen respectively (see corresponding docs).
+If mode is set to 'coordinates' a flat file with ("x", "y", "gene"), ("x", "y", "feature") or ("x", "y", "cell")
+expected for path_or_data. If mode is set to 'merscope_csv' the transcript csv file exported by Merscope should be provided
+as path_or_data (contains 'global_x', 'global_y' and 'gene' column). If mode is set to 'xenium' or 'merscope'
+path_or_data is passed to the 'data.dir' argument of Seurat::ReadXenium and Seurat::ReadVizgen respectively (see corresponding docs).
+Note that if mode is set to 'coordinates' path_or_data can be a data.frame.
 }
 \examples{
   # Coordinate example
   fp <- file.path(system.file("extdata", package = "STarlight"), "tyni.txt")
-  st <- load_spatial(fp, method = "coordinates")
+  st <- load_spatial(fp, mode = "coordinates")
   # merscope csv file
   fp <- file.path(system.file("extdata", package = "STarlight"), "merscope_122_r1_sub.csv.gz")
-  st <- load_spatial(fp, method = "merscope_csv", sep=",")
+  st <- load_spatial(fp, mode = "merscope_csv", sep=",")
   # Xenium
   fp <- file.path(system.file("extdata", package = "STarlight"), "xenium_mouse_brain_tx_tiny.csv")
   st <- load_spatial(fp,
-                     method = "coordinates", sep=",",
+                     mode = "coordinates", sep=",",
                      mapping = c("x"="x_location", "y"="y_location", "feature"="feature_name"))
   # Cosmix
   fp <- file.path(system.file("extdata", package = "STarlight"), "Lung5_Rep1_tx_file_tiny.csv.gz")
-  st <- load_spatial(fp, method = "coordinates", sep=",", mapping=c("x"="x_global_px", "y"="y_global_px", feature="target"))
+  st <- load_spatial(fp, mode = "coordinates", sep=",", mapping=c("x"="x_global_px", "y"="y_global_px", feature="target"))
 
 }
